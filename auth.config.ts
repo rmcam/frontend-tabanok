@@ -22,25 +22,38 @@ export default {
         },
       },
       async authorize(credentials) {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              email: credentials?.email,
-              password: credentials?.password,
-            }),
+        console.log("Received credentials:", credentials);
+        try {
+          // Filtrar las credenciales para evitar que se envíen valores inesperados
+          const { email, password } = credentials;
+          if (!email || !password) {
+            return null;
           }
-        );
-        // console.log(res);
-        const user = await res.json();
-        if (user.error) {
-          throw new Error(user.error);
+          const res = await fetch(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email, password }),
+            }
+          );
+
+          const data = await res.json();
+
+          if (!res.ok || !data.accessToken) {
+            console.error("Error en la autenticación:", data);
+            return null;
+          }
+
+          return {
+            accessToken: data.accessToken,
+            refreshToken: data.refreshToken,
+            user: data.user,
+          };
+        } catch (error) {
+          console.error("Error en authorize:", error);
+          return error
         }
-        return user;
       },
     }),
     GitHub({
@@ -48,6 +61,5 @@ export default {
       clientSecret: process.env.GITHUB_SECRET,
     }),
   ],
-
   secret: process.env.NEXTAUTH_SECRET,
 } satisfies NextAuthConfig;

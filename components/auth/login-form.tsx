@@ -16,7 +16,7 @@ import { signInSchema } from "@/lib/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import { FormSuccess } from "../form-success";
@@ -25,7 +25,7 @@ export const LoginForm = () => {
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
 
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState(false); // Estado de carga;
   const router = useRouter();
 
   const form = useForm<z.infer<typeof signInSchema>>({
@@ -39,25 +39,34 @@ export const LoginForm = () => {
   async function onSubmit(values: z.infer<typeof signInSchema>) {
     setError(undefined);
     setSuccess(undefined);
-    startTransition(async () => {
-      try {
-        const response = await signIn("credentials", {
-          email: values.email,
-          password: values.password,
-          redirect: false,
-        });
-        if (response?.error) {
-          setError(response.error);
-        } else {
-          setSuccess("¡Login exitoso!");
-          router.push("/dashboard");
-        }
-      } catch (err) {
-        console.error(err);
-        setError("Ocurrió un error en el servidor");
-      }
+    setIsPending(true);
+  
+    const response = await signIn("credentials", {
+      email: values.email,
+      password: values.password,
+      redirect: false,
     });
+  
+    console.log("response", response);
+  
+    if (!response || response.error) {
+      let errorMessage = "Ocurrió un error desconocido.";
+  
+      if (response?.error === "CredentialsSignin") {
+        errorMessage = "Correo o contraseña incorrectos.";
+      } else if (response?.error) {
+        errorMessage = response.error;
+      }
+  
+      setError(errorMessage);
+    } else {
+      setSuccess("¡Inicio de sesión exitoso!");
+      router.push("/admin");
+    }
+  
+    setIsPending(false);
   }
+  
 
   return (
     <CardWrapper

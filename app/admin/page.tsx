@@ -3,7 +3,7 @@ import { SignOutButton } from "@/components/auth/signout-button";
 
 const AdminPage = async () => {
   const session = await auth();
-  console.log("Session:", session);
+  // console.log("Session:", session);
 
   if (!session?.user) {
     return <div>Not authenticated</div>;
