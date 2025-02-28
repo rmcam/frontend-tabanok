@@ -22,37 +22,28 @@ export default {
         },
       },
       async authorize(credentials) {
-        console.log("Received credentials:", credentials);
-        try {
-          // Filtrar las credenciales para evitar que se envíen valores inesperados
-          const { email, password } = credentials;
-          if (!email || !password) {
-            return null;
+        // console.log("Received credentials:", credentials);
+        const { email, password } = credentials;
+        if (!email || !password) {
+          return null;
+        }
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/signin`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
           }
-          const res = await fetch(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ email, password }),
-            }
-          );
-
+        );
+        if (res.ok === false) {
+          return null;
+        } else {
           const data = await res.json();
-
-          if (!res.ok || !data.accessToken) {
-            console.error("Error en la autenticación:", data);
-            return null;
-          }
-
           return {
+            ...data.user,
             accessToken: data.accessToken,
             refreshToken: data.refreshToken,
-            user: data.user,
           };
-        } catch (error) {
-          console.error("Error en authorize:", error);
-          return error
         }
       },
     }),

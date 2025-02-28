@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 
 const { auth: middleware } = NextAuth(authConfig);
 
-const publicRoutes = ["/sign-in", "/sign-up", "/api/auth/verify-email"];
+const publicRoutes = ["/", "/sign-in", "/sign-up", "/api/auth/verify-email"];
 export default middleware((req) => {
   const { nextUrl, auth } = req;
   const isLoggedIn = !!auth?.user;

@@ -11,15 +11,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.user = user;
-        token.accessToken = user.accessToken;
       }
+
       return token;
     },
     // session() se utiliza para agregar la información del token a la sesión del usuario,
     // lo que hace que esté disponible en el cliente.
     async session({ session, token }) {
       session.user = token.user as any;
-      session.user.accessToken = token.accessToken;
       return session;
     },
   },

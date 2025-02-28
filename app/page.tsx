@@ -1,6 +1,13 @@
 import { LoginButton } from "@/components/auth/login-button";
 import { Button } from "@/components/ui/button";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Home",
+};
+
+// Output: <title>About | Acme</title>
 export default function HomePage() {
   return (
     <main className="flex h-full flex-col items-center justify-center ">

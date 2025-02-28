@@ -48,13 +48,13 @@ export const RegisterForm = () => {
       const response = await registerAction(values);
       if (response.error) {
         setError(response.error);
-      } else {
-        setSuccess("¡Registro exitoso!");
+      }
+      if (response.ok) {
+        setSuccess(response.message);
         router.push("/sign-in");
       }
-    } catch (err) {
-      console.error(err);
-      setError("Ocurrió un error en el servidor");
+    } catch (error) {
+      console.error(error);
     } finally {
       setIsPending(false); // Desactivar estado de carga
     }

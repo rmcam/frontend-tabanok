@@ -40,33 +40,32 @@ export const LoginForm = () => {
     setError(undefined);
     setSuccess(undefined);
     setIsPending(true);
-  
-    const response = await signIn("credentials", {
-      email: values.email,
-      password: values.password,
-      redirect: false,
-    });
-  
-    console.log("response", response);
-  
-    if (!response || response.error) {
-      let errorMessage = "Ocurrió un error desconocido.";
-  
-      if (response?.error === "CredentialsSignin") {
-        errorMessage = "Correo o contraseña incorrectos.";
-      } else if (response?.error) {
-        errorMessage = response.error;
+    try {
+      const response = await signIn("credentials", {
+        email: values.email,
+        password: values.password,
+        redirect: false,
+      });
+      if (!response || response.error) {
+        let errorMessage = "Ocurrió un error desconocido.";
+
+        if (response?.error === "CredentialsSignin") {
+          errorMessage = "Correo o contraseña incorrectos.";
+        } else if (response?.error) {
+          errorMessage = response.error;
+        }
+
+        setError(errorMessage);
+      } else {
+        setSuccess("¡Inicio de sesión exitoso!");
+        router.push("/admin");
       }
-  
-      setError(errorMessage);
-    } else {
-      setSuccess("¡Inicio de sesión exitoso!");
-      router.push("/admin");
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsPending(false); // Desactivar estado de carga
     }
-  
-    setIsPending(false);
   }
-  
 
   return (
     <CardWrapper

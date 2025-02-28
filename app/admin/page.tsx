@@ -1,6 +1,10 @@
 import { auth } from "@/auth";
 import { SignOutButton } from "@/components/auth/signout-button";
 
+export const metadata = {
+  title: "Perfil",
+};
+
 const AdminPage = async () => {
   const session = await auth();
   // console.log("Session:", session);
@@ -11,8 +15,7 @@ const AdminPage = async () => {
 
   return (
     <div>
-      <h1>Bienvenido, {session.user.name}</h1>
-      <p>Rol: {session.user.role}</p>
+      <h1>Bienvenido, {session.user.email}</h1>
       <pre>{JSON.stringify(session, null, 2)}</pre>
       <SignOutButton />
     </div>
