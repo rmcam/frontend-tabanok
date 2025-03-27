@@ -10,6 +10,7 @@ import {
 import {
   SidebarGroup,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuAction,
   SidebarMenuButton,
@@ -18,10 +19,24 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
+import { Button } from "./ui/button"
+import Link from "next/link"
+import { cn } from "@/lib/utils"
+import { useState } from "react"
+import SettingsPage from "@/app/dashboard/settings/page"
+import ProfilePage from "@/app/dashboard/profiles/page"
+import DashboardPage from "@/app/(protected)/page"
+import NotificationPage from "@/app/dashboard/notifications/page"
+import PracticePage from "@/app/dashboard/practice/page"
+import ChallengesPage from "@/app/dashboard/challenges/page"
+import ComunityPage from "@/app/dashboard/comunity/page"
+import ResoursesPage from "@/app/dashboard/resources/page"
 
 export function NavMain({
+  
   items,
 }: {
+  
   items: {
     title: string
     url: string
@@ -33,45 +48,32 @@ export function NavMain({
     }[]
   }[]
 }) {
+  const [activeView, setActiveView] = useState("settings") 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip={item.title}>
-                <a href={item.url}>
-                  <item.icon />
+              <SidebarMenuButton onClick={()=> setActiveView(item.title.toLowerCase())} asChild tooltip={item.title}  className={ cn("flex items-center justify-between w-full px-4 py-2 text-sm font-bold text-gray-500 rounded-lg hover:text-gray-900  hover:bg-blue-100", activeView === item.title.toLowerCase() ? "bg-blue-100 text-gray-900" : "")}>
+                <Link href={item.url} >
+                  <item.icon className="w-5 h-5" />
                   <span>{item.title}</span>
-                </a>
+                </Link>
               </SidebarMenuButton>
-              {item.items?.length ? (
-                <>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuAction className="data-[state=open]:rotate-90">
-                      <ChevronRight />
-                      <span className="sr-only">Toggle</span>
-                    </SidebarMenuAction>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      {item.items?.map((subItem) => (
-                        <SidebarMenuSubItem key={subItem.title}>
-                          <SidebarMenuSubButton asChild>
-                            <a href={subItem.url}>
-                              <span>{subItem.title}</span>
-                            </a>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </>
-              ) : null}
+           
             </SidebarMenuItem>
           </Collapsible>
         ))}
+          {activeView === "dashboard" && <DashboardPage />}
+          {activeView === "learn" && <SettingsPage />}
+          {activeView === "practice" && <PracticePage />}
+          {activeView === "challenges" && <ChallengesPage />}
+          {activeView === "comunity" && <ComunityPage />}
+          {activeView === "resources" && <ResoursesPage />}
+          {activeView === "progress" && <SettingsPage />}
+          {activeView === "settings" && <SettingsPage />}
+          {activeView === "settings" && <SettingsPage />}
       </SidebarMenu>
     </SidebarGroup>
   )

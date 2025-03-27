@@ -3,7 +3,6 @@ import { SessionProvider } from "next-auth/react";
 
 import { ThemeProvider } from "next-themes";
 
-import { auth } from "@/auth";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

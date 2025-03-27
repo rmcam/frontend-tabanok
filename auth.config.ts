@@ -27,6 +27,7 @@ export default {
         if (!email || !password) {
           return null;
         }
+        
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/signin`,
           {

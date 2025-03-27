@@ -2,6 +2,7 @@
 
 import {
   AudioWaveform,
+  Bell,
   BookOpen,
   Bot,
   Command,
@@ -27,129 +28,53 @@ import {
 } from "@/components/ui/sidebar";
 import { useSession } from "next-auth/react";
 import { NavUser } from "./nav-user";
-
-// This is sample data.
+import Link from "next/link";
 
 const data = {
-  teams: [
-    {
-      name: "Acme Inc",
-      logo: GalleryVerticalEnd,
-      plan: "Enterprise",
-    },
-    {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Free",
-    },
-  ],
   navMain: [
     {
-      title: "Playground",
-      url: "#",
-      icon: SquareTerminal,
-      isActive: true,
-      items: [
-        {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Models",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
+      title: "Inicio",
+      url: "/dashboard",
       icon: Frame,
+      isActive: true,
     },
     {
-      name: "Sales & Marketing",
-      url: "#",
+      title: "Aprender",
+      url: "/dashboard/learn",
+      icon: BookOpen,
+    },
+    {
+      title: "Práctica",
+      url: "/dashboard/practice",
+      icon: SquareTerminal,
+  
+    },
+    {
+      title: "Desafíos",
+      url: "/dashboard/challenges",
+      icon: GalleryVerticalEnd,
+    },
+    {
+      title: "Comunidad",
+      url: "/dashboard/comunity",
+      icon: Bot,
+      
+    },
+    {
+      title: "Recursos",
+      url: "/dashboard/resources",
+      icon: Map,
+      
+    },
+    {
+      title: "Progreso",
+      url: "/dashboard/progress",
       icon: PieChart,
     },
     {
-      name: "Travel",
-      url: "#",
-      icon: Map,
+      title: "Ayuda y Soporte",
+      url: "/dashboard/help",
+      icon: Command,
     },
   ],
 };
@@ -161,16 +86,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       collapsible="icon"
       {...props}
     >
-      <SidebarHeader>
-        <SidebarGroupLabel>{session?.user?.role}</SidebarGroupLabel>
-      </SidebarHeader>
-      <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
-      </SidebarContent>
-      <SidebarFooter>
-        <NavUser session={session} />
-      </SidebarFooter>
+      <SidebarHeader className="scroll-m-20 flex items-start p-4">
+        <Link href={'/dashboard'}>
+        <h1 className="text-2xl font-extrabold tracking-wide lg:text-3xl text-blue-500 ">
+          tabanok
+        </h1></Link>
+        </SidebarHeader>
+      <SidebarContent className="space-y-2">
+    <NavMain items={data.navMain}  />
+  </SidebarContent>
+  <SidebarFooter>
+    <NavUser session={session} />
+  </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   );

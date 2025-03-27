@@ -46,13 +46,13 @@ export function NavUser({ session }: { session: Session | null }) {
                 />
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
+              <div className="grid flex-1 text-left text-sm font-bold leading-tight">
                 <span className="truncate font-semibold">
                   {session?.user?.name}
                 </span>
-                <span className="truncate text-xs">{session?.user?.email}</span>
+                <h1>Perfil</h1>
               </div>
-              <ChevronsUpDown className="ml-auto size-4" />
+              
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent

@@ -5,26 +5,36 @@ import { signUpSchema } from "@/lib/zod";
 import { z } from "zod";
 
 export const registerAction = async (values: z.infer<typeof signUpSchema>) => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/signup`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(values),
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/signup`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify(values),
+      }
+    );
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      return {
+        error: errorData.message || res.statusText || "Error al registrar usuario",
+      };
     }
-  );
-  console.log("res", res);
-  if (res.ok === false) {
-    return {
-      error: res.status === 409 ? "El correo ya existe" : res.statusText,
-    };
-  } else {
+
+    const data = await res.json();
     return {
       ok: true,
-      message:
-        res.status === 201 ? "Usuario creado exitosamente" : res.statusText,
+      message: "Usuario creado exitosamente",
+      data,
+    };
+  } catch (error) {
+    console.error("Error en registerAction:", error);
+    return {
+      error: "Error de conexión con el servidor",
     };
   }
 };
