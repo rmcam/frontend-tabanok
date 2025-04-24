@@ -3,14 +3,13 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY packages ./packages
+COPY package.json pnpm-lock.yaml ./
 
 # Usar Corepack para pnpm
 RUN corepack enable && pnpm install --no-frozen-lockfile
 
-# Copiar todo el directorio frontend
-COPY frontend ./frontend
+# Copiar el contenido del directorio src al directorio /app/frontend
+COPY src ./frontend
 
 RUN pnpm --filter frontend build
 
