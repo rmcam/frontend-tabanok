@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import useAuthService from '../hooks/useAuthService';
 import { SigninData, SignupData, User } from '../types/authTypes';
 import { AuthContext } from './authContext';
+import { refreshToken } from '../services/authService';
 
 const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
   if (type === 'success') {
@@ -49,6 +50,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        // Intentar refrescar el token antes de verificar la sesión
+        await refreshToken(); // Descomentar si refreshToken está definido en este archivo
         const authenticatedUser = await verifySessionService();
         setUser(authenticatedUser);
       } catch (error) {
@@ -59,7 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
     checkAuth();
-  }, [verifySessionService]); // Dependencia: verifySessionService
+  }, [verifySessionService]);
 
   const signup = async (data: SignupData) => {
     setSigningUp(true);

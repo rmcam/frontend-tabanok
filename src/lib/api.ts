@@ -1,13 +1,11 @@
-const API_URL = import.meta.env.VITE_API_URL;
-
 const api = {
   get: async (path: string) => {
-    const response = await fetch(`${API_URL}${path}`, {
-      method: 'GET',
+    const response = await fetch(`${import.meta.env.VITE_API_URL}${path}`, {
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
-      credentials: 'include', // Incluir cookies en la solicitud
+      credentials: "include",
     });
 
     if (!response.ok) {
@@ -18,8 +16,24 @@ const api = {
 
     return response.json();
   },
-  // Puedes añadir otros métodos como post, put, delete si son necesarios
-  // post: async (path: string, data: any) => { ... }
+  post: async (path: string, data: Record<string, any>) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+    const response = await fetch(`${import.meta.env.VITE_API_URL}${path}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      const errorMessage = errorData.message || `Error posting to ${path}`;
+      throw new Error(errorMessage);
+    }
+
+    return response.json();
+  },
 };
 
 export default api;
