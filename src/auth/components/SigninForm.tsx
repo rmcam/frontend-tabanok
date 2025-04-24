@@ -31,13 +31,11 @@ const SigninForm: React.FC = () => {
       setApiError(null); // Clear previous errors
       try {
         // Use signin from the context
-        const success = await signin({
+        await signin({
           identifier: values.identifier,
           password: values.password,
         });
-        if (success) {
-          navigate('/dashboard'); // Redirigir al dashboard después del inicio de sesión exitoso
-        }
+        navigate('/dashboard'); // Redirigir al dashboard después del inicio de sesión exitoso
       } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
         console.error('Error al iniciar sesión:', error);
         // Intenta parsear el error para mostrar un mensaje más amigable

@@ -75,7 +75,7 @@ const SignUpForm = () => {
     if (formIsValid) { // Use the boolean return value from handleSubmit
       console.log('Formulario válido, enviando datos:', values);
       try {
-        const success = await signup({
+        await signup({
           email: values.email,
           password: values.password,
           username: values.username,
@@ -84,10 +84,9 @@ const SignUpForm = () => {
           firstLastName: values.firstLastName,
           secondLastName: values.secondLastName,
         });
-        if (success) {
-          console.log('Registro exitoso');
-          navigate('/');
-        }
+        // If signup completes without throwing an error, it was successful
+        console.log('Registro exitoso');
+        navigate('/');
       } catch (error: unknown) { // Usar unknown para un manejo de errores más seguro
         console.error('Error durante el registro:', error);
         const errorMessage = (error instanceof Error && error.message) ? error.message : 'Ocurrió un error desconocido durante el registro.';
