@@ -1,35 +1,26 @@
 # Etapa de build
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-COPY pnpm-lock.yaml ./
-COPY package.json ./
-COPY . .
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY packages ./packages
 
-RUN npm install -g pnpm \
-  && pnpm install --frozen-lockfile \
-  && pnpm build
+# Usar Corepack para pnpm
+RUN corepack enable && pnpm install --no-frozen-lockfile
 
-# Etapa de producción
-FROM node:18-alpine AS runner
+# Copiar todo el directorio frontend
+COPY frontend ./frontend
 
-WORKDIR /app
+RUN pnpm --filter frontend build
 
-ENV NODE_ENV=production
+# Etapa de producción: nginx para servir archivos estáticos
+FROM nginx:alpine AS production
 
-RUN npm install -g pnpm
+WORKDIR /usr/share/nginx/html
 
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=builder /app/frontend/dist .
 
-# Instalar solo dependencias de producción
-RUN pnpm install --prod --frozen-lockfile
+EXPOSE 80
 
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/next.config.mjs ./next.config.mjs
-
-EXPOSE 3000
-
-CMD ["pnpm", "start"]
+CMD ["nginx", "-g", "daemon off;"]

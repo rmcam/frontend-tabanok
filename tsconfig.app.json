@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "outDir": "dist",
+    "composite": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src/**/*.tsx", "src/lib/api.ts", "src/lib/authService.ts", "src/vite-env.d.ts", "src/**/*.ts", "src/components/ui/button.tsx"],
+  "exclude": ["src/hooks/useAuth.ts", "src/**/*.test.ts", "src/**/*.spec.ts"]
+}
