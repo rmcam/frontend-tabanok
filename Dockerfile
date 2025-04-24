@@ -1,5 +1,7 @@
 FROM node:20-alpine AS builder
 
+RUN npm install -g pnpm
+
 WORKDIR /app
 
 COPY package.json pnpm-lock.yaml ./
