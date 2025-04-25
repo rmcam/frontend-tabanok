@@ -15,16 +15,7 @@ const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info')
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>({
-    id: '1',
-    username: 'testuser',
-    email: 'test@example.com',
-    firstName: 'Test',
-    secondName: '',
-    firstLastName: 'User',
-    secondLastName: '',
-    roles: ['user'],
-  });
+  const [user, setUser] = useState<User | null>(null);
   const [signingIn, setSigningIn] = useState(false);
   const [signingUp, setSigningUp] = useState(false);
   const [requestingPasswordReset, setRequestingPasswordReset] = useState(false);

@@ -47,7 +47,10 @@ Este documento lista las tareas pendientes y los próximos pasos planificados pa
 *   **Refactorización y Limpieza:**
     *   Revisar y eliminar redundancias y campos obsoletos restantes en el código y la base de datos.
     *   Revisar redundancias y eliminar campos obsoletos restantes en el módulo de gamificación.
-    *   Refactorizar los componentes en `src/components` para mejorar la organización y seguir las buenas prácticas (esto ya se ha iniciado según `EstadoProyecto.md`).
+*   Refactorizar los componentes en `src/components` para mejorar la organización y seguir las buenas prácticas (esto ya se ha iniciado según `EstadoProyecto.md`).
+*   ~~Corregir errores de TypeScript en el módulo de recomendaciones~~
+*   **Módulo de Recomendaciones:**
+    *   ~~Corregir errores de TypeScript en `recommendations.service.ts` y `recommendations.controller.ts`~~
 *   **Componentes del Dashboard:**
     *   Implementar la lógica para guardar la actividad en el componente `ActivityCreator`. (Completado: Se ha integrado la llamada a la API para guardar las actividades en el backend, utilizando la API definida en `src/lib/api.ts` y agregando validaciones para la longitud del título y caracteres especiales).
     *   Implementar la lógica para mostrar el progreso de los estudiantes en el componente `StudentProgress`. (Completado: Se ha agregado una barra de progreso visual para representar el progreso de los estudiantes, utilizando la API definida en `src/lib/api.ts`). Se ha agregado un manejo de errores más robusto y se muestra un mensaje de error en caso de que la API no responda.

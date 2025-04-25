@@ -38,7 +38,8 @@ function App() {
         <Route
           path="/dashboard"
           element={
-            <AuthenticatedLayout>
+            <PrivateRoute requiredRoles={['user', 'student']}>
+              <AuthenticatedLayout>
               {' '}
               {/* Usar el layout autenticado */}
               <Suspense fallback={<div>Cargando contenido...</div>}>
@@ -47,6 +48,7 @@ function App() {
                 <UnifiedDashboard />
               </Suspense>
             </AuthenticatedLayout>
+            </PrivateRoute>
           }
         />
         <Route path="/unauthorized" element={<div>Acceso no autorizado</div>} />

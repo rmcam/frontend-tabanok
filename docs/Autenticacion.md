@@ -280,8 +280,14 @@ Si el refresh token no es válido o ha expirado, el backend devuelve un error 40
 
 #### Manejo de Tokens Expirados
 
+*   El frontend intercepta el error 401 (por ejemplo, en el servicio de autenticación o un interceptor global) y redirige al usuario a la página de inicio de sesión (`/`).
+
+#### Manejo de Tokens Expirados
+
 *   El backend verifica la fecha de expiración del token JWT. Si ha expirado, devuelve 401.
 *   El frontend intercepta el error 401 (por ejemplo, en el servicio de autenticación o un interceptor global) y redirige al usuario a la página de inicio de sesión (`/`).
+
+Para manejar los errores de autenticación, se modificó el archivo `src/lib/api.ts` para lanzar un evento "unauthorized" cuando se recibe un error 401. Se agregó un `useEffect` a `src/App.tsx` para escuchar el evento "unauthorized" y redirigir al usuario a la página de inicio de sesión.
 
 #### Manejo de Rutas Públicas Específicas (`/lesson/featured`)
 
