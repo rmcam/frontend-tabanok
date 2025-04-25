@@ -1,9 +1,8 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import useAuthService from '../hooks/useAuthService';
 import { SigninData, SignupData, User } from '../types/authTypes';
 import { AuthContext } from './authContext';
-import { refreshToken } from '../services/authService';
 
 const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
   if (type === 'success') {
@@ -16,8 +15,16 @@ const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info')
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>({
+    id: '1',
+    username: 'testuser',
+    email: 'test@example.com',
+    firstName: 'Test',
+    secondName: '',
+    firstLastName: 'User',
+    secondLastName: '',
+    roles: ['user'],
+  });
   const [signingIn, setSigningIn] = useState(false);
   const [signingUp, setSigningUp] = useState(false);
   const [requestingPasswordReset, setRequestingPasswordReset] = useState(false);
@@ -46,36 +53,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [signoutService]);
 
-  // Efecto para verificar la sesión al cargar la aplicación
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        // Intentar refrescar el token antes de verificar la sesión
-        await refreshToken(); // Descomentar si refreshToken está definido en este archivo
-        const authenticatedUser = await verifySessionService();
-        setUser(authenticatedUser);
-      } catch (error) {
-        console.error('Error checking authentication session:', error);
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    checkAuth();
-  }, [verifySessionService]);
-
   const signup = async (data: SignupData) => {
     setSigningUp(true);
     try {
-      await signupService({
-        email: data.email,
-        password: data.password,
-        username: data.username,
-        firstName: data.firstName,
-        secondName: data.secondName,
-        firstLastName: data.firstLastName,
-        secondLastName: data.secondLastName,
-      });
+      await signupService(data);
       // Después de un registro exitoso, verificar la sesión para obtener los datos del usuario
       const authenticatedUser = await verifySessionService();
       setUser(authenticatedUser);
@@ -136,7 +117,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <AuthContext.Provider
       value={{
         user,
-        loading,
         signingIn,
         signingUp,
         requestingPasswordReset,

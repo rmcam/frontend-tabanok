@@ -3,7 +3,6 @@ import { SigninData, SignupData, User } from '../types/authTypes';
 
 export interface AuthContextType {
   user: User | null;
-  loading: boolean;
   signingIn: boolean;
   signingUp: boolean;
   requestingPasswordReset: boolean;

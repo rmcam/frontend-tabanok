@@ -1,12 +1,67 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FaPlusCircle } from "react-icons/fa";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Activity } from '../types/activity';
+import { toast } from 'sonner'
 
 const ActivityCreator = () => {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+
+  const handleSave = async () => {
+    try {
+      // Simulación de llamada a la API
+      const newActivity: Activity = {
+        id: Math.random().toString(), // Generar un ID simulado
+        title,
+        description,
+      };
+
+      console.log('Simulando envío a la API:', newActivity);
+
+      // Simular un tiempo de espera de la API
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      toast.success("Actividad creada!", {
+        description: "La actividad se ha guardado correctamente.",
+      })
+      setTitle('');
+      setDescription('');
+    } catch (error) {
+      toast.error("Error!", {
+        description: "Hubo un error al guardar la actividad.",
+      })
+      console.error('Error al guardar la actividad:', error);
+    }
+  };
+
   return (
-    <div className="flex items-center">
-      <FaPlusCircle size={24} className="mr-2" />
-      <h2>Creación de Actividades</h2>
-      {/* Aquí se implementará la lógica para la creación de actividades */}
+    <div className="flex flex-col">
+      <div className="flex items-center mb-4">
+        <FaPlusCircle size={24} className="mr-2" />
+        <h2 className="text-xl font-semibold">Creación de Actividades</h2>
+      </div>
+      <div className="mb-2">
+        <label htmlFor="title" className="block text-sm font-medium text-gray-700">Título</label>
+        <Input
+          type="text"
+          id="title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="mt-1"
+        />
+      </div>
+      <div className="mb-4">
+        <label htmlFor="description" className="block text-sm font-medium text-gray-700">Descripción</label>
+        <textarea
+          id="description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="mt-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+        />
+      </div>
+      <Button onClick={handleSave}>Guardar Actividad</Button>
     </div>
   );
 };

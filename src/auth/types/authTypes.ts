@@ -17,6 +17,7 @@ export interface SigninData {
 export interface User {
   id: string;
   email: string;
+  username: string;
   roles: string[];
   firstName: string;
   secondName: string;
