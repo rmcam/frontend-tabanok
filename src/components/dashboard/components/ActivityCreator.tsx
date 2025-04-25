@@ -2,33 +2,42 @@ import React, { useState } from 'react';
 import { FaPlusCircle } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Activity } from '../types/activity';
-import { toast } from 'sonner'
+import { toast } from 'sonner';
+import api from '@/lib/api';
 
 const ActivityCreator = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
 
   const handleSave = async () => {
+    if (!title) {
+      toast.error("Error!", {
+        description: "El título es obligatorio.",
+      });
+      return;
+    }
+
+    if (description.length < 10) {
+      toast.error("Error!", {
+        description: "La descripción debe tener al menos 10 caracteres.",
+      });
+      return;
+    }
+
     try {
-      // Simulación de llamada a la API
-      const newActivity: Activity = {
-        id: Math.random().toString(), // Generar un ID simulado
+      const newActivity = {
         title,
         description,
       };
 
-      console.log('Simulando envío a la API:', newActivity);
-
-      // Simular un tiempo de espera de la API
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await api.post('/activities', newActivity);
 
       toast.success("Actividad creada!", {
         description: "La actividad se ha guardado correctamente.",
       })
       setTitle('');
       setDescription('');
-    } catch (error) {
+    } catch (error: unknown) {
       toast.error("Error!", {
         description: "Hubo un error al guardar la actividad.",
       })

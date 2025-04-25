@@ -11,6 +11,8 @@ import ActivityCreator from './components/ActivityCreator';
 import ReportViewer from './components/ReportViewer';
 import MultimediaUploadForm from './components/MultimediaUploadForm';
 import MultimediaGallery from './components/MultimediaGallery';
+import DashboardStatistics from './components/DashboardStatistics';
+import LatestActivities from './components/LatestActivities';
 import { useAuth } from '@/auth/hooks/useAuth';
 
 const UnifiedDashboard = () => {
@@ -30,6 +32,11 @@ const UnifiedDashboard = () => {
         </BreadcrumbList>
       </Breadcrumb>
       <h1 className="text-3xl font-semibold mb-5">{isTeacher ? 'Panel Docente' : 'Dashboard'}</h1>
+
+      {/* Estadísticas del dashboard */}
+      <section className="mb-8">
+        <DashboardStatistics />
+      </section>
 
       {/* Herramientas para docentes */}
       <section className="mb-8">
@@ -61,6 +68,12 @@ const UnifiedDashboard = () => {
       <section className="mb-8">
         <h2 className="text-2xl font-semibold mb-3">Evaluaciones Efectivas</h2>
         <ContentManager />
+      </section>
+
+      {/* Últimas Actividades */}
+      <section className="mb-8">
+        <h2 className="text-2xl font-semibold mb-3">Últimas Actividades</h2>
+        <LatestActivities />
       </section>
     </div>
   );

@@ -21,7 +21,7 @@ El componente `HomePage` (`src/components/home/HomePage.tsx`) es la página prin
 Los componentes del frontend se organizan en el directorio `src/components/` con la siguiente estructura:
 
 *   `common/`: Componentes reutilizables en toda la aplicación (ej. `PrivateRoute`, `AuthModals`, `Loading`).
-*   `dashboard/`: Componentes específicos del dashboard unificado (`UnifiedDashboard`) y sus subcomponentes (ej. `ActivityCreator`, `StudentProgress`, `ReportViewer`, `MultimediaUploadForm`, `MultimediaGallery`, `ContentManager`).
+*   `dashboard/`: Componentes específicos del dashboard unificado (`UnifiedDashboard`) y sus subcomponentes (ej. `ActivityCreator`, `StudentProgress`, `ReportViewer`, `MultimediaUploadForm`, `MultimediaGallery`, `ContentManager`, `LatestActivities`). Estos componentes ahora tienen implementada la lógica para interactuar con la API del backend y mejorar la experiencia del usuario, incluyendo validaciones, uso de variables de entorno y la API definida en `src/lib/api.ts`.
 *   `general/`: Componentes generales no específicos de una sección particular.
 *   `home/`: Componentes utilizados en la página de inicio (`HomePage`) y sus subcomponentes (ej. `HeroSection`, `FeaturedLessonCard`, `ContactForm`, `FAQ`, `HomeNavbar`).
 *   `layout/`: Componentes de layout (ej. `AuthenticatedLayout`).

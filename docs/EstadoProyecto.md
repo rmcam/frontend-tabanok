@@ -22,7 +22,15 @@ El frontend es una aplicación **React + Vite** con una estructura modular bien 
 *   **Internacionalización:** Configurada con `react-i18next`, aunque la traducción completa está pendiente.
 *   **Validación Lingüística:** Validaciones básicas con **Zod** en formularios. La integración avanzada con APIs para control ortográfico y gramatical está en progreso. Ver [`./ValidacionLingüistica.md`](./ValidacionLingüistica.md) para más detalles.
 *   **Accesibilidad:** En proceso, con componentes accesibles de `shadcn/ui` y mejoras específicas implementadas (ej. atributos ARIA en carruseles, `ariaLabel` en botones). Aún no cumple completamente con WCAG 2.1. Ver [`./Accesibilidad.md`](./Accesibilidad.md) y [`./Accesibilidad-Pruebas.md`](./Accesibilidad-Pruebas.md) para más detalles y guía de pruebas manuales.
-*   **Gestión de Contenidos (Panel Docente):** Se ha implementado la interfaz de usuario básica para la gestión de contenidos en el Panel Docente unificado (`UnifiedDashboard.tsx`), incluyendo componentes para creación de actividades (`ActivityCreator`), seguimiento de estudiantes (`StudentProgress`), reportes (`ReportViewer`), carga (`MultimediaUploadForm`) y galería multimedia (`MultimediaGallery`), y gestión de contenido general (`ContentManager`). Los componentes `ActivityCreator`, `StudentProgress` y `ReportViewer` muestran datos de ejemplo. El componente `MultimediaUploadForm` utiliza la variable de entorno `VITE_API_URL` y mejora el manejo de errores. La lógica detallada reside en los subcomponentes importados.
+*   **Gestión de Contenidos (Panel Docente):** Se ha implementado la interfaz de usuario para la gestión de contenidos en el Panel Docente unificado (`UnifiedDashboard.tsx`), incluyendo componentes para creación de actividades (`ActivityCreator`), seguimiento de estudiantes (`StudentProgress`), reportes (`ReportViewer`), carga (`MultimediaUploadForm`) y galería multimedia (`MultimediaGallery`), y gestión de contenido general (`ContentManager`). Los componentes `ActivityCreator`, `StudentProgress`, `ReportViewer`, `MultimediaUploadForm`, `MultimediaGallery` y `ContentManager` ahora tienen implementada la lógica para interactuar con la API del backend.
+    *   `ActivityCreator`: Permite crear actividades y guardarlas en el backend.
+    *   `StudentProgress`: Muestra el progreso de los estudiantes utilizando una barra de progreso visual. Se ha agregado un manejo de errores más robusto y se muestra un mensaje de error en caso de que la API no responda.
+    *   `ReportViewer`: Muestra una lista de reportes con descripciones. Se ha agregado un manejo de errores más robusto y se muestra un mensaje de error en caso de que la API no responda.
+    *   `MultimediaUploadForm`: Permite subir archivos multimedia al backend con validación del tipo de archivo.
+    *   `MultimediaGallery`: Muestra una galería de archivos multimedia con filtros por tipo.
+    *   `ContentManager`: Permite crear, leer, actualizar y eliminar contenido en el backend, utilizando la API definida en `src/lib/api.ts`.
+*   Se agregó el componente `LatestActivities` para mostrar las últimas actividades realizadas por los estudiantes.
+*   Se movió la verificación de la variable de entorno `VITE_API_URL` al componente `App.tsx` para que se realice solo una vez al inicio de la aplicación.
 
 ### Estado del Backend
 

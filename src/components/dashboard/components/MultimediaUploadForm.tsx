@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import api from '@/lib/api';
 
 const MultimediaUploadForm: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -7,7 +8,14 @@ const MultimediaUploadForm: React.FC = () => {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
-      setSelectedFile(event.target.files[0]);
+      const file = event.target.files[0];
+      const allowedTypes = ['image/png', 'image/jpg', 'image/jpeg', 'image/gif', 'audio/mpeg', 'audio/wav', 'video/mp4', 'video/webm'];
+      if (!allowedTypes.includes(file.type)) {
+        setSelectedFile(null);
+        setMessage("Por favor, selecciona un archivo válido (png, jpg, jpeg, gif, mp3, wav, mp4, webm).");
+        return;
+      }
+      setSelectedFile(file);
       setMessage("");
     } else {
       setSelectedFile(null);
@@ -28,27 +36,10 @@ const MultimediaUploadForm: React.FC = () => {
     formData.append("multimedia", selectedFile); // 'multimedia' es el nombre esperado por el backend
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/multimedia/upload`,
-        {
-          method: "POST",
-          body: formData,
-          // No Content-Type header needed for FormData
-        }
-      );
+      const response = await api.put('/multimedia/upload', formData);
 
-      if (response.ok) {
-        const result = await response.json();
-        setMessage("Archivo subido con éxito: " + result.url);
-        setSelectedFile(null); // Limpiar la selección después de subir
-      } else {
-        try {
-          const errorJson = await response.json();
-          setMessage("Error al subir el archivo: " + errorJson.message);
-        } catch (error) {
-          setMessage("Error al subir el archivo: " + (error as Error).message);
-        }
-      }
+      setMessage("Archivo subido con éxito: " + response.url);
+      setSelectedFile(null); // Limpiar la selección después de subir
     } catch (error: unknown) {
       setMessage("Error de red o del servidor: " + (error as Error).message);
     } finally {

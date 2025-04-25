@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom'; // Eliminar useNavigate, importar Navigate
 // import { useAuth } from './auth/hooks/useAuth'; // Importar useAuth desde el hook
 import PrivateRoute from './components/common/PrivateRoute';
@@ -11,12 +11,26 @@ const UnifiedDashboard = lazy(() => import('./components/dashboard/Dashboard'));
 // import { SidebarTrigger } from './components/ui/sidebar';
 
 function App() {
-  // const { user } = useAuth(); // Obtener user y loading
+  const [apiReady, setApiReady] = useState(false);
 
-  // Mostrar un indicador de carga o null mientras se verifica la autenticación inicial
-  // if (loading) {
-  //   return <div>Cargando autenticación...</div>; // O un spinner, etc.
-  // }
+  useEffect(() => {
+    const VITE_API_URL = import.meta.env.VITE_API_URL;
+    if (!VITE_API_URL) {
+      console.error("La variable de entorno VITE_API_URL no está definida.");
+      return;
+    }
+    setApiReady(true);
+  }, []);
+
+  if (!apiReady) {
+    return (
+      <div>
+        <h1>Error</h1>
+        <p>La variable de entorno VITE_API_URL no está definida.</p>
+      </div>
+    );
+  }
+
   return (
     <SidebarProvider>
       <Routes>
@@ -24,13 +38,13 @@ function App() {
         <Route
           path="/dashboard"
           element={
-              <AuthenticatedLayout>
+            <AuthenticatedLayout>
               {' '}
               {/* Usar el layout autenticado */}
               <Suspense fallback={<div>Cargando contenido...</div>}>
-              {' '}
-              {/* Mover Suspense aquí */}
-              <UnifiedDashboard />
+                {' '}
+                {/* Mover Suspense aquí */}
+                <UnifiedDashboard />
               </Suspense>
             </AuthenticatedLayout>
           }

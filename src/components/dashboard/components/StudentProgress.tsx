@@ -1,13 +1,33 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaChartLine } from "react-icons/fa";
+import { Progress } from "@/components/ui/progress";
+import api from '@/lib/api';
+
+interface Student {
+  id: string;
+  name: string;
+  progress: number;
+}
 
 const StudentProgress = () => {
-  // Datos de ejemplo para el progreso de los estudiantes
-  const studentData = [
-    { id: '1', name: 'Estudiante 1', progress: 75 },
-    { id: '2', name: 'Estudiante 2', progress: 50 },
-    { id: '3', name: 'Estudiante 3', progress: 90 },
-  ];
+  const [studentData, setStudentData] = useState<Student[]>([]);
+
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data: Student[] = await api.get('/students/progress');
+        setStudentData(data);
+        setError(null);
+      } catch (error: unknown) {
+        console.error('Error al obtener el progreso de los estudiantes:', error);
+        setError('Error al obtener el progreso de los estudiantes. Por favor, inténtelo de nuevo más tarde.');
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <div className="flex flex-col">
@@ -17,11 +37,16 @@ const StudentProgress = () => {
       </div>
       <ul>
         {studentData.map((student) => (
-          <li key={student.id} className="mb-2">
-            {student.name}: {student.progress}%
+          <li key={student.id} className="mb-4">
+            <div className="flex justify-between">
+              <span>{student.name}</span>
+              <span>{student.progress}%</span>
+            </div>
+            <Progress value={student.progress} />
           </li>
         ))}
       </ul>
+      {error && <p className="text-red-500">{error}</p>}
     </div>
   );
 };

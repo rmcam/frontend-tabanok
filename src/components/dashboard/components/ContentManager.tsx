@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import api from "@/lib/api";
 
 // Define a type for content items
 interface ContentItem {
@@ -33,37 +34,9 @@ interface ContentItem {
 const ContentManager = () => {
   const [showForm, setShowForm] = useState(false);
   const [contentType, setContentType] = useState("");
-  const [contents, setContents] = useState<ContentItem[]>([
-    // Use the defined type
-    {
-      id: 1,
-      title: "Contenido 1",
-      description: "Descripción del contenido 1",
-      category: "categoria1",
-      tags: "tag1, tag2",
-      type: "texto",
-      content: "Este es el contenido de texto 1",
-    },
-    {
-      id: 2,
-      title: "Contenido 2",
-      description: "Descripción del contenido 2",
-      category: "categoria2",
-      tags: "tag3, tag4",
-      type: "imagen",
-      content: null, // Representing a file, actual file object won't be stored here
-    },
-    {
-      id: 3,
-      title: "Contenido 3",
-      description: "Descripción del contenido 3",
-      category: "categoria3",
-      tags: "tag5, tag6",
-      type: "video",
-      content: null, // Representing a file
-    },
-  ]);
+  const [contents, setContents] = useState<ContentItem[]>([]);
   const [editContent, setEditContent] = useState<ContentItem | null>(null); // Use the defined type
+  const [loading, setLoading] = useState(true);
 
   // State for form fields
   const [title, setTitle] = useState("");
@@ -72,7 +45,6 @@ const ContentManager = () => {
   const [tags, setTags] = useState("");
   const [content, setContent] = useState<string | File | null>(null); // Updated state type
 
-  // Populate form fields when editing
   useEffect(() => {
     if (editContent) {
       setTitle(editContent.title);
@@ -80,10 +52,8 @@ const ContentManager = () => {
       setCategory(editContent.category);
       setTags(editContent.tags);
       setContentType(editContent.type);
-      // Set content only if it's text, otherwise it's a file input
       setContent(editContent.type === "texto" ? editContent.content : null);
     } else {
-      // Clear form fields when not editing
       setTitle("");
       setDescription("");
       setCategory("");
@@ -93,11 +63,28 @@ const ContentManager = () => {
     }
   }, [editContent]);
 
+  useEffect(() => {
+    const fetchContents = async () => {
+      try {
+        const data: ContentItem[] = await api.get("/contents");
+        setContents(data);
+      } catch (error: unknown) {
+        toast.error("Error!", {
+          description: "Hubo un error al obtener los contenidos.",
+        });
+        console.error("Error al obtener los contenidos:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContents();
+  }, []);
+
   const handleSave = async () => {
     try {
       const newContent: ContentItem = {
-        // Use the defined type
-        id: editContent ? editContent.id : contents.length + 1, // Simple ID generation
+        id: editContent ? editContent.id : contents.length + 1,
         title,
         description,
         category,
@@ -108,40 +95,96 @@ const ContentManager = () => {
             ? (content as string | null)
             : content instanceof File
             ? content.name
-            : null, // Store file name or text content
+            : null,
       };
 
-      // Simulación de llamada a la API
-      console.log("Simulando envío a la API:", newContent);
+      const method = editContent ? 'PUT' : 'POST';
+      const url = editContent ? `/contents/${editContent.id}` : `/contents`;
 
-      // Simular un tiempo de espera de la API
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      if (editContent) {
-        setContents(
-          contents.map((c) => (c.id === editContent.id ? newContent : c))
-        );
+      let body;
+      if (contentType === "texto") {
+        body = JSON.stringify(newContent);
       } else {
-        setContents([...contents, newContent]);
+        const formData = new FormData();
+        if (content instanceof File) {
+          formData.append("content", content);
+        }
+        formData.append("title", title);
+        formData.append("description", description);
+        formData.append("category", category);
+        formData.append("tags", tags);
+        formData.append("type", contentType);
+        body = formData;
       }
 
-      toast.success("Contenido guardado!", {
-        description: "El contenido se ha guardado correctamente.",
-      });
+      // Validate form
+      const errors: { [key: string]: string } = {};
+      if (!title) errors.title = "El título es obligatorio.";
+      if (!description) errors.description = "La descripción es obligatoria.";
+      if (!category) errors.category = "La categoría es obligatoria.";
+      if (!contentType) errors.type = "El tipo de contenido es obligatorio.";
+      if (contentType === "texto" && !content)
+        errors.content = "El contenido es obligatorio.";
+      if (
+        (contentType === "imagen" ||
+          contentType === "video" ||
+          contentType === "audio") &&
+        !content
+      )
+        errors.content = "El archivo es obligatorio.";
+
+      if (Object.keys(errors).length > 0) {
+        Object.values(errors).forEach(error => {
+          toast.error("Error!", {
+            description: error,
+          });
+        });
+        return;
+      }
+
+      try {
+        if (method === 'PUT') {
+          await api.put(url, body as unknown);
+        } else {
+          await api.post(url, body as unknown);
+        }
+
+        toast.success("Contenido guardado!", {
+          description: "El contenido se ha guardado correctamente.",
+        });
+      } catch (error: unknown) {
+        toast.error("Error!", {
+          description: "Hubo un error al guardar el contenido.",
+        });
+        if (error instanceof Error) {
+          console.error("Error al guardar el contenido:", error.message);
+        } else {
+          console.error("Error al guardar el contenido:", error);
+        }
+      }
 
       setShowForm(false);
       setEditContent(null);
     } catch (error: unknown) {
-      toast.error("Error!", {
-        description: "Hubo un error al guardar el contenido.",
-      });
       console.error("Error al guardar el contenido:", error);
     }
   };
 
-  const handleDelete = (id: number) => {
-    // Add type for id
-    setContents(contents.filter((c) => c.id !== id));
+  const handleDelete = async (id: number) => {
+    try {
+      await api.delete(`/contents/${id}`);
+
+      toast.success("Contenido eliminado!", {
+        description: "El contenido se ha eliminado correctamente.",
+      });
+
+      setContents(contents.filter((c) => c.id !== id));
+    } catch (error: unknown) {
+      toast.error("Error!", {
+        description: "Hubo un error al eliminar el contenido.",
+      });
+      console.error("Error al eliminar el contenido:", error);
+    }
   };
 
   const handleEdit = (content: ContentItem) => {
@@ -267,21 +310,27 @@ const ContentManager = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {contents.map((content) => (
-              <TableRow key={content.id}>
-                <TableCell>{content.title}</TableCell>
-                <TableCell>{content.description}</TableCell>
-                <TableCell>{content.category}</TableCell>
-                <TableCell>{content.tags}</TableCell>
-                <TableCell>{content.type}</TableCell>
-                <TableCell>
-                  <Button onClick={() => handleDelete(content.id)}>
-                    Eliminar
-                  </Button>
-                  <Button onClick={() => handleEdit(content)}>Editar</Button>
-                </TableCell>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={6}>Cargando contenidos...</TableCell>
               </TableRow>
-            ))}
+            ) : (
+              contents.map((content) => (
+                <TableRow key={content.id}>
+                  <TableCell>{content.title}</TableCell>
+                  <TableCell>{content.description}</TableCell>
+                  <TableCell>{content.category}</TableCell>
+                  <TableCell>{content.tags}</TableCell>
+                  <TableCell>{content.type}</TableCell>
+                  <TableCell>
+                    <Button onClick={() => handleDelete(content.id)}>
+                      Eliminar
+                    </Button>
+                    <Button onClick={() => handleEdit(content)}>Editar</Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>

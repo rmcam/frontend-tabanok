@@ -34,10 +34,11 @@ Este documento lista las tareas pendientes y los próximos pasos planificados pa
     *   Implementar la lógica para guardar los datos del formulario en el backend del Panel Docente.
     *   Implementar la lógica para la gestión de categorías y etiquetas en el Panel Docente.
     *   Mejorar la interfaz de usuario del formulario en el Panel Docente.
-    *   Implementar la lógica en el frontend para la subida y visualización de archivos multimedia.
+    *   Implementar la lógica en el frontend para la subida y visualización de archivos multimedia. (Completado: Se ha implementado la validación del tipo de archivo en el componente `MultimediaUploadForm` y se han agregado filtros por tipo en el componente `MultimediaGallery`).
     *   Usar un componente `MultimediaPlayer` reutilizable en el frontend.
     *   Desarrollar la galería multimedia accesible en el frontend.
     *   Escribir pruebas unitarias y de integración para las nuevas funcionalidades del Panel Docente.
+    *   Implementar la lógica para la gestión de contenidos, progreso de estudiantes, creación de actividades y acceso a reportes en el Panel Docente. (Completado: Se han implementado las funcionalidades de crear, leer, actualizar y eliminar contenido en el componente `ContentManager`, utilizando la API definida en `src/lib/api.ts`).
 *   **Validación Lingüística:**
     *   Internacionalizar mensajes existentes en formularios y otros componentes del frontend.
     *   Integrar control ortográfico y gramatical en inputs de contenido textual.
@@ -48,9 +49,15 @@ Este documento lista las tareas pendientes y los próximos pasos planificados pa
     *   Revisar redundancias y eliminar campos obsoletos restantes en el módulo de gamificación.
     *   Refactorizar los componentes en `src/components` para mejorar la organización y seguir las buenas prácticas (esto ya se ha iniciado según `EstadoProyecto.md`).
 *   **Componentes del Dashboard:**
-    *   Implementar la lógica para guardar la actividad en el componente `ActivityCreator`.
-    *   Implementar la lógica para mostrar el progreso de los estudiantes en el componente `StudentProgress`.
-    *   Implementar la lógica para mostrar los reportes en el componente `ReportViewer`.
+    *   Implementar la lógica para guardar la actividad en el componente `ActivityCreator`. (Completado: Se ha integrado la llamada a la API para guardar las actividades en el backend, utilizando la API definida en `src/lib/api.ts` y agregando validaciones).
+    *   Implementar la lógica para mostrar el progreso de los estudiantes en el componente `StudentProgress`. (Completado: Se ha agregado una barra de progreso visual para representar el progreso de los estudiantes, utilizando la API definida en `src/lib/api.ts`). Se ha agregado un manejo de errores más robusto y se muestra un mensaje de error en caso de que la API no responda.
+    *   Implementar la lógica para mostrar los reportes en el componente `ReportViewer`. (Completado: Se ha agregado una descripción para cada reporte, utilizando la API definida en `src/lib/api.ts`). Se ha agregado un manejo de errores más robusto y se muestra un mensaje de error en caso de que la API no responda.
+    *   Implementar la lógica en el frontend para la subida y visualización de archivos multimedia.
+    *   Usar un componente `MultimediaPlayer` reutilizable en el frontend.
+    *   Desarrollar la galería multimedia accesible en el frontend.
+    *   Escribir pruebas unitarias y de integración para las nuevas funcionalidades del Panel Docente.
+*   Se agregó el componente `LatestActivities` para mostrar las últimas actividades realizadas por los estudiantes.
+*   Se movió la verificación de la variable de entorno `VITE_API_URL` al componente `App.tsx` para que se realice solo una vez al inicio de la aplicación.
 
 ## Próximos pasos recomendados (Resumen)
 
