@@ -2,17 +2,31 @@ import React, { useState } from 'react';
 import { FaPlusCircle } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { toast } from 'sonner';
-import api from '@/lib/api';
+import { toast } from "sonner";
+import api from "@/lib/api";
 
 const ActivityCreator = () => {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
 
   const handleSave = async () => {
     if (!title) {
       toast.error("Error!", {
         description: "El título es obligatorio.",
+      });
+      return;
+    }
+
+    if (title.length < 3) {
+      toast.error("Error!", {
+        description: "El título debe tener al menos 3 caracteres.",
+      });
+      return;
+    }
+
+    if (!/^[a-zA-Z0-9\s]*$/.test(title)) {
+      toast.error("Error!", {
+        description: "El título solo puede contener letras, números y espacios.",
       });
       return;
     }
@@ -30,18 +44,18 @@ const ActivityCreator = () => {
         description,
       };
 
-      await api.post('/activities', newActivity);
+      await api.post("/activities", newActivity);
 
       toast.success("Actividad creada!", {
         description: "La actividad se ha guardado correctamente.",
-      })
-      setTitle('');
-      setDescription('');
+      });
+      setTitle("");
+      setDescription("");
     } catch (error: unknown) {
       toast.error("Error!", {
         description: "Hubo un error al guardar la actividad.",
-      })
-      console.error('Error al guardar la actividad:', error);
+      });
+      console.error("Error al guardar la actividad:", error);
     }
   };
 

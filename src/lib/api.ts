@@ -34,7 +34,7 @@ const api = {
 
     return response.json();
   },
-  put: async (path: string, data: any): Promise<any> => { // eslint-disable-line @typescript-eslint/no-explicit-any
+  put: async (path: string, data: any, config: any = {}): Promise<any> => { // eslint-disable-line @typescript-eslint/no-explicit-any
     const response = await fetch(`${import.meta.env.VITE_API_URL}${path}`, {
       method: "PUT",
       headers: {
@@ -42,6 +42,7 @@ const api = {
       },
       body: data instanceof FormData ? data : JSON.stringify(data),
       credentials: "include",
+      ...config,
     });
 
     if (!response.ok) {

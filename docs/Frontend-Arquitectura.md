@@ -21,7 +21,13 @@ El componente `HomePage` (`src/components/home/HomePage.tsx`) es la página prin
 Los componentes del frontend se organizan en el directorio `src/components/` con la siguiente estructura:
 
 *   `common/`: Componentes reutilizables en toda la aplicación (ej. `PrivateRoute`, `AuthModals`, `Loading`).
-*   `dashboard/`: Componentes específicos del dashboard unificado (`UnifiedDashboard`) y sus subcomponentes (ej. `ActivityCreator`, `StudentProgress`, `ReportViewer`, `MultimediaUploadForm`, `MultimediaGallery`, `ContentManager`, `LatestActivities`). Estos componentes ahora tienen implementada la lógica para interactuar con la API del backend y mejorar la experiencia del usuario, incluyendo validaciones, uso de variables de entorno y la API definida en `src/lib/api.ts`.
+*   `dashboard/`: Componentes específicos del dashboard unificado (`UnifiedDashboard`) y sus subcomponentes (ej. `ActivityCreator`, `StudentProgress`, `ReportViewer`, `MultimediaUploadForm`, `MultimediaGallery`, `ContentManager`, `LatestActivities`).
+    *   `ActivityCreator`: Permite crear actividades y guardarlas en el backend. Se ha agregado validación para la longitud del título y caracteres especiales.
+    *   `StudentProgress`: Muestra el progreso de los estudiantes utilizando una barra de progreso visual. Se ha agregado un manejo de errores más robusto y se muestra un mensaje de error en caso de que la API no responda.
+    *   `ReportViewer`: Muestra una lista de reportes con descripciones. Se ha agregado un manejo de errores más robusto y se muestra un mensaje de error en caso de que la API no responda.
+    *   `MultimediaUploadForm`: Permite subir archivos multimedia al backend. Se ha implementado la previsualización del archivo seleccionado, la barra de progreso durante la subida y la selección de tipos de archivo permitidos, y la adición de metadatos al archivo.
+    *   `MultimediaGallery`: Muestra una galería de archivos multimedia con filtros por tipo.
+    *   `ContentManager`: Permite crear, leer, actualizar y eliminar contenido en el backend. Se ha implementado la subida de múltiples archivos, la previsualización de archivos subidos, la eliminación de archivos subidos y el editor de texto enriquecido.
 *   `general/`: Componentes generales no específicos de una sección particular.
 *   `home/`: Componentes utilizados en la página de inicio (`HomePage`) y sus subcomponentes (ej. `HeroSection`, `FeaturedLessonCard`, `ContactForm`, `FAQ`, `HomeNavbar`).
 *   `layout/`: Componentes de layout (ej. `AuthenticatedLayout`).
