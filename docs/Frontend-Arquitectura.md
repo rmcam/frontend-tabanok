@@ -27,20 +27,22 @@ Los componentes del frontend se organizan en el directorio `src/components/` con
     *   `ReportViewer`: Muestra una lista de reportes con descripciones. Se ha agregado un manejo de errores más robusto y se muestra un mensaje de error en caso de que la API no responda.
     *   `MultimediaUploadForm`: Permite subir archivos multimedia al backend. Se ha implementado la previsualización del archivo seleccionado, la barra de progreso durante la subida y la selección de tipos de archivo permitidos, y la adición de metadatos al archivo.
     *   `MultimediaGallery`: Muestra una galería de archivos multimedia con filtros por tipo.
-    *   `ContentManager`: Permite crear, leer, actualizar y eliminar contenido en el backend. Se ha implementado la subida de múltiples archivos, la previsualización de archivos subidos, la eliminación de archivos subidos y el editor de texto enriquecido.
+    *   `ContentManager`: Permite crear, leer, actualizar y eliminar contenido en el backend. Se ha implementado la subida de múltiples archivos, la previsualización de archivos subidos, la eliminación de archivos subidos y el editor de texto enriquecido. Además, se ha implementado la funcionalidad de edición de contenido.
 *   `general/`: Componentes generales no específicos de una sección particular.
+*   Se han añadido indicadores de carga a los componentes `ActivityCreator`, `StudentProgress` y `ReportViewer`.
 *   `home/`: Componentes utilizados en la página de inicio (`HomePage`) y sus subcomponentes (ej. `HeroSection`, `FeaturedLessonCard`, `ContactForm`, `FAQ`, `HomeNavbar`).
 *   `layout/`: Componentes de layout (ej. `AuthenticatedLayout`).
 *   `navigation/`: Componentes de navegación (ej. Sidebar).
 *   `ui/`: Componentes base de Shadcn UI y componentes personalizados basados en ellos (ej. `Button`, `Carousel`, `Sidebar`).
+*   **Service Worker:** Se ha implementado un Service Worker para habilitar la funcionalidad offline, mejorando la experiencia del usuario en condiciones de conectividad limitada. El archivo `sw.js` contiene la lógica de cacheo y manejo de peticiones, y se registra en `src/main.tsx`.
 
 ### Gestión de Rutas
 
-Las rutas de la aplicación se gestionan utilizando **React Router DOM**. Se emplea el componente `PrivateRoute` (`src/components/common/PrivateRoute.tsx`) para proteger las rutas sensibles, verificando la autenticación del usuario y los roles requeridos.
+Las rutas de la aplicación se gestionan utilizando **React Router DOM**. Se emplea el componente `PrivateRoute` (`src/components/common/PrivateRoute.tsx`) para proteger las rutas sensibles, verificando la autenticación del usuario, el estado de carga de la sesión y los roles requeridos.
 
 ### Estado de Autenticación
 
-El estado de autenticación se maneja globalmente utilizando un **Contexto de React (`AuthContext`)** y un **Proveedor (`AuthProvider`)** (`src/auth/context/`). La lógica de interacción con la API de autenticación y el manejo de cookies HttpOnly reside en `src/auth/services/authService.ts`. Se utilizan hooks personalizados (`src/auth/hooks/useAuth.ts`) para acceder al contexto de autenticación.
+El estado de autenticación se maneja globalmente utilizando un **Contexto de React (`AuthContext`)** y un **Proveedor (`AuthProvider`)** (`src/auth/context/`). El `AuthProvider` verifica la sesión al montarse y proporciona el estado `loading` para indicar si la sesión está cargando. La lógica de interacción con la API de autenticación y el manejo de cookies HttpOnly reside en `src/auth/services/authService.ts`. Se utilizan hooks personalizados (`src/auth/hooks/useAuth.ts`) para acceder al contexto de autenticación, incluyendo el estado `loading`.
 
 ### Estilos
 

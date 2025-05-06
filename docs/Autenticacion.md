@@ -136,7 +136,7 @@ POST /auth/reset-password
 **Request:**
 
 ```json
-POST /auth/forgot-password
+POST /auth/password/reset/request
 {
   "email": "correo@ejemplo.com"
 }
@@ -241,7 +241,7 @@ Si el refresh token no es válido o ha expirado, el backend devuelve un error 40
 ### Frontend
 
 *   El frontend utiliza el componente `PrivateRoute` (`src/components/common/PrivateRoute.tsx`) para proteger rutas sensibles.
-*   Si el usuario no está autenticado (determinado por el estado del `AuthContext`), se muestra un loader mientras se verifica el estado; si no está autenticado tras la verificación, se redirige automáticamente a la página de inicio (`/`).
+*   Si el usuario no está autenticado (determinado por el estado `user` en el `AuthContext`), o si la sesión está cargando (`loading` es `true`), se muestra un componente de carga (`Loading`). Una vez que la carga finaliza, si el usuario no está autenticado, se redirige a la página de inicio (`/`).
 *   Si la ruta requiere un rol específico (por ejemplo, `admin`), y el usuario no lo tiene, se redirige a `/unauthorized`.
 *   Tras iniciar sesión correctamente, el usuario es redirigido automáticamente a `/dashboard`.
 *   El componente `PrivateRoute` acepta una prop `requiredRoles` (un array de strings) para especificar qué roles tienen permiso para acceder a la ruta.
@@ -297,7 +297,7 @@ Se implementó una solución en el backend para asegurar que el endpoint `GET /l
 
 ## Estructura del Frontend de Autenticación
 
-*   `src/auth/services/authService.ts`: Funciones para llamadas a la API de autenticación (Login, Signup, Forgot Password, Verify Session, Signout, Refresh Token). No espera tokens en el cuerpo de la respuesta y utiliza `credentials: 'include'` para cookies HttpOnly. Manejo de errores mejorado con mensajes condicionales (producción/desarrollo) y tipado correcto.
+*   `src/auth/services/authService.ts`: Funciones para llamadas a la API de autenticación (Login, Signup, Generate Reset Token, Verify Session, Signout, Refresh Token). No espera tokens en el cuerpo de la respuesta y utiliza `credentials: 'include'` para cookies HttpOnly. Manejo de errores mejorado con mensajes condicionales (producción/desarrollo) y tipado correcto.
 *   `src/auth/hooks/useAuthService.ts`: Hook que encapsula la lógica de `authService.ts`.
 *   `src/auth/utils/authUtils.ts`: Utilidades relacionadas con autenticación. Funciones de manejo de tokens (`saveToken`, `getToken`, `removeToken`) son no-op ya que el frontend no gestiona directamente las cookies HttpOnly.
 *   `src/auth/context/authContext.ts`: Define y exporta el Contexto de Autenticación (`AuthContext`).
@@ -323,7 +323,8 @@ Se implementó una solución en el backend para asegurar que el endpoint `GET /l
 *   Implementar la validación de la firma del token JWT en el backend.
 *   Confirmar la lógica de usar el email como username por defecto en el registro con los requisitos del backend.
 *   Unificar el manejo de errores (retornar booleanos vs. lanzar errores) en el `AuthContext`.
+*   Los tests unitarios para `auth.service.spec.ts` han sido corregidos y ahora pasan. Se han añadido pruebas para el guard `JwtAuthGuard` y ahora prioriza el token del header sobre el de las cookies.
 
 ---
 
-Última actualización: 24/4/2025, 8:51 p. m. (America/Bogota, UTC-5:00)
+Última actualización: 30/4/2025, 9:21 p. m. (America/Bogota, UTC-5:00)

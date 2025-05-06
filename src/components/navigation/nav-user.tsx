@@ -87,24 +87,24 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+<DropdownMenuItem onClick={() => window.location.href = '/upgrade-to-pro'}>
                 <Sparkles />
-                <a href="/upgrade-to-pro">Upgrade to Pro</a>
+                Upgrade to Pro
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => window.location.href = '/account'}>
                 <BadgeCheck />
-                <a href="/account">Account</a>
+                Account
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => window.location.href = '/billing'}>
                 <CreditCard />
-                <a href="/billing">Billing</a>
+                Billing
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => window.location.href = '/notifications'}>
                 <Bell />
-                <a href="/notifications">Notifications</a>
+                Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

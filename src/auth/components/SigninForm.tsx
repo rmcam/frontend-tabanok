@@ -54,7 +54,7 @@ const SigninForm: React.FC = () => {
           <Label htmlFor="identifier" className="text-sm">
             Usuario
           </Label>
-          <Input
+<Input
             id="identifier"
             type="text"
             placeholder="Email or Username"
@@ -63,8 +63,9 @@ const SigninForm: React.FC = () => {
             onChange={handleChange}
             className={`w-full rounded-lg border ${errors.identifier ? 'border-red-500' : 'border-gray-300'} focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50`}
             aria-label="Usuario"
+            aria-describedby="identifier-error"
           />
-          {errors.identifier && <p className="text-red-500 text-sm mt-1">{errors.identifier}</p>}
+          {errors.identifier && <p id="identifier-error" className="text-red-500 text-sm mt-1">{errors.identifier}</p>}
         </div>
         <div className="grid gap-3">
           <Label htmlFor="password" className="text-sm text-gray-700">
@@ -79,8 +80,9 @@ const SigninForm: React.FC = () => {
             onChange={handleChange}
             className={`w-full rounded-lg border ${errors.password ? 'border-red-500' : 'border-gray-300'} focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50`}
             aria-label="Contraseña"
+            aria-describedby="password-error"
           />
-          {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+          {errors.password && <p id="password-error" className="text-red-500 text-sm mt-1">{errors.password}</p>}
           <div className="text-right text-sm mt-1">
             <a href="/forgot-password" className="text-blue-600 hover:underline">
               ¿Olvidaste tu contraseña?

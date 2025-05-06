@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import useAuthService from '../hooks/useAuthService';
 import { SigninData, SignupData, User } from '../types/authTypes';
@@ -16,6 +16,7 @@ const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info')
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const [signingIn, setSigningIn] = useState(false);
   const [signingUp, setSigningUp] = useState(false);
   const [requestingPasswordReset, setRequestingPasswordReset] = useState(false);
@@ -27,6 +28,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     handleSignout: signoutService,
     verifySession: verifySessionService,
   } = useAuthService();
+
+  useEffect(() => {
+    const verifyAuth = async () => {
+      try {
+        const authenticatedUser = await verifySessionService();
+        if (authenticatedUser) {
+          setUser(authenticatedUser);
+        }
+      } catch (error) {
+        console.error('Error verifying session on mount:', error);
+        // Manejar el error según sea necesario
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    verifyAuth();
+  }, [verifySessionService]);
 
   const signout = useCallback(async () => {
     try {
@@ -40,7 +59,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           ? error.message
           : 'Error al cerrar sesión. Por favor, inténtalo de nuevo.';
       showToast(errorMessage, 'error');
-      throw error;
+      return false;
     }
   }, [signoutService]);
 
@@ -59,7 +78,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           ? error.message
           : 'Error al registrarse. Por favor, inténtalo de nuevo.';
       showToast(errorMessage, 'error');
-      throw error;
+      return false;
     } finally {
       setSigningUp(false);
     }
@@ -80,7 +99,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           ? error.message
           : 'Error al iniciar sesión. Por favor, inténtalo de nuevo.';
       showToast(errorMessage, 'error');
-      throw error;
+      return false;
     } finally {
       setSigningIn(false);
     }
@@ -98,7 +117,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           ? error.message
           : 'Error al solicitar el restablecimiento de contraseña. Por favor, inténtalo de nuevo.';
       showToast(errorMessage, 'error');
-      throw error;
+      return false;
     } finally {
       setRequestingPasswordReset(false);
     }
@@ -108,6 +127,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <AuthContext.Provider
       value={{
         user,
+        loading,
         signingIn,
         signingUp,
         requestingPasswordReset,

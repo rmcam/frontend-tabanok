@@ -33,7 +33,7 @@ const DashboardStatistics = () => {
         {statisticsData.map((item) => (
           <div key={item.id} className="p-4 border rounded-md shadow-sm">
             <div className="flex items-center mb-2">
-              {item.icon && <item.icon size={20} className="mr-2" />}
+{item.icon && <item.icon size={20} className="mr-2" aria-label={item.label} />}
               <h3 className="text-xl font-semibold">{item.label}</h3>
             </div>
             <p className="text-gray-700">{item.value}</p>

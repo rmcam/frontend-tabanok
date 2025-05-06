@@ -11,7 +11,7 @@ interface PrivateRouteProps {
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children, requiredRoles }) => {
   // Incluir requiredRoles en las props
   const location = useLocation();
-  const { user, loading } = useAuth(); // Eliminar el argumento navigate
+  const { user, loading } = useAuth();
 
   if (loading) {
     return <Loading />;

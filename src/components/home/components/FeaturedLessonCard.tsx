@@ -20,11 +20,10 @@ const FeaturedLessonCard: React.FC<FeaturedLessonCardProps> = ({ lesson }) => {
       className="shrink-0 transform transition-transform hover:scale-105 hover:shadow-lg duration-300 group"
     >
       <CardContent className="flex flex-col h-full">
-        <img
+<img
           src={lesson.imageSrc}
           alt={lesson.title}
           className="rounded-md mb-2 aspect-video w-full object-cover h-48"
-          aria-label={lesson.title}
         />
         <h3 className="text-2xl font-semibold mb-2 group-hover:text-teal-500 transition-colors duration-300">
           {lesson.title}

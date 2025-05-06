@@ -178,25 +178,46 @@ const ContentManager = () => {
         body = formData;
       }
 
-      try {
-        if (method === "PUT") {
-          await api.put(url, body as unknown);
-        } else {
-          await api.post(url, body as unknown);
-        }
-
-        toast.success("Contenido guardado!", {
-          description: "El contenido se ha guardado correctamente.",
-        });
-      } catch (error: unknown) {
-        toast.error("Error!", {
-          description: "Hubo un error al guardar el contenido.",
-        });
-        if (error instanceof Error) {
-          console.error("Error al guardar el contenido:", error.message);
-        } else {
-          console.error("Error al guardar el contenido:", error);
-        }
+      if (method === "PUT") {
+        await api.put(url, body as unknown)
+          .then(() => {
+            toast.success("Contenido actualizado!", {
+              description: "El contenido se ha actualizado correctamente.",
+            });
+            setContents(
+              contents.map((c) => (c.id === editContent.id ? newContent : c))
+            );
+          })
+          .catch((error: unknown) => {
+            toast.error("Error!", {
+              description: "Hubo un error al actualizar el contenido.",
+            });
+            console.error("Error al actualizar el contenido:", error);
+          });
+      } else {
+        await api.post(url, body as unknown)
+          .then(() => {
+            toast.success("Contenido guardado!", {
+              description: "El contenido se ha guardado correctamente.",
+            });
+            // After successfully creating a new content, fetch the updated list of contents
+            api.get("/contents")
+              .then((data: ContentItem[]) => {
+                setContents(data);
+              })
+              .catch((error: unknown) => {
+                toast.error("Error!", {
+                  description: "Hubo un error al obtener los contenidos actualizados.",
+                });
+                console.error("Error al obtener los contenidos actualizados:", error);
+              });
+          })
+          .catch((error: unknown) => {
+            toast.error("Error!", {
+              description: "Hubo un error al guardar el contenido.",
+            });
+            console.error("Error al guardar el contenido:", error);
+          });
       }
 
       setShowForm(false);

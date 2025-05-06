@@ -11,11 +11,12 @@ interface Student {
 
 const StudentProgress = () => {
   const [studentData, setStudentData] = useState<Student[]>([]);
-
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         const data: Student[] = await api.get('/students/progress');
         setStudentData(data);
@@ -23,6 +24,8 @@ const StudentProgress = () => {
       } catch (error: unknown) {
         console.error('Error al obtener el progreso de los estudiantes:', error);
         setError('Error al obtener el progreso de los estudiantes. Por favor, inténtelo de nuevo más tarde.');
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -32,7 +35,7 @@ const StudentProgress = () => {
   return (
     <div className="flex flex-col">
       <div className="flex items-center mb-4">
-        <FaChartLine size={24} className="mr-2" />
+<FaChartLine size={24} className="mr-2" aria-label="Progreso de Estudiantes" />
         <h2 className="text-xl font-semibold">Progreso de Estudiantes</h2>
       </div>
       <ul>
@@ -46,6 +49,7 @@ const StudentProgress = () => {
           </li>
         ))}
       </ul>
+      {isLoading && <p>Cargando datos...</p>}
       {error && <p className="text-red-500">{error}</p>}
     </div>
   );

@@ -142,7 +142,7 @@ const SignUpForm = () => {
               <Label htmlFor="email" className="text-sm text-gray-700">
                 Email
               </Label>
-              <Input
+<Input
                 id="email"
                 type="email"
                 placeholder="Email"
@@ -150,8 +150,9 @@ const SignUpForm = () => {
                 value={values.email}
                 onChange={handleChange}
                 aria-invalid={!!errors.email}
+                aria-describedby="email-error"
               />
-              {errors.email && <p className="text-red-500 text-sm mt-2">{errors.email}</p>}
+              {errors.email && <p id="email-error" className="text-red-500 text-sm mt-2">{errors.email}</p>}
             </div>
             <div className="grid gap-1">
               <Label htmlFor="password" className="text-sm text-gray-700">
@@ -165,8 +166,9 @@ const SignUpForm = () => {
                 value={values.password}
                 onChange={handleChange}
                 aria-invalid={!!errors.password}
+                aria-describedby="password-error"
               />
-              {errors.password && <p className="text-red-500 text-sm mt-2">{errors.password}</p>}
+              {errors.password && <p id="password-error" className="text-red-500 text-sm mt-2">{errors.password}</p>}
             </div>
             <div className="grid gap-1">
               <Label htmlFor="username" className="text-sm text-gray-700">
@@ -180,8 +182,9 @@ const SignUpForm = () => {
                 value={values.username}
                 onChange={handleChange}
                 aria-invalid={!!errors.username}
+                aria-describedby="username-error"
               />
-              {errors.username && <p className="text-red-500 text-sm mt-2">{errors.username}</p>}
+              {errors.username && <p id="username-error" className="text-red-500 text-sm mt-2">{errors.username}</p>}
             </div>
             <Button type="button" onClick={nextStep} className="w-full rounded-lg py-2 mt-4">
               Siguiente
@@ -203,8 +206,9 @@ const SignUpForm = () => {
                 value={values.firstName}
                 onChange={handleChange}
                 aria-invalid={!!errors.firstName}
+                aria-describedby="firstName-error"
               />
-              {errors.firstName && <p className="text-red-500 text-sm mt-2">{errors.firstName}</p>}
+              {errors.firstName && <p id="firstName-error" className="text-red-500 text-sm mt-2">{errors.firstName}</p>}
             </div>
             <div className="grid gap-1">
               <Label htmlFor="secondName" className="text-sm text-gray-700">
@@ -218,8 +222,9 @@ const SignUpForm = () => {
                 value={values.secondName}
                 onChange={handleChange}
                 aria-invalid={!!errors.secondName}
+                aria-describedby="secondName-error"
               />
-              {errors.secondName && <p className="text-red-500 text-sm mt-2">{errors.secondName}</p>}
+              {errors.secondName && <p id="secondName-error" className="text-red-500 text-sm mt-2">{errors.secondName}</p>}
             </div>
             <div className="grid gap-1">
               <Label htmlFor="firstLastName" className="text-sm text-gray-700">
@@ -233,8 +238,9 @@ const SignUpForm = () => {
                 value={values.firstLastName}
                 onChange={handleChange}
                 aria-invalid={!!errors.firstLastName}
+                aria-describedby="firstLastName-error"
               />
-              {errors.firstLastName && <p className="text-red-500 text-sm mt-2">{errors.firstLastName}</p>}
+              {errors.firstLastName && <p id="firstLastName-error" className="text-red-500 text-sm mt-2">{errors.firstLastName}</p>}
             </div>
             <div className="grid gap-1">
               <Label htmlFor="secondLastName" className="text-sm text-gray-700">
@@ -248,8 +254,9 @@ const SignUpForm = () => {
                 value={values.secondLastName}
                 onChange={handleChange}
                 aria-invalid={!!errors.secondLastName}
+                aria-describedby="secondLastName-error"
               />
-              {errors.secondLastName && <p className="text-red-500 text-sm mt-2">{errors.secondLastName}</p>}
+              {errors.secondLastName && <p id="secondLastName-error" className="text-red-500 text-sm mt-2">{errors.secondLastName}</p>}
             </div>
             <Button type="button" onClick={prevStep} className="w-full rounded-lg py-2 mt-4">
               Anterior

@@ -39,8 +39,22 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
     return (
       <Sidebar collapsible="icon" {...props}>
         <SidebarContent>
-          <div className="text-red-500">Error al cargar las unidades: {unitsError || 'Ocurrió un error. Por favor, inténtalo de nuevo.'}</div>
-          <Button onClick={() => refetch()}>Recargar</Button>
+          <div className="text-red-500 p-4">
+            Error al cargar las unidades: {unitsError || 'Ocurrió un error desconocido.'}
+            <br />
+            Por favor, inténtalo de nuevo.
+          </div>
+          <div className="flex justify-center space-x-4 p-4">
+            <Button onClick={() => refetch()}>Recargar</Button>
+            {user?.roles.includes('teacher') && (
+              <Button variant="secondary" onClick={() => alert('Navegar al Panel Docente (implementar)')}>
+                Panel Docente
+              </Button>
+            )}
+            <Button variant="secondary" onClick={() => alert('Navegar al Dashboard (implementar)')}>
+              Dashboard
+            </Button>
+          </div>
         </SidebarContent>
         <SidebarRail />
       </Sidebar>

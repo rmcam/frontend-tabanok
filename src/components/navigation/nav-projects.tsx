@@ -59,18 +59,18 @@ export function NavProjects({
                 side={isMobile ? "bottom" : "right"}
                 align={isMobile ? "end" : "start"}
               >
-                <DropdownMenuItem>
+<DropdownMenuItem aria-label="View Project" onClick={() => alert('View Project')}>
                   <Folder className="text-muted-foreground" />
-                  <span>View Project</span>
+                  View Project
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem aria-label="Share Project" onClick={() => alert('Share Project')}>
                   <Forward className="text-muted-foreground" />
-                  <span>Share Project</span>
+                  Share Project
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem aria-label="Delete Project" onClick={() => alert('Delete Project')}>
                   <Trash2 className="text-muted-foreground" />
-                  <span>Delete Project</span>
+                  Delete Project
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -79,7 +79,7 @@ export function NavProjects({
         <SidebarMenuItem>
           <SidebarMenuButton className="text-sidebar-foreground/70">
             <MoreHorizontal className="text-sidebar-foreground/70" />
-            <span>More</span>
+            More
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>

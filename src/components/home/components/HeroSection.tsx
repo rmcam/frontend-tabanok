@@ -45,8 +45,8 @@ const HeroSection: React.FC<HeroProps> = ({
           y,
         }}
       />
-      <div className="absolute inset-0 bg-teal-700 opacity-60"></div>{' '}
-      {/* Cambiado a superposición teal con opacidad */}
+      <div className="absolute inset-0 bg-teal-700 opacity-90"></div>{' '}
+      {/* Cambiado a superposición teal con opacidad aumentada para mejor contraste */}
       <div className="hero-content text-center md:text-left relative z-10">
         <h2 className="text-4xl font-bold mb-6 text-white">{title}</h2>
         <p className="text-xl mb-8 text-white">{description}</p>

@@ -9,14 +9,14 @@ Este documento describe los hooks personalizados clave utilizados en el frontend
 Acceso al contexto de autenticación.
 
 *   **Ubicación:** `frontend/src/auth/hooks/useAuth.ts`
-*   **Descripción:** Proporciona acceso al estado de autenticación del usuario y a las funciones para interactuar con el sistema de autenticación (inicio de sesión, registro, cierre de sesión, recuperación de contraseña). Se basa en el `AuthContext` y el `AuthProvider`.
+*   **Descripción:** Proporciona acceso al estado de autenticación del usuario (`user`, `loading`) y a las funciones para interactuar con el sistema de autenticación (inicio de sesión, registro, cierre de sesión, recuperación de contraseña). Se basa en el `AuthContext` y el `AuthProvider`.
 *   **Uso:**
 
 ```typescript
 import { useAuth } from '@/auth/hooks/useAuth';
 
 function MyComponent() {
-  const { user, signin, signup, signout, forgotPassword, loading, signingIn, signingUp, requestingPasswordReset } = useAuth();
+  const { user, loading, signin, signup, signout, forgotPassword, signingIn, signingUp, requestingPasswordReset } = useAuth();
   // ...
 }
 ```
@@ -71,7 +71,7 @@ function MyComponent() {
 
 Acceso a la lista de unidades del usuario autenticado con almacenamiento en caché.
 
-*   **Ubicación:** `frontend/src/hooks/useFetchUnits.ts`
+*   **Ubicación:** `src/hooks/useFetchUnits.ts` (en el repositorio frontend)
 *   **Descripción:** Hook personalizado para obtener la lista de unidades asociadas al usuario autenticado. Utiliza el hook `useAuth` para verificar la autenticación y obtener el ID del usuario. Implementa almacenamiento en caché utilizando `sessionStorage` para mejorar el rendimiento en cargas posteriores.
 *   **Uso:**
 
