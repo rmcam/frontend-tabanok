@@ -9,14 +9,14 @@ Este documento describe los hooks personalizados clave utilizados en el frontend
 Acceso al contexto de autenticación.
 
 *   **Ubicación:** `frontend/src/auth/hooks/useAuth.ts`
-*   **Descripción:** Proporciona acceso al estado de autenticación del usuario (`user`, `loading`) y a las funciones para interactuar con el sistema de autenticación (inicio de sesión, registro, cierre de sesión, recuperación de contraseña). Se basa en el `AuthContext` y el `AuthProvider`.
+*   **Descripción:** Proporciona acceso al estado de autenticación del usuario y a las funciones para interactuar con el sistema de autenticación (inicio de sesión, registro, cierre de sesión, recuperación de contraseña). Se basa en el `AuthContext` y el `AuthProvider`.
 *   **Uso:**
 
 ```typescript
 import { useAuth } from '@/auth/hooks/useAuth';
 
 function MyComponent() {
-  const { user, loading, signin, signup, signout, forgotPassword, signingIn, signingUp, requestingPasswordReset } = useAuth();
+  const { user, signin, signup, signout, forgotPassword, loading, signingIn, signingUp, requestingPasswordReset } = useAuth();
   // ...
 }
 ```

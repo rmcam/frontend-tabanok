@@ -9,18 +9,16 @@ Este documento lista las tareas pendientes y los próximos pasos planificados pa
 - **Accesibilidad:**
   - Finalizar auditorías manuales de accesibilidad según WCAG 2.1.
   - Validar nuevamente la accesibilidad con herramientas automáticas y manuales después de implementar mejoras.
-  - Mejorar el contraste entre el texto y la imagen de fondo en la Hero Section. (Completado: Se aumentó la opacidad de la superposición en el componente `HeroSection` para mejorar el contraste).
-  - Añadir descripciones accesibles para iconos de react-icons y elementos visuales que aún no las tengan. (Completado: Se han añadido descripciones accesibles a los iconos de react-icons en los componentes `DashboardStatistics.tsx`, `ReportViewer.tsx`, `StudentProgress.tsx` y `ActivityCreator.tsx`.)
-  - Mejorar la navegación por teclado en menús y diálogos si es necesario. (Completado: Se ha mejorado la navegación por teclado en los componentes `DropdownMenu` en `src/components/navigation/nav-user.tsx` y `src/components/navigation/nav-projects.tsx`. Se eliminaron los enlaces dentro de los elementos `DropdownMenuItem` y se agregó la lógica de navegación directamente a los elementos `DropdownMenuItem`. Se agregaron atributos `aria-label` a los iconos en `src/components/navigation/nav-projects.tsx`.)
-  - Asegurar que los formularios tengan etiquetas asociadas a cada campo y mensajes de error accesibles (`aria-invalid`, `aria-describedby`). (Completado: Se ha agregado el atributo `aria-describedby` a los campos de entrada en `src/auth/components/SigninForm.tsx` y `src/auth/components/SignupForm.tsx` y se ha implementado la validación del formulario y mensajes de error accesibles en `src/components/home/components/ContactForm.tsx`.)
-  - Mejorar la lectura por lectores de pantalla añadiendo descripciones y roles adecuados. (Completado: Se ha asegurado que las imágenes en los componentes `HeroSection`, `FeaturedLessonCard` y `MultimediaPlayer` tengan descripciones accesibles para lectores de pantalla.)
+  - Mejorar el contraste entre el texto y la imagen de fondo en la Hero Section.
+  - Añadir descripciones accesibles para iconos de react-icons y elementos visuales que aún no las tengan.
+  - Mejorar la navegación por teclado en menús y diálogos si es necesario.
+  - Asegurar que los formularios tengan etiquetas asociadas a cada campo y mensajes de error accesibles (`aria-invalid`, `aria-describedby`).
+  - Mejorar la lectura por lectores de pantalla añadiendo descripciones y roles adecuados.
 - **Testing:**
-  - Mejorar la cobertura de tests en el frontend, especialmente en rutas protegidas y hooks personalizados. (Pendiente: Se necesita crear archivos de prueba en el frontend).
-  - ~~Mejorar la cobertura de tests en el backend. Se han añadido pruebas unitarias para el módulo `activity`.~~ (Completado)
-  - ~~Solucionar el problema de la redirección al dashboard al recargar la página.~~ (Completado)
+  - Mejorar la cobertura de tests en el frontend, especialmente en rutas protegidas y hooks personalizados.
+  - Mejorar la cobertura de tests en el backend. (Completado)
 - **Despliegue:**
-  - ~~Automatizar despliegues a producción (el pipeline CI/CD ya construye y sube imágenes, falta activar el paso SSH).~~ (Configurado con Docker Hub y GitHub Actions)
-  - ~~Implementar Service Worker para la funcionalidad offline.~~ (Completado: Se ha implementado un Service Worker para habilitar la funcionalidad offline).
+  - Automatizar despliegues a producción (el pipeline CI/CD ya construye y sube imágenes, falta activar el paso SSH). (Configurado con Docker Hub y GitHub Actions)
 - **Planificación y Desarrollo de Nuevas Funcionalidades:**
   - Planificar nuevas funcionalidades y mejoras detalladas.
   - Prototipar la UI de los paneles (docente y estudiante) en Figma antes de codificar.
@@ -60,7 +58,9 @@ Este documento lista las tareas pendientes y los próximos pasos planificados pa
 - Se han añadido indicadores de carga a los componentes `ActivityCreator`, `StudentProgress` y `ReportViewer`.
 - Se movió la verificación de la variable de entorno `VITE_API_URL` al componente `App.tsx` para que se realice solo una vez al inicio de la aplicación.
   - Implementar la funcionalidad de edición de contenido en el componente `ContentManager`. (Completado: Se ha implementado la funcionalidad de edición de contenido).
-
+    - **Siembra de Base de Datos:**
+      - [x] Completar la siembra detallada para todas las entidades en los seeders individuales, utilizando los datos disponibles en los directorios `files/json/` y `files/sql/`. Se han implementado seeders para las entidades principales (`User`, `Account`, `Module`, `Unity`, `Lesson`, `Topic`, `Activity`, `Content`, `ContentVersion`, `Comment`, `Exercise`, `Progress`, `Vocabulary`, `Reward`, `Achievement`, `Badge`, `MissionTemplate`, `Season`, y `SpecialEvent`) a través de seeders individuales ejecutados por un comando de `nest-commander`. **Se ha completado la implementación básica de seeders para las entidades restantes: `RevokedToken`, `BaseAchievement`, `CollaborationReward`, `Gamification`, `Leaderboard`, `MentorSpecialization`, `Mentor`, `MentorshipRelation`, `Mission`, `Streak`, `UserAchievement`, `UserBadge`, `UserMission`, `UserReward`, `ContentValidation`, `Notification`, `Tag` (anteriormente `StatisticsTag`), `WebhookSubscription`, `Multimedia`, `UserLevel`, `CulturalAchievement` y `AchievementProgress`.** [x] Extender esta siembra para proporcionar datos más completos y realistas en todos los seeders.
+      - [x] Investigar y resolver el error `EntityMetadataNotFoundError: No metadata for "Comment" was found.` al ejecutar `pnpm run seed`. Este error ha sido resuelto.
 
 ## Próximos pasos recomendados (Resumen)
 
@@ -73,4 +73,4 @@ Este documento lista las tareas pendientes y los próximos pasos planificados pa
 
 ---
 
-Última actualización: 30/4/2025, 9:08:02 p. m. (America/Bogota, UTC-5:00)
+Última actualización: 7/5/2025, 12:36 a. m. (America/Bogota, UTC-5:00)

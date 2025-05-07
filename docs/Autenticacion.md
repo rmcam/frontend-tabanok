@@ -110,6 +110,8 @@ POST /auth/signup
 }
 ```
 
+Se ha ajustado el seeder de usuarios (`UserSeeder`) para utilizar el enum `UserRole` definido en `src/auth/enums/auth.enum.ts` y se ha corregido la importación de `UserStatus`. El rol 'mentor' en el seeder ahora utiliza `UserRole.TEACHER` para ser compatible con el enum de roles de la base de datos.
+
 ### Restablecer contraseña
 
 **Request:**
@@ -241,7 +243,7 @@ Si el refresh token no es válido o ha expirado, el backend devuelve un error 40
 ### Frontend
 
 *   El frontend utiliza el componente `PrivateRoute` (`src/components/common/PrivateRoute.tsx`) para proteger rutas sensibles.
-*   Si el usuario no está autenticado (determinado por el estado `user` en el `AuthContext`), o si la sesión está cargando (`loading` es `true`), se muestra un componente de carga (`Loading`). Una vez que la carga finaliza, si el usuario no está autenticado, se redirige a la página de inicio (`/`).
+*   Si el usuario no está autenticado (determinado por el estado del `AuthContext`), se muestra un loader mientras se verifica el estado; si no está autenticado tras la verificación, se redirige automáticamente a la página de inicio (`/`).
 *   Si la ruta requiere un rol específico (por ejemplo, `admin`), y el usuario no lo tiene, se redirige a `/unauthorized`.
 *   Tras iniciar sesión correctamente, el usuario es redirigido automáticamente a `/dashboard`.
 *   El componente `PrivateRoute` acepta una prop `requiredRoles` (un array de strings) para especificar qué roles tienen permiso para acceder a la ruta.
@@ -327,4 +329,4 @@ Se implementó una solución en el backend para asegurar que el endpoint `GET /l
 
 ---
 
-Última actualización: 30/4/2025, 9:21 p. m. (America/Bogota, UTC-5:00)
+Última actualización: 7/5/2025, 12:33 a. m. (America/Bogota, UTC-5:00)

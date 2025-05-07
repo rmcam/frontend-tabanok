@@ -34,15 +34,14 @@ Los componentes del frontend se organizan en el directorio `src/components/` con
 *   `layout/`: Componentes de layout (ej. `AuthenticatedLayout`).
 *   `navigation/`: Componentes de navegación (ej. Sidebar).
 *   `ui/`: Componentes base de Shadcn UI y componentes personalizados basados en ellos (ej. `Button`, `Carousel`, `Sidebar`).
-*   **Service Worker:** Se ha implementado un Service Worker para habilitar la funcionalidad offline, mejorando la experiencia del usuario en condiciones de conectividad limitada. El archivo `sw.js` contiene la lógica de cacheo y manejo de peticiones, y se registra en `src/main.tsx`.
 
 ### Gestión de Rutas
 
-Las rutas de la aplicación se gestionan utilizando **React Router DOM**. Se emplea el componente `PrivateRoute` (`src/components/common/PrivateRoute.tsx`) para proteger las rutas sensibles, verificando la autenticación del usuario, el estado de carga de la sesión y los roles requeridos.
+Las rutas de la aplicación se gestionan utilizando **React Router DOM**. Se emplea el componente `PrivateRoute` (`src/components/common/PrivateRoute.tsx`) para proteger las rutas sensibles, verificando la autenticación del usuario y los roles requeridos.
 
 ### Estado de Autenticación
 
-El estado de autenticación se maneja globalmente utilizando un **Contexto de React (`AuthContext`)** y un **Proveedor (`AuthProvider`)** (`src/auth/context/`). El `AuthProvider` verifica la sesión al montarse y proporciona el estado `loading` para indicar si la sesión está cargando. La lógica de interacción con la API de autenticación y el manejo de cookies HttpOnly reside en `src/auth/services/authService.ts`. Se utilizan hooks personalizados (`src/auth/hooks/useAuth.ts`) para acceder al contexto de autenticación, incluyendo el estado `loading`.
+El estado de autenticación se maneja globalmente utilizando un **Contexto de React (`AuthContext`)** y un **Proveedor (`AuthProvider`)** (`src/auth/context/`). La lógica de interacción con la API de autenticación y el manejo de cookies HttpOnly reside en `src/auth/services/authService.ts`. Se utilizan hooks personalizados (`src/auth/hooks/useAuth.ts`) para acceder al contexto de autenticación.
 
 ### Estilos
 
@@ -66,4 +65,4 @@ El frontend consume la API RESTful proporcionada por el backend para obtener dat
 
 ---
 
-Última actualización: 24/4/2025, 8:50 p. m. (America/Bogota, UTC-5:00)
+Última actualización: 7/5/2025, 12:35 a. m. (America/Bogota, UTC-5:00)
