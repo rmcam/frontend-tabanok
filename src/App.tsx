@@ -5,6 +5,10 @@ import AuthenticatedLayout from "./components/layout/AuthenticatedLayout";
 import MultimediaPage from "./components/multimedia/MultimediaPage";
 import { SidebarProvider } from "./components/ui/sidebar";
 import UnifiedDashboard from "./components/dashboard/Dashboard";
+import QuizActivity from "./components/activities/QuizActivity"; // Import QuizActivity
+import MatchingActivity from "./components/activities/MatchingActivity"; // Import MatchingActivity
+import FillInTheBlanksActivity from "./components/activities/FillInTheBlanksActivity"; // Import FillInTheBlanksActivity
+import { useParams } from "react-router-dom"; // Import useParams
 
 function App() {
   return (
@@ -62,6 +66,42 @@ function App() {
             <PrivateRoute requiredRoles={["user", "student", "teacher"]}>
               <AuthenticatedLayout>
                 <div>Actividades</div>
+              </AuthenticatedLayout>
+            </PrivateRoute>
+          }
+        />
+        {/* Route for QuizActivity */}
+        <Route
+          path="/activities/quiz/:activityId"
+          element={
+            <PrivateRoute requiredRoles={["student"]}> {/* Only students can access quizzes */}
+              <AuthenticatedLayout>
+                {/* Pass activityId from URL params to QuizActivity */}
+                <QuizActivity activityId={useParams().activityId as string} />
+              </AuthenticatedLayout>
+            </PrivateRoute>
+          }
+        />
+        {/* Route for MatchingActivity */}
+        <Route
+          path="/activities/matching/:activityId"
+          element={
+            <PrivateRoute requiredRoles={["student"]}> {/* Only students can access matching activities */}
+              <AuthenticatedLayout>
+                {/* Pass activityId from URL params to MatchingActivity */}
+                <MatchingActivity activityId={useParams().activityId as string} />
+              </AuthenticatedLayout>
+            </PrivateRoute>
+          }
+        />
+        {/* New route for FillInTheBlanksActivity */}
+        <Route
+          path="/activities/fill-in-the-blanks/:activityId"
+          element={
+            <PrivateRoute requiredRoles={["student"]}> {/* Only students can access fill-in-the-blanks activities */}
+              <AuthenticatedLayout>
+                {/* Pass activityId from URL params to FillInTheBlanksActivity */}
+                <FillInTheBlanksActivity activityId={useParams().activityId as string} />
               </AuthenticatedLayout>
             </PrivateRoute>
           }

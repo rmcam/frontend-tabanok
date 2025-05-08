@@ -18,27 +18,24 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useEffect, useState } from "react";
+import { toast } from "sonner"; // Assuming sonner is used for notifications
+import api from "@/lib/api"; // Import the api object
+
+interface Tag {
+  id: number;
+  name: string;
+}
 
 const TagManager = () => {
   const [showForm, setShowForm] = useState(false);
-  const [tags, setTags] = useState([
-    {
-      id: 1,
-      name: "Tag 1",
-    },
-    {
-      id: 2,
-      name: "Tag 2",
-    },
-    {
-      id: 3,
-      name: "Tag 3",
-    },
-  ]);
-  const [editTag, setEditTag] = useState<{ id: number; name: string } | null>(
-    null
-  );
+  const [tags, setTags] = useState<Tag[]>([]);
+  const [editTag, setEditTag] = useState<Tag | null>(null);
   const [tagName, setTagName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    fetchTags();
+  }, []);
 
   useEffect(() => {
     if (editTag) {
@@ -48,44 +45,59 @@ const TagManager = () => {
     }
   }, [editTag]);
 
-  const handleSave = () => {
+  const fetchTags = async () => {
+    setIsLoading(true);
+    try {
+      const data = await api.get("/tags"); // Use api.get
+      setTags(data);
+    } catch (error: any) {
+      toast.error(`Error al cargar las etiquetas: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
     if (!tagName.trim()) {
-      // Basic validation
-      alert("El nombre de la etiqueta no puede estar vacío.");
+      toast.warning("El nombre de la etiqueta no puede estar vacío.");
       return;
     }
 
-    if (editTag) {
-      setTags(
-        tags.map((t) =>
-          t.id === editTag.id
-            ? {
-                ...t,
-                name: tagName,
-              }
-            : t
-        )
-      );
-    } else {
-      setTags([
-        ...tags,
-        {
-          id: tags.length + 1, // Simple ID generation
-          name: tagName,
-        },
-      ]);
+    setIsLoading(true);
+    try {
+      if (editTag) {
+        await api.put(`/tags/${editTag.id}`, { name: tagName }); // Use api.put
+        toast.success("Etiqueta actualizada exitosamente.");
+      } else {
+        await api.post("/tags", { name: tagName }); // Use api.post
+        toast.success("Etiqueta creada exitosamente.");
+      }
+      fetchTags(); // Refresh the list
+    } catch (error: any) {
+      const action = editTag ? "actualizar" : "crear";
+      toast.error(`Error al ${action} la etiqueta: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+      setShowForm(false);
+      setEditTag(null);
+      setTagName("");
     }
-
-    setShowForm(false);
-    setEditTag(null);
-    setTagName(""); // Clear input after saving
   };
 
-  const handleDelete = (id: number) => {
-    setTags(tags.filter((t) => t.id !== id));
+  const handleDelete = async (id: number) => {
+    setIsLoading(true);
+    try {
+      await api.delete(`/tags/${id}`); // Use api.delete
+      toast.success("Etiqueta eliminada exitosamente.");
+      fetchTags(); // Refresh the list
+    } catch (error: any) {
+      toast.error(`Error al eliminar la etiqueta: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleEdit = (tag: { id: number; name: string }) => {
+  const handleEdit = (tag: Tag) => {
     setEditTag(tag);
     setShowForm(true);
   };
@@ -99,8 +111,9 @@ const TagManager = () => {
           setEditTag(null); // Clear edit state when toggling form
           setTagName(""); // Clear input when toggling form
         }}
+        disabled={isLoading}
       >
-        Crear Nueva Etiqueta
+        {showForm ? "Cancelar" : "Crear Nueva Etiqueta"}
       </Button>
       {(showForm || editTag) && (
         <Card>
@@ -109,7 +122,7 @@ const TagManager = () => {
               {editTag ? "Editar Etiqueta" : "Crear Nueva Etiqueta"}
             </CardTitle>
             <CardDescription>
-              Ingrese la información de la nueva etiqueta.
+              Ingrese la información de la etiqueta.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
@@ -119,35 +132,48 @@ const TagManager = () => {
                 id="name"
                 value={tagName}
                 onChange={(e) => setTagName(e.target.value)}
+                disabled={isLoading}
               />
             </div>
           </CardContent>
           <CardFooter className="flex justify-end">
-            <Button onClick={handleSave}>Guardar</Button>
+            <Button onClick={handleSave} disabled={isLoading}>
+              {isLoading ? "Guardando..." : "Guardar"}
+            </Button>
           </CardFooter>
         </Card>
       )}
       <div>
         <h3>Etiquetas Existentes</h3>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nombre</TableHead>
-              <TableHead></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {tags.map((tag) => (
-              <TableRow key={tag.id}>
-                <TableCell>{tag.name}</TableCell>
-                <TableCell>
-                  <Button onClick={() => handleDelete(tag.id)}>Eliminar</Button>
-                  <Button onClick={() => handleEdit(tag)}>Editar</Button>
-                </TableCell>
+        {isLoading ? (
+          <p>Cargando etiquetas...</p>
+        ) : tags.length === 0 ? (
+          <p>No hay etiquetas disponibles.</p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nombre</TableHead>
+                <TableHead></TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {tags.map((tag) => (
+                <TableRow key={tag.id}>
+                  <TableCell>{tag.name}</TableCell>
+                  <TableCell>
+                    <Button onClick={() => handleDelete(tag.id)} disabled={isLoading}>
+                      Eliminar
+                    </Button>
+                    <Button onClick={() => handleEdit(tag)} disabled={isLoading}>
+                      Editar
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
       </div>
     </div>
   );

@@ -59,7 +59,12 @@ const MultimediaUploadForm: React.FC = () => {
     formData.append("multimedia", selectedFile);
     formData.append("title", title);
     formData.append("description", description);
-    formData.append("tags", tags);
+
+    // Split tags string into an array and append each tag
+    const tagsArray = tags.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
+    tagsArray.forEach(tag => {
+      formData.append("tags[]", tag); // Assuming backend expects 'tags[]' for array
+    });
 
     try {
       const response = await api.put("/multimedia/upload", formData, {
@@ -78,7 +83,11 @@ const MultimediaUploadForm: React.FC = () => {
       setDescription("");
       setTags("");
     } catch (error: unknown) {
-      setMessage("Error de red o del servidor: " + (error as Error).message);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Error desconocido al subir el archivo.";
+      setMessage(`Error al subir el archivo: ${errorMessage}`);
       setUploadProgress(0);
     } finally {
       setUploading(false);
@@ -118,6 +127,7 @@ const MultimediaUploadForm: React.FC = () => {
         <Select
           onValueChange={handleTypeChange}
           defaultValue={selectedTypes[0]}
+          disabled={uploading}
         >
           <SelectTrigger>
             <SelectValue placeholder="Seleccione los tipos de archivo" />
@@ -138,6 +148,7 @@ const MultimediaUploadForm: React.FC = () => {
           id="title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          disabled={uploading}
         />
       </div>
       <div>
@@ -146,6 +157,7 @@ const MultimediaUploadForm: React.FC = () => {
           id="description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          disabled={uploading}
         />
       </div>
       <div>
@@ -155,14 +167,17 @@ const MultimediaUploadForm: React.FC = () => {
           id="tags"
           value={tags}
           onChange={(e) => setTags(e.target.value)}
+          disabled={uploading}
         />
       </div>
-      <div {...getRootProps()} className="dropzone">
-        <input {...getInputProps()} />
-        {isDragActive ? (
+      <div {...getRootProps()} className={`dropzone ${uploading ? 'disabled' : ''}`}>
+        <input {...getInputProps()} disabled={uploading} />
+        {isDragActive && !uploading ? (
           <p>Suelta el archivo aquí ...</p>
-        ) : (
+        ) : !uploading ? (
           <p>Arrastra y suelta el archivo aquí, o haz clic para seleccionar un archivo</p>
+        ) : (
+          <p>Subiendo archivo...</p>
         )}
       </div>
       {selectedFile && (

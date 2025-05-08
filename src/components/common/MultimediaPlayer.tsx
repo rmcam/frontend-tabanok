@@ -4,6 +4,7 @@ interface MultimediaPlayerProps {
   type: 'video' | 'audio' | 'image';
   url: string;
   title?: string;
+  width?: number; // Add optional width prop
 }
 
 const MultimediaPlayer: React.FC<MultimediaPlayerProps> = ({ type, url, title }) => {
