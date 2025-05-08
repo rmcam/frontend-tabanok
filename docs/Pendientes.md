@@ -40,7 +40,7 @@ Este documento lista las tareas pendientes y los próximos pasos planificados pa
   - Escribir pruebas unitarias y de integración para las nuevas funcionalidades del Panel Docente.
 - **Funcionalidades Incompletas Identificadas (Backend):**
   - **Módulo Multimedia:** Completada la lógica de eliminación en S3 (manejo de errores más granular) y mejorada la validación de roles más granular.
-  - **Módulo Auto-grading:** Implementada lógica más compleja y precisa en la evaluación según criterios de calificación detallados (comparación de sinónimos).
+  - **Módulo Auto-grading:** Implementada lógica más compleja y precisa en la evaluación según criterios de calificación detallados (comparación de sinónimos). Las pruebas unitarias para este módulo han sido corregidas y ahora pasan.
   - **Módulo Analytics:** Implementada lógica más compleja en las pruebas y añadido el endpoint `studentProgress` en el controlador según los requisitos de analytics.
   - **Validación Lingüística:** Implementada lógica detallada para validar la calidad lingüística en contenido generado por usuarios (análisis de la estructura de las oraciones y verificación de la concordancia gramatical).
   - **Refactorización y Limpieza:** Revisar redundancias y eliminar campos obsoletos restantes en el código y la base de datos.
