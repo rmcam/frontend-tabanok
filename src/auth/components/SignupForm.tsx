@@ -8,7 +8,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/hooks/useAuth'; // Corregir la ruta de importación
 
 const SignUpForm = () => {
-  const [signupError, setSignupError] = useState<string | null>(null);
   const [step, setStep] = useState(1);
   const initialValues = {
     email: '',
@@ -62,7 +61,6 @@ const SignUpForm = () => {
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSignupError(null);
 
     // Trigger validation for all fields on final submit
     // Based on the previous error message "Se esperaban 1 argumentos, pero se obtuvieron 0" for handleSubmit(),
@@ -87,10 +85,10 @@ const SignUpForm = () => {
         // If signup completes without throwing an error, it was successful
         console.log('Registro exitoso');
         navigate('/');
-      } catch (error: unknown) { // Usar unknown para un manejo de errores más seguro
+      } catch (error) {
         console.error('Error durante el registro:', error);
-        const errorMessage = (error instanceof Error && error.message) ? error.message : 'Ocurrió un error desconocido durante el registro.';
-        setSignupError(errorMessage);
+        // El AuthProvider ya maneja la visualización de los toasts de error.
+        // No necesitamos establecer un estado de error local aquí.
       }
     } else {
       console.log('Errores de validación en el formulario final.');
@@ -285,10 +283,6 @@ const SignUpForm = () => {
               {signingUp ? <Loading /> : 'Registrarse'}
             </Button>
           </>
-        )}
-
-        {signupError && (
-          <p className="text-red-500 text-sm mt-2 text-center">{signupError}</p>
         )}
       </form>
     </div>

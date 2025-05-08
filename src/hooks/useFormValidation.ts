@@ -14,7 +14,8 @@ interface UseFormValidationResult<T> {
   ) => void;
   handleSubmit: (validationRules: {
     [key: string]: (value: string) => string | undefined;
-  }) => (event: React.FormEvent) => void;
+  }) => (event: React.FormEvent) => ValidationResult; // Corrected return type
+  setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>; // Add setErrors to the interface
 }
 
 const useFormValidation = <T extends { [key: string]: string }>(
@@ -69,6 +70,7 @@ const useFormValidation = <T extends { [key: string]: string }>(
     isValid,
     handleChange,
     handleSubmit,
+    setErrors, // Include setErrors in the returned object
   };
 };
 

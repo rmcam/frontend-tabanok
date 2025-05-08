@@ -1,6 +1,6 @@
 import { useCallback } from 'react'; // Import useCallback
-import { signin, signup, forgotPassword, SignupData, verifySession, signout } from '../services/authService'; // Importar verifySession y signout, eliminar refreshToken
-import { SigninData, User } from '../types/authTypes'; // Importar User, eliminar AuthResponse
+import { signin, signup, forgotPassword, SignupData, verifySession, signout, resetPassword } from '../services/authService'; // Importar verifySession, signout, y resetPassword
+import { SigninData, User } from '../types/authTypes'; // Importar User
 // Eliminar importaciones de authUtils
 // import { removeToken, saveToken, saveRefreshToken, removeRefreshToken } from '../utils/authUtils';
 // Eliminar importación de toast
@@ -82,6 +82,17 @@ const useAuthService = () => {
     }
   }, []);
 
+  // New handler for reset password
+  const handleResetPassword = useCallback(async (token: string, newPassword: string): Promise<void> => {
+    try {
+      await resetPassword(token, newPassword);
+    } catch (error) {
+      console.error('Error al restablecer contraseña:', error);
+      throw error;
+    }
+  }, []);
+
+
   return {
     handleSignup,
     handleSignin,
@@ -89,6 +100,7 @@ const useAuthService = () => {
     // handleRefreshToken ya no se exporta ni se usa directamente en AuthContext
     handleSignout,
     verifySession: handleVerifySession, // Exportar la nueva función con un nombre más descriptivo para el contexto
+    handleResetPassword, // Export the new handler
   };
 };
 

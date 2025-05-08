@@ -166,6 +166,33 @@ export const signout = async (): Promise<void> => {
 };
 
 
+// Función para restablecer la contraseña
+export const resetPassword = async (token: string, newPassword: string): Promise<void> => {
+  try {
+    const response = await fetch(`${API_URL}/auth/reset-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ token, newPassword }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      const errorMessage = import.meta.env.NODE_ENV === 'production'
+        ? 'Error al restablecer la contraseña. Por favor, inténtalo de nuevo.'
+        : errorData.message || 'Error al restablecer la contraseña';
+      throw new Error(errorMessage);
+    }
+
+    console.log('Contraseña restablecida exitosamente');
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Error al restablecer la contraseña';
+    throw new Error(errorMessage);
+  }
+};
+
+
 // Nueva función para verificar la sesión actual usando la cookie HttpOnly
 export const verifySession = async (): Promise<User | null> => {
   try {

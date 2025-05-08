@@ -7,10 +7,12 @@ export interface AuthContextType {
   signingIn: boolean;
   signingUp: boolean;
   requestingPasswordReset: boolean;
-  signin: (data: SigninData) => Promise<boolean>;
-  signup: (data: SignupData) => Promise<boolean>;
-  signout: () => Promise<boolean>;
-  forgotPassword: (email: string) => Promise<boolean>;
+  signin: (data: SigninData) => Promise<void>;
+  signup: (data: SignupData) => Promise<void>;
+  signout: () => Promise<void>;
+  forgotPassword: (email: string) => Promise<void>;
+  resetPassword: (token: string, newPassword: string) => Promise<void>;
+  resettingPassword: boolean;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
