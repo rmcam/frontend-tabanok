@@ -1,13 +1,10 @@
-import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import PrivateRoute from "./components/common/PrivateRoute";
 import HomePage from "./components/home/HomePage";
 import AuthenticatedLayout from "./components/layout/AuthenticatedLayout";
 import MultimediaPage from "./components/multimedia/MultimediaPage";
 import { SidebarProvider } from "./components/ui/sidebar";
-
-// Importaciones dinámicas para code-splitting
-const UnifiedDashboard = lazy(() => import("./components/dashboard/Dashboard"));
+import UnifiedDashboard from "./components/dashboard/Dashboard";
 
 function App() {
   return (
@@ -22,9 +19,7 @@ function App() {
           element={
             <PrivateRoute requiredRoles={["user", "student", "teacher"]}>
               <AuthenticatedLayout>
-                <Suspense fallback={<div>Cargando contenido...</div>}>
-                  <UnifiedDashboard />
-                </Suspense>
+                <UnifiedDashboard />
               </AuthenticatedLayout>
             </PrivateRoute>
           }
