@@ -81,6 +81,7 @@
     "@types/node": "^22.14.1",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
+    "@types/react-i18next": "^8.1.0",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.21.0",

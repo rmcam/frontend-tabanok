@@ -74,9 +74,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setSigningUp(true);
     try {
       await signupService(data);
-      // Después de un registro exitoso, verificar la sesión para obtener los datos del usuario
-      const authenticatedUser = await verifySessionService();
-      setUser(authenticatedUser);
+      // Después de un registro exitoso, realizar un inicio de sesión automático
+      // para asegurar que las cookies HttpOnly se establezcan correctamente.
+      await signin({ identifier: data.email, password: data.password }); // Usar la función signin del AuthProvider
+      // La función signin ya llama a verifySessionService y actualiza el estado del usuario.
       showToast("Registro exitoso. ¡Bienvenido!", "success");
     } catch (error) {
       console.error("Error al registrarse:", error);
