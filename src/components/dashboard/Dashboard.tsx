@@ -5,19 +5,20 @@ import {
   BreadcrumbLink,
   BreadcrumbList,
 } from "@/components/ui/breadcrumb";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import React, { Suspense, lazy } from "react";
-const ContentManager = lazy(() => import("./components/ContentManager"));
-const StudentProgress = lazy(() => import("./components/StudentProgress"));
+
 const ActivityCreator = lazy(() => import("./components/ActivityCreator"));
-const ReportViewer = lazy(() => import("./components/ReportViewer"));
-const MultimediaUploadForm = lazy(
-  () => import("./components/MultimediaUploadForm")
-);
-const MultimediaGallery = lazy(() => import("./components/MultimediaGallery"));
-const DashboardStatistics = lazy(
-  () => import("./components/DashboardStatistics")
-);
+const CategoryManager = lazy(() => import("./components/CategoryManager"));
+const ContentManager = lazy(() => import("./components/ContentManager"));
+const DashboardStatistics = lazy(() => import("./components/DashboardStatistics"));
 const LatestActivities = lazy(() => import("./components/LatestActivities"));
+const MultimediaGallery = lazy(() => import("./components/MultimediaGallery"));
+const MultimediaUploadForm = lazy(() => import("./components/MultimediaUploadForm"));
+const ReportViewer = lazy(() => import("./components/ReportViewer"));
+const StudentProgress = lazy(() => import("./components/StudentProgress"));
+const TagManager = lazy(() => import("./components/TagManager"));
+
 
 const UnifiedDashboard = () => {
   const { user } = useAuth();
@@ -41,74 +42,55 @@ const UnifiedDashboard = () => {
         {isTeacher ? "Panel Docente" : "Dashboard"}
       </h1>
 
-      {/* Estadísticas del dashboard */}
-      <section className="mb-8">
-        <Suspense fallback={<div>Cargando...</div>}>
-          <DashboardStatistics />
-        </Suspense>
-      </section>
-
-      {/* Herramientas para docentes */}
-      <section className="mb-8">
-        <h2 className="text-2xl font-semibold mb-3">
-          Herramientas para docentes
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <h3 className="text-xl font-semibold mb-2">
-              Creación de Contenido
-            </h3>
-            <p className="text-gray-700">
-              Diseña lecciones y actividades interactivas.
-            </p>
-            <Suspense fallback={<div>Cargando...</div>}>
-              <ActivityCreator />
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList>
+          <TabsTrigger value="overview">Resumen</TabsTrigger>
+          <TabsTrigger value="content">Gestión de Contenido</TabsTrigger>
+          <TabsTrigger value="activities">Gestión de Actividades</TabsTrigger>
+          <TabsTrigger value="multimedia">Gestión Multimedia</TabsTrigger>
+          <TabsTrigger value="progress">Seguimiento y Reportes</TabsTrigger>
+        </TabsList>
+        <TabsContent value="overview">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Suspense fallback={<div>Cargando estadísticas...</div>}>
+              <DashboardStatistics />
+            </Suspense>
+            <Suspense fallback={<div>Cargando últimas actividades...</div>}>
+              <LatestActivities />
             </Suspense>
           </div>
-          <div>
-            <h3 className="text-xl font-semibold mb-2">
-              Seguimiento de Estudiantes
-            </h3>
-            <p className="text-gray-700">
-              Monitorea el progreso y genera reportes.
-            </p>
-            <Suspense fallback={<div>Cargando...</div>}>
-              <StudentProgress />
-            </Suspense>
-            <Suspense fallback={<div>Cargando...</div>}>
-              <ReportViewer />
-            </Suspense>
-          </div>
-        </div>
-      </section>
-
-      {/* Multimedia */}
-      <section className="mb-8">
-        <h2 className="text-2xl font-semibold mb-3">Multimedia</h2>
-        <p>Carga y gestiona recursos multimedia.</p>
-        <Suspense fallback={<div>Cargando...</div>}>
-          <MultimediaUploadForm />
-        </Suspense>
-        <Suspense fallback={<div>Cargando...</div>}>
-          <MultimediaGallery />
-        </Suspense>
-      </section>
-
-      {/* Evaluaciones Efectivas */}
-      <section className="mb-8">
-        <h2 className="text-2xl font-semibold mb-3">Evaluaciones Efectivas</h2>
-        <Suspense fallback={<div>Cargando...</div>}>
-          <ContentManager />
-        </Suspense>
-      </section>
-
-      {/* Últimas Actividades */}
-      <section className="mb-8">
-        <h2 className="text-2xl font-semibold mb-3">Últimas Actividades</h2>
-        <Suspense fallback={<div>Cargando...</div>}>
-          <LatestActivities />
-        </Suspense>
-      </section>
+        </TabsContent>
+        <TabsContent value="content">
+          <Suspense fallback={<div>Cargando gestión de contenido...</div>}>
+            <ContentManager />
+          </Suspense>
+          <Suspense fallback={<div>Cargando gestión de categorías...</div>}>
+            <CategoryManager />
+          </Suspense>
+          <Suspense fallback={<div>Cargando gestión de etiquetas...</div>}>
+            <TagManager />
+          </Suspense>
+        </TabsContent>
+        <TabsContent value="activities">
+          <Suspense fallback={<div>Cargando creador de actividades...</div>}>
+            <ActivityCreator />
+          </Suspense>
+        </TabsContent>
+        <TabsContent value="multimedia">
+          <Suspense fallback={<div>Cargando gestión multimedia...</div>}>
+            <MultimediaUploadForm />
+            <MultimediaGallery />
+          </Suspense>
+        </TabsContent>
+        <TabsContent value="progress">
+          <Suspense fallback={<div>Cargando seguimiento de estudiantes...</div>}>
+            <StudentProgress />
+          </Suspense>
+          <Suspense fallback={<div>Cargando reportes...</div>}>
+            <ReportViewer />
+          </Suspense>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
