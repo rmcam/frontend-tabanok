@@ -94,7 +94,8 @@ const MultimediaUploadForm: React.FC = () => {
     });
 
     try {
-      const response = await api.put("/multimedia/upload", formData, {
+      // TODO: Verificar la estructura exacta del payload esperado por el backend para POST /multimedia/upload
+      const response = await api.post("/multimedia/upload", formData, { // Cambiado de PUT a POST
         onUploadProgress: (progressEvent: ProgressEvent) => {
           const progress = Math.round(
             (progressEvent.loaded * 100) / progressEvent.total
@@ -132,7 +133,7 @@ const MultimediaUploadForm: React.FC = () => {
         <img
           src={URL.createObjectURL(selectedFile)}
           alt="Preview"
-          style={{ width: "200px" }}
+          className="w-full max-w-xs h-auto" // Usar clases responsive de Tailwind
         />
       );
     } else if (selectedFile.type.startsWith("video")) {

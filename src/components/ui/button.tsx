@@ -10,21 +10,21 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-[#007bff] text-white shadow-xs hover:bg-[#0056b3]",
+          "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
         destructive:
-          "bg-[#dc3545] text-white shadow-xs hover:bg-[#c82333] focus-visible:ring-[#dc3545]/20 dark:focus-visible:ring-[#dc3545]/40 dark:bg-[#dc3545]/60",
+          "bg-destructive text-destructive-foreground shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:
-          "border bg-white shadow-xs hover:bg-gray-100 hover:text-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700 dark:hover:text-white",
+          "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700 dark:hover:text-white",
         secondary:
-          "bg-[#6c757d] text-white shadow-xs hover:bg-[#5a6268]",
+          "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
         ghost:
-          "hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-white",
-        link: "text-[#007bff] underline-offset-4 hover:underline",
+          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-gray-700 dark:hover:text-white",
+        link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-9 px-4 py-2 has-[>svg]:px-3",
-        sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
-        lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
+        default: "h-9 px-3 py-2 has-[>svg]:px-2",
+        sm: "h-8 rounded-md gap-1.5 px-2 py-1 has-[>svg]:px-1.5",
+        lg: "h-10 rounded-md px-3 py-2 has-[>svg]:px-2",
         icon: "size-9",
       },
     },

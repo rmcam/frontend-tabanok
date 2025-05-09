@@ -21,16 +21,16 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner"; // Assuming sonner is used for notifications
 import api from "@/lib/api"; // Import the api object
 
-interface Category {
-  id: number;
-  name: string;
+interface Category { // Asumiendo que 'Category' en el frontend se mapea a 'Topic' en el backend
+  id: string; // Cambiado a string asumiendo UUIDs en el backend
+  name: string; // Asumiendo que el campo se llama 'name' o 'title' en el backend
 }
 
 const CategoryManager = () => {
   const [showForm, setShowForm] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [editCategory, setEditCategory] = useState<Category | null>(null);
-  const [categoryName, setCategoryName] = useState("");
+  const [categories, setCategories] = useState<Category[]>([]); // Lista de 'Topics'
+  const [editCategory, setEditCategory] = useState<Category | null>(null); // 'Topic' a editar
+  const [categoryName, setCategoryName] = useState(""); // Nombre del 'Topic'
   const [categoryNameError, setCategoryNameError] = useState(""); // Add state for validation error
   const [isLoading, setIsLoading] = useState(false);
 
@@ -40,7 +40,7 @@ const CategoryManager = () => {
 
   useEffect(() => {
     if (editCategory) {
-      setCategoryName(editCategory.name);
+      setCategoryName(editCategory.name); // Usar 'name', ajustar si es 'title'
       setCategoryNameError(""); // Clear error when editing
     } else {
       setCategoryName("");
@@ -51,11 +51,12 @@ const CategoryManager = () => {
   const fetchCategories = async () => {
     setIsLoading(true);
     try {
-      const data = await api.get("/categories"); // Use api.get
-      setCategories(data);
+      // TODO: Verificar la estructura exacta de la respuesta del endpoint /topics
+      const data: Category[] = await api.get("/topics"); // Usar endpoint /topics
+      setCategories(data); // Asumiendo que la respuesta es un array de Topics con id y name
     } catch (error: unknown) { // Change any to unknown
-      const errorMessage = error instanceof Error ? error.message : "Error desconocido al cargar categorías.";
-      toast.error(`Error al cargar las categorías: ${errorMessage}`);
+      const errorMessage = error instanceof Error ? error.message : "Error desconocido al cargar temas.";
+      toast.error(`Error al cargar los temas: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
@@ -63,7 +64,7 @@ const CategoryManager = () => {
 
   const handleSave = async () => {
     if (!categoryName.trim()) {
-      setCategoryNameError("El nombre de la categoría es obligatorio."); // Set validation error state
+      setCategoryNameError("El nombre del tema es obligatorio."); // Set validation error state
       return;
     }
 
@@ -71,17 +72,19 @@ const CategoryManager = () => {
     setIsLoading(true);
     try {
       if (editCategory) {
-        await api.put(`/categories/${editCategory.id}`, { name: categoryName }); // Use api.put
-        toast.success("Categoría actualizada exitosamente.");
+        // TODO: Verificar el payload y el endpoint de actualización de topics
+        await api.patch(`/topics/${editCategory.id}`, { name: categoryName }); // Usar endpoint /topics y PATCH para actualizar
+        toast.success("Tema actualizado exitosamente.");
       } else {
-        await api.post("/categories", { name: categoryName }); // Use api.post
-        toast.success("Categoría creada exitosamente.");
+        // TODO: Verificar el payload y el endpoint de creación de topics
+        await api.post("/topics", { name: categoryName }); // Usar endpoint /topics para crear
+        toast.success("Tema creado exitosamente.");
       }
       fetchCategories(); // Refresh the list
     } catch (error: unknown) { // Change any to unknown
-      const errorMessage = error instanceof Error ? error.message : "Error desconocido al guardar categoría.";
+      const errorMessage = error instanceof Error ? error.message : "Error desconocido al guardar tema.";
       const action = editCategory ? "actualizar" : "crear";
-      toast.error(`Error al ${action} la categoría: ${errorMessage}`);
+      toast.error(`Error al ${action} el tema: ${errorMessage}`);
     } finally {
       setIsLoading(false);
       setShowForm(false);
@@ -90,21 +93,22 @@ const CategoryManager = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => { // Cambiado a string
     setIsLoading(true);
     try {
-      await api.delete(`/categories/${id}`); // Use api.delete
-      toast.success("Categoría eliminada exitosamente.");
+      // TODO: Verificar el endpoint de eliminación de topics
+      await api.delete(`/topics/${id}`); // Usar endpoint /topics para eliminar
+      toast.success("Tema eliminado exitosamente.");
       fetchCategories(); // Refresh the list
     } catch (error: unknown) { // Change any to unknown
-      const errorMessage = error instanceof Error ? error.message : "Error desconocido al eliminar categoría.";
-      toast.error(`Error al eliminar la categoría: ${errorMessage}`);
+      const errorMessage = error instanceof Error ? error.message : "Error desconocido al eliminar tema.";
+      toast.error(`Error al eliminar el tema: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleEdit = (category: Category) => {
+  const handleEdit = (category: Category) => { // 'category' es en realidad un 'topic'
     setEditCategory(category);
     setShowForm(true);
   };

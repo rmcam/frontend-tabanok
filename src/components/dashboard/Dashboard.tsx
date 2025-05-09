@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import React, { Suspense, lazy } from "react";
+import { FaChartBar, FaFileAlt, FaTasks, FaImages, FaUsers } from "react-icons/fa"; // Import icons
 
 const ActivityCreator = lazy(() => import("./components/ActivityCreator"));
 const CategoryManager = lazy(() => import("./components/CategoryManager"));
@@ -25,7 +26,7 @@ const UnifiedDashboard = () => {
   const isTeacher = user?.roles.includes("teacher");
 
   return (
-    <div className="container mx-auto py-10">
+    <div className="container mx-auto px-2 sm:px-6 lg:px-8 py-10">
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -43,12 +44,12 @@ const UnifiedDashboard = () => {
       </h1>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList>
-          <TabsTrigger value="overview">Resumen</TabsTrigger>
-          <TabsTrigger value="content">Gestión de Contenido</TabsTrigger>
-          <TabsTrigger value="activities">Gestión de Actividades</TabsTrigger>
-          <TabsTrigger value="multimedia">Gestión Multimedia</TabsTrigger>
-          <TabsTrigger value="progress">Seguimiento y Reportes</TabsTrigger>
+        <TabsList className="flex overflow-x-auto w-full justify-start gap-2 p-1">
+          <TabsTrigger value="overview" className="flex-shrink-0 px-3 py-1 text-sm flex items-center gap-1"><FaChartBar className="text-base" aria-hidden="true" /> Resumen</TabsTrigger> {/* Add icon */}
+          <TabsTrigger value="content" className="flex-shrink-0 px-3 py-1 text-sm flex items-center gap-1"><FaFileAlt className="text-base" aria-hidden="true" /> Gestión de Contenido</TabsTrigger> {/* Add icon */}
+          <TabsTrigger value="activities" className="flex-shrink-0 px-3 py-1 text-sm flex items-center gap-1"><FaTasks className="text-base" aria-hidden="true" /> Gestión de Actividades</TabsTrigger> {/* Add icon */}
+          <TabsTrigger value="multimedia" className="flex-shrink-0 px-3 py-1 text-sm flex items-center gap-1"><FaImages className="text-base" aria-hidden="true" /> Gestión Multimedia</TabsTrigger> {/* Add icon */}
+          <TabsTrigger value="progress" className="flex-shrink-0 px-3 py-1 text-sm flex items-center gap-1"><FaUsers className="text-base" aria-hidden="true" /> Seguimiento y Reportes</TabsTrigger> {/* Add icon */}
         </TabsList>
         <TabsContent value="overview">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

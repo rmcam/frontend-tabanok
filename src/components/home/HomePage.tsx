@@ -205,7 +205,7 @@ const HomePage = () => {
         isAuthenticated={!!user} // Pasar el estado de autenticación
       />
       <motion.div
-        className="container mx-auto py-8"
+        className="container mx-auto px-4 sm:px-6 lg:px-8 py-8" // Añadido padding horizontal y mantenido padding vertical inicial
         ref={ref}
         initial={{ opacity: 0, y: 100 }}
         animate={animation}
@@ -222,16 +222,16 @@ const HomePage = () => {
           aria-roledescription="carousel"
         >
           <CarouselContent
-            className="w-full h-[500px]"
+            className="w-full h-auto md:h-[500px]"
             role="group"
             aria-label="Elementos del carrusel"
           >
             {' '}
-            {/* Añadida altura fija */}
+            {/* Altura automática en móvil, fija en md */}
             {heroCardsData.map((card, index) => (
-              <CarouselItem key={index} className="md:w-1/2 lg:w-1/3 h-full">
+              <CarouselItem key={index} className="w-full md:w-1/2 lg:w-1/3 h-full">
                 {' '}
-                {/* Asegurar que el item ocupe la altura */}
+                {/* Ancho completo en móvil */}
                 <HeroSection
                   title={card.title}
                   description={card.description}
@@ -265,9 +265,9 @@ const HomePage = () => {
         </Carousel>
 
         {/* Features Section */}
-        <section className="py-12">
+        <section className="py-10 sm:py-16">
           {' '}
-          {/* Ajustado espaciado */}
+          {/* Ajustado espaciado vertical */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <FeatureCard
               title="Lecciones Interactivas"
@@ -277,7 +277,7 @@ const HomePage = () => {
               ariaLabel="Descubre la riqueza de la cultura Kamëntsá a través de lecciones interactivas y atractivas."
               className={clsx(
                 featureCardCommonClasses, // Usar constante
-                'border border-red-500',
+                'md:border md:border-red-500',
               )} // Usar clsx
             />
             <FeatureCard
@@ -288,7 +288,7 @@ const HomePage = () => {
               ariaLabel="Gana puntos y recompensas mientras avanzas en tu aprendizaje."
               className={clsx(
                 featureCardCommonClasses, // Usar constante
-                'border border-yellow-500',
+                'md:border md:border-yellow-500',
               )} // Usar clsx
             />
             <FeatureCard
@@ -299,16 +299,16 @@ const HomePage = () => {
               ariaLabel="Visualiza tu progreso y mantente motivado para alcanzar tus metas."
               className={clsx(
                 featureCardCommonClasses, // Usar constante
-                'border border-teal-500',
+                'md:border md:border-teal-500',
               )} // Usar clsx
             />
           </div>
         </section>
 
         {/* Featured Lessons Section */}
-        <section className="py-12">
+        <section className="py-10 sm:py-16">
           {' '}
-          {/* Ajustado espaciado */}
+          {/* Ajustado espaciado vertical */}
           <h2 className="text-2xl font-bold text-center mb-4">Lecciones Destacadas</h2>
           {loadingFeaturedLessons && (
             <div className="flex justify-center items-center py-8">
@@ -349,9 +349,9 @@ const HomePage = () => {
 
         {/* Testimonials Section */}
         {/* Testimonials Section */}
-        <section className="py-12">
+        <section className="py-10 sm:py-16">
           {' '}
-          {/* Ajustado espaciado */}
+          {/* Ajustado espaciado vertical */}
           <h2 className="text-2xl font-bold text-center mb-4">Testimonios</h2>
           <motion.div
             className="w-full max-w-2xl mx-auto relative" // Añadido relative para posicionar el botón
@@ -422,12 +422,16 @@ const HomePage = () => {
         </section>
 
         {/* FAQ Section */}
-        <FAQ />
+        <section className="py-10 sm:py-16">
+          {' '}
+          {/* Ajustado espaciado vertical */}
+          <FAQ />
+        </section>
 
         {/* Contact Section */}
-        <section className="py-12 bg-white">
+        <section className="py-10 sm:py-16 bg-white">
           {' '}
-          {/* Ajustado espaciado */}
+          {/* Ajustado espaciado vertical */}
           <h2 className="text-2xl font-bold text-center mb-4">¿Tienes preguntas?</h2>
           <ContactForm />
         </section>
@@ -436,11 +440,11 @@ const HomePage = () => {
         <footer className="text-center py-4 text-gray-500 text-sm">
           {' '}
           {/* Increased padding */}
-          <div className="flex justify-center space-x-4 mb-2">
-            <HashLink to="/privacy" smooth={true} duration={500} className="hover:underline">
+          <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 mb-2">
+            <HashLink to="/privacy" smooth={true} duration={500} className="hover:underline mb-4 sm:mb-0">
               Política de Privacidad
             </HashLink>
-            <HashLink to="/terms" smooth={true} duration={500} className="hover:underline">
+            <HashLink to="/terms" smooth={true} duration={500} className="hover:underline mb-4 sm:mb-0">
               Términos de Servicio
             </HashLink>
             <HashLink to="/contact" smooth={true} duration={500} className="hover:underline">

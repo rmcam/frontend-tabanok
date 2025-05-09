@@ -21,6 +21,11 @@ self.addEventListener('install', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
+  // Ignorar solicitudes que no sean http, https o chrome-extension
+  if (!(event.request.url.startsWith('http://') || event.request.url.startsWith('https://')) || event.request.url.startsWith('chrome-extension://')) {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then(function(response) {
