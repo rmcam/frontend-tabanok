@@ -15,13 +15,20 @@ interface MatchingActivityData {
   pairs: MatchingPair[];
 }
 
+interface MatchingActivityResult {
+  correctMatches: number;
+  totalPairs: number;
+  pointsEarned?: number; // Added for gamification
+  unlockedBadges?: { id: string; name: string }[]; // Added for gamification
+}
+
 const MatchingActivity: React.FC<{ activityId: string; onActivityComplete?: () => void }> = ({ activityId, onActivityComplete }) => {
   const [activityData, setActivityData] = useState<MatchingActivityData | null>(null);
-  const [loading, setLoading] = useState(true);
+const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedItems, setSelectedItems] = useState<string[]>([]); // To store selected item IDs for matching
   const [matchedPairs, setMatchedPairs] = useState<string[]>([]); // To store IDs of successfully matched pairs
-  const [results, setResults] = useState<any>(null); // State to store results from backend
+  const [results, setResults] = useState<MatchingActivityResult | null>(null); // Updated state type
 
   const navigate = useNavigate(); // Get navigate function
 
@@ -99,17 +106,17 @@ const MatchingActivity: React.FC<{ activityId: string; onActivityComplete?: () =
     setError(null); // Clear previous errors
     try {
       // Assuming backend endpoint for completing matching activity is POST /activities/matching/:id/complete
-      const finalResults = await api.post(`/activities/matching/${activityId}/complete`, { matchedPairs });
+      const finalResults: MatchingActivityResult = await api.post(`/activities/matching/${activityId}/complete`, { matchedPairs }); // Cast response
       console.log("Resultados finales de la actividad de emparejamiento:", finalResults);
       setResults(finalResults); // Store the final results
-      // TODO: Handle gamification updates based on final results (e.g., points earned, badges unlocked)
+      // TODO: Handle gamification updates based on final results (e.g., points earned, badges unlocked) - Now displaying in UI
       if (onActivityComplete) {
         onActivityComplete(); // Call the callback to refresh student data
       }
       toast.success("Actividad de emparejamiento completada!", { // Display success message
         description: `Parejas correctas: ${finalResults.correctMatches} / ${finalResults.totalPairs}`,
       });
-      navigate('/dashboard'); // Redirect to dashboard after completion
+      // navigate('/dashboard'); // Decide whether to redirect immediately or let user see results
     } catch (err: unknown) {
       setError(
         "Error al completar la actividad de emparejamiento: " +
@@ -139,37 +146,56 @@ const MatchingActivity: React.FC<{ activityId: string; onActivityComplete?: () =
     <div>
       <h3>{activityData.title}</h3>
       {/* Render matching pairs */}
-      <div className="matching-container">
-        {activityData.pairs.map(pair => (
-          <div key={pair.id} className="matching-pair">
-            {/* Render item1 and item2, allow clicking */}
-            <div
-              className={`matching-item ${selectedItems.includes(pair.item1) ? 'selected' : ''} ${matchedPairs.includes(pair.id) ? 'matched' : ''}`}
-              onClick={() => handleItemClick(pair.item1)}
-            >
-              {pair.item1}
+      {!results ? (
+        <div className="matching-container">
+          {activityData.pairs.map(pair => (
+            <div key={pair.id} className="matching-pair">
+              {/* Render item1 and item2, allow clicking */}
+              <div
+                className={`matching-item ${selectedItems.includes(pair.item1) ? 'selected' : ''} ${matchedPairs.includes(pair.id) ? 'matched' : ''}`}
+                onClick={() => handleItemClick(pair.item1)}
+              >
+                {pair.item1}
+              </div>
+              <div
+                className={`matching-item ${selectedItems.includes(pair.item2) ? 'selected' : ''} ${matchedPairs.includes(pair.id) ? 'matched' : ''}`}
+                onClick={() => handleItemClick(pair.item2)}
+              >
+                {pair.item2}
+              </div>
             </div>
-            <div
-              className={`matching-item ${selectedItems.includes(pair.item2) ? 'selected' : ''} ${matchedPairs.includes(pair.id) ? 'matched' : ''}`}
-              onClick={() => handleItemClick(pair.item2)}
-            >
-              {pair.item2}
-            </div>
-          </div>
-        ))}
-      </div>
-      {/* Add submit button and display results */}
-      <button onClick={handleSubmit} disabled={loading || matchedPairs.length !== activityData.pairs.length}>
-        Completar Actividad
-      </button>
-      {results && (
+          ))}
+        </div>
+      ) : (
+        // Render results if available, including gamification updates
         <div>
           <h3>Resultados de la Actividad</h3>
           {/* Display detailed results */}
           <p>Parejas correctas: {results.correctMatches} / {results.totalPairs}</p>
+
+          {/* Display gamification updates */}
+          {results.pointsEarned !== undefined && (
+            <p>Puntos ganados: {results.pointsEarned}</p>
+          )}
+          {results.unlockedBadges && results.unlockedBadges.length > 0 && (
+            <div>
+              <h4>Insignias desbloqueadas:</h4>
+              <ul>
+                {results.unlockedBadges.map(badge => (
+                  <li key={badge.id}>{badge.name}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {/* TODO: Display more detailed feedback or highlight correct pairs */}
-          {/* TODO: Update gamification UI based on results */}
+           <button onClick={() => navigate('/dashboard')}>Volver al Dashboard</button> {/* Button to return to dashboard */}
         </div>
+      )}
+      {!results && (
+        <button onClick={handleSubmit} disabled={loading || matchedPairs.length !== activityData.pairs.length}>
+          Completar Actividad
+        </button>
       )}
     </div>
   );

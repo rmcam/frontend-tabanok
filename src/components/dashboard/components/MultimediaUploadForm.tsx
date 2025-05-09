@@ -28,9 +28,14 @@ const MultimediaUploadForm: React.FC = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState("");
+  const [titleError, setTitleError] = useState(""); // Add state for title error
+  const [descriptionError, setDescriptionError] = useState(""); // Add state for description error
+  const [tagsError, setTagsError] = useState(""); // Add state for tags error
+  const [fileError, setFileError] = useState(""); // Add state for file selection error
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
+      setFileError(""); // Clear file error on drop
       const file = acceptedFiles[0];
       if (!selectedTypes.includes(file.type)) {
         setSelectedFile(null);
@@ -45,14 +50,36 @@ const MultimediaUploadForm: React.FC = () => {
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
-  const handleUpload = async () => {
+  const validateForm = () => {
+    let isValid = true;
+    setTitleError(""); // Clear previous errors
+    setDescriptionError("");
+    setTagsError("");
+    setFileError("");
+
     if (!selectedFile) {
-      setMessage("Por favor, selecciona un archivo.");
+      setFileError("Por favor, selecciona un archivo.");
+      isValid = false;
+    }
+
+    if (!title.trim()) {
+      setTitleError("El título es obligatorio.");
+      isValid = false;
+    }
+
+    // Add validation for description and tags if needed (based on project requirements)
+    // For now, assuming they are optional or have basic validation
+
+    return isValid;
+  };
+
+  const handleUpload = async () => {
+    if (!validateForm()) {
       return;
     }
 
     setUploading(true);
-    setMessage("");
+    setMessage(""); // Clear general message
     setUploadProgress(0);
 
     const formData = new FormData();
@@ -76,18 +103,22 @@ const MultimediaUploadForm: React.FC = () => {
         },
       });
 
-      setMessage("Archivo subido con éxito: " + response.url);
+      setMessage("Archivo subido con éxito: " + response.url); // Keep success message
       setSelectedFile(null);
       setUploadProgress(0);
       setTitle("");
       setDescription("");
       setTags("");
+      setTitleError(""); // Clear errors on success
+      setDescriptionError("");
+      setTagsError("");
+      setFileError("");
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error
           ? error.message
           : "Error desconocido al subir el archivo.";
-      setMessage(`Error al subir el archivo: ${errorMessage}`);
+      setMessage(`Error al subir el archivo: ${errorMessage}`); // Keep error message
       setUploadProgress(0);
     } finally {
       setUploading(false);
@@ -147,18 +178,30 @@ const MultimediaUploadForm: React.FC = () => {
           type="text"
           id="title"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => {
+            setTitle(e.target.value);
+            setTitleError(""); // Clear error on input change
+          }}
           disabled={uploading}
+          aria-invalid={!!titleError} // Add aria-invalid
+          aria-describedby={titleError ? "multimedia-title-error" : undefined} // Add aria-describedby
         />
+        {titleError && <p id="multimedia-title-error" className="text-red-500 text-sm">{titleError}</p>} {/* Add id to error message */}
       </div>
       <div>
         <Label htmlFor="description">Descripción</Label>
         <Textarea
           id="description"
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          onChange={(e) => {
+            setDescription(e.target.value);
+            setDescriptionError(""); // Clear error on input change
+          }}
           disabled={uploading}
+          aria-invalid={!!descriptionError} // Add aria-invalid
+          aria-describedby={descriptionError ? "multimedia-description-error" : undefined} // Add aria-describedby
         />
+        {descriptionError && <p id="multimedia-description-error" className="text-red-500 text-sm">{descriptionError}</p>} {/* Add id to error message */}
       </div>
       <div>
         <Label htmlFor="tags">Etiquetas</Label>
@@ -166,9 +209,15 @@ const MultimediaUploadForm: React.FC = () => {
           type="text"
           id="tags"
           value={tags}
-          onChange={(e) => setTags(e.target.value)}
+          onChange={(e) => {
+            setTags(e.target.value);
+            setTagsError(""); // Clear error on input change
+          }}
           disabled={uploading}
+          aria-invalid={!!tagsError} // Add aria-invalid
+          aria-describedby={tagsError ? "multimedia-tags-error" : undefined} // Add aria-describedby
         />
+        {tagsError && <p id="multimedia-tags-error" className="text-red-500 text-sm">{tagsError}</p>} {/* Add id to error message */}
       </div>
       <div {...getRootProps()} className={`dropzone ${uploading ? 'disabled' : ''}`}>
         <input {...getInputProps()} disabled={uploading} />
@@ -180,6 +229,7 @@ const MultimediaUploadForm: React.FC = () => {
           <p>Subiendo archivo...</p>
         )}
       </div>
+      {fileError && <p id="multimedia-file-error" className="text-red-500 text-sm">{fileError}</p>} {/* Add id to file error message */}
       {selectedFile && (
         <div>
           <p>Archivo seleccionado: {selectedFile.name}</p>
@@ -190,7 +240,7 @@ const MultimediaUploadForm: React.FC = () => {
       <Button onClick={handleUpload} disabled={!selectedFile || uploading}>
         {uploading ? "Subiendo..." : "Subir"}
       </Button>
-      {message && <p>{message}</p>}
+      {message && <p>{message}</p>} {/* Keep general message for success/error */}
     </div>
   );
 };

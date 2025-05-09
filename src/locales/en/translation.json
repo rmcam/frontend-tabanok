@@ -1,0 +1,79 @@
+{
+  "auth": {
+    "signin": {
+      "label": {
+        "username": "Username",
+        "password": "Password"
+      },
+      "placeholder": {
+        "username": "Email or Username",
+        "password": "Password"
+      },
+      "link": {
+        "forgotPassword": "Forgot your password?"
+      },
+      "button": {
+        "signIn": "Sign In"
+      }
+    },
+    "signup": {
+      "validation": {
+        "emailRequired": "Email is required",
+        "emailInvalid": "Email is not valid",
+        "passwordRequired": "Password is required",
+        "passwordMinLength": "Password must be at least 6 characters",
+        "usernameRequired": "Username is required",
+        "firstNameRequired": "First name is required",
+        "lastNameRequired": "Last name is required"
+      },
+      "step": "Step {{step}} of 3",
+      "label": {
+        "email": "Email",
+        "password": "Password",
+        "username": "Username",
+        "firstName": "First Name",
+        "secondName": "Second Name",
+        "firstLastName": "Last Name",
+        "secondLastName": "Second Last Name"
+      },
+      "placeholder": {
+        "email": "Email",
+        "password": "Password",
+        "username": "Username",
+        "firstName": "First Name",
+        "secondName": "Second Name",
+        "firstLastName": "Last Name",
+        "secondLastName": "Second Last Name"
+      },
+      "button": {
+        "next": "Next",
+        "previous": "Previous",
+        "signUp": "Sign Up"
+      },
+      "confirmation": {
+        "title": "Confirm your details:",
+        "email": "Email: {{email}}",
+        "username": "Username: {{username}}",
+        "firstName": "First Name: {{firstName}}",
+        "secondName": "Second Name: {{secondName}}",
+        "firstLastName": "Last Name: {{firstLastName}}",
+        "secondLastName": "Second Last Name: {{secondLastName}}"
+      }
+    },
+    "forgotPassword": {
+      "validation": {
+        "emailRequired": "Please enter your email address.",
+        "emailInvalid": "Please enter a valid email address."
+      },
+      "label": {
+        "email": "Email address"
+      },
+      "placeholder": {
+        "email": "Enter your email address"
+      },
+      "button": {
+        "sendResetLink": "Send Reset Link"
+      }
+    }
+  }
+}

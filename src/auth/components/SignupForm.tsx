@@ -6,8 +6,10 @@ import useFormValidation from '@/hooks/useFormValidation';
 import React, { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/hooks/useAuth'; // Corregir la ruta de importación
+import { useTranslation } from 'react-i18next'; // Import useTranslation
 
 const SignUpForm = () => {
+  const { t } = useTranslation(); // Initialize useTranslation
   const [step, setStep] = useState(1);
   const initialValues = {
     email: '',
@@ -23,35 +25,35 @@ const SignUpForm = () => {
   const validationRules = React.useMemo(
     () => ({
       email: (value: string) => {
-        if (!value) return 'Email es requerido';
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Email no es válido';
+        if (!value) return t('auth.signup.validation.emailRequired');
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return t('auth.signup.validation.emailInvalid');
         return undefined;
       },
       password: (value: string) => {
-        if (!value) return 'Contraseña es requerida';
-        if (value.length < 6) return 'Contraseña debe tener al menos 6 caracteres';
+        if (!value) return t('auth.signup.validation.passwordRequired');
+        if (value.length < 6) return t('auth.signup.validation.passwordMinLength');
         return undefined;
       },
       username: (value: string) => {
-        if (!value) return 'Usuario es requerido';
+        if (!value) return t('auth.signup.validation.usernameRequired');
         return undefined;
       },
       firstName: (value: string) => {
-        if (!value) return 'Nombre es requerido';
+        if (!value) return t('auth.signup.validation.firstNameRequired');
         return undefined;
       },
       secondName: () => {
         return undefined; // Optional field
       },
       firstLastName: (value: string) => {
-        if (!value) return 'Apellido es requerido';
+        if (!value) return t('auth.signup.validation.lastNameRequired');
         return undefined;
       },
       secondLastName: () => {
         return undefined; // Optional field
       },
     }),
-    [],
+    [t], // Add t to dependencies
   );
 
   const { values, errors, isValid, handleChange, handleSubmit } = useFormValidation(initialValues);
@@ -131,19 +133,19 @@ const SignUpForm = () => {
   return (
     <div className="flex flex-col items-center justify-center">
       <div className="mb-4 text-center text-gray-700">
-        Paso {step} de 3
+        {t('auth.signup.step', { step })} {/* Use translation with interpolation */}
       </div>
       <form onSubmit={onSubmit} className="w-full max-w-sm space-y-3">
         {step === 1 && (
           <>
             <div className="grid gap-1">
               <Label htmlFor="email" className="text-sm text-gray-700">
-                Email
+                {t('auth.signup.label.email')} {/* Use translation */}
               </Label>
-<Input
+              <Input
                 id="email"
                 type="email"
-                placeholder="Email"
+                placeholder={t('auth.signup.placeholder.email')}
                 name="email"
                 value={values.email}
                 onChange={handleChange}
@@ -154,12 +156,12 @@ const SignUpForm = () => {
             </div>
             <div className="grid gap-1">
               <Label htmlFor="password" className="text-sm text-gray-700">
-                Contraseña
+                {t('auth.signup.label.password')} {/* Use translation */}
               </Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="Password"
+                placeholder={t('auth.signup.placeholder.password')}
                 name="password"
                 value={values.password}
                 onChange={handleChange}
@@ -170,12 +172,12 @@ const SignUpForm = () => {
             </div>
             <div className="grid gap-1">
               <Label htmlFor="username" className="text-sm text-gray-700">
-                Usuario
+                {t('auth.signup.label.username')} {/* Use translation */}
               </Label>
               <Input
                 id="username"
                 type="text"
-                placeholder="Username"
+                placeholder={t('auth.signup.placeholder.username')}
                 name="username"
                 value={values.username}
                 onChange={handleChange}
@@ -185,7 +187,7 @@ const SignUpForm = () => {
               {errors.username && <p id="username-error" className="text-red-500 text-sm mt-2">{errors.username}</p>}
             </div>
             <Button type="button" onClick={nextStep} className="w-full rounded-lg py-2 mt-4">
-              Siguiente
+              {t('auth.signup.button.next')} {/* Use translation */}
             </Button>
           </>
         )}
@@ -194,12 +196,12 @@ const SignUpForm = () => {
           <>
             <div className="grid gap-1">
               <Label htmlFor="firstName" className="text-sm text-gray-700">
-                Nombre
+                {t('auth.signup.label.firstName')} {/* Use translation */}
               </Label>
               <Input
                 id="firstName"
                 type="text"
-                placeholder="First Name"
+                placeholder={t('auth.signup.placeholder.firstName')}
                 name="firstName"
                 value={values.firstName}
                 onChange={handleChange}
@@ -210,12 +212,12 @@ const SignUpForm = () => {
             </div>
             <div className="grid gap-1">
               <Label htmlFor="secondName" className="text-sm text-gray-700">
-                Segundo Nombre
+                {t('auth.signup.label.secondName')} {/* Use translation */}
               </Label>
               <Input
                 id="secondName"
                 type="text"
-                placeholder="Second Name"
+                placeholder={t('auth.signup.placeholder.secondName')}
                 name="secondName"
                 value={values.secondName}
                 onChange={handleChange}
@@ -226,12 +228,12 @@ const SignUpForm = () => {
             </div>
             <div className="grid gap-1">
               <Label htmlFor="firstLastName" className="text-sm text-gray-700">
-                Apellido
+                {t('auth.signup.label.firstLastName')} {/* Use translation */}
               </Label>
               <Input
                 id="firstLastName"
                 type="text"
-                placeholder="First Last Name"
+                placeholder={t('auth.signup.placeholder.firstLastName')}
                 name="firstLastName"
                 value={values.firstLastName}
                 onChange={handleChange}
@@ -242,12 +244,12 @@ const SignUpForm = () => {
             </div>
             <div className="grid gap-1">
               <Label htmlFor="secondLastName" className="text-sm text-gray-700">
-                Segundo Apellido
+                {t('auth.signup.label.secondLastName')} {/* Use translation */}
               </Label>
               <Input
                 id="secondLastName"
                 type="text"
-                placeholder="Second Last Name"
+                placeholder={t('auth.signup.placeholder.secondLastName')}
                 name="secondLastName"
                 value={values.secondLastName}
                 onChange={handleChange}
@@ -257,10 +259,10 @@ const SignUpForm = () => {
               {errors.secondLastName && <p id="secondLastName-error" className="text-red-500 text-sm mt-2">{errors.secondLastName}</p>}
             </div>
             <Button type="button" onClick={prevStep} className="w-full rounded-lg py-2 mt-4">
-              Anterior
+              {t('auth.signup.button.previous')} {/* Use translation */}
             </Button>
             <Button type="button" onClick={nextStep} className="w-full rounded-lg py-2">
-              Siguiente
+              {t('auth.signup.button.next')} {/* Use translation */}
             </Button>
           </>
         )}
@@ -268,19 +270,19 @@ const SignUpForm = () => {
         {step === 3 && (
           <>
             <div className="space-y-2 text-gray-700">
-              <p className="font-semibold">Confirme sus datos:</p>
-              <p>Email: {values.email}</p>
-              <p>Usuario: {values.username}</p>
-              <p>Nombre: {values.firstName}</p>
-              <p>Segundo Nombre: {values.secondName}</p>
-              <p>Apellido: {values.firstLastName}</p>
-              <p>Segundo Apellido: {values.secondLastName}</p>
+              <p className="font-semibold">{t('auth.signup.confirmation.title')}</p> {/* Use translation */}
+              <p>{t('auth.signup.confirmation.email', { email: values.email })}</p> {/* Use translation with interpolation */}
+              <p>{t('auth.signup.confirmation.username', { username: values.username })}</p> {/* Use translation with interpolation */}
+              <p>{t('auth.signup.confirmation.firstName', { firstName: values.firstName })}</p> {/* Use translation with interpolation */}
+              <p>{t('auth.signup.confirmation.secondName', { secondName: values.secondName })}</p> {/* Use translation with interpolation */}
+              <p>{t('auth.signup.confirmation.firstLastName', { firstLastName: values.firstLastName })}</p> {/* Use translation with interpolation */}
+              <p>{t('auth.signup.confirmation.secondLastName', { secondLastName: values.secondLastName })}</p> {/* Use translation with interpolation */}
             </div>
             <Button type="button" onClick={prevStep} className="w-full rounded-lg py-2 mt-4">
-              Anterior
+              {t('auth.signup.button.previous')} {/* Use translation */}
             </Button>
             <Button type="submit" className="w-full rounded-lg py-2" disabled={!isValid || signingUp}>
-              {signingUp ? <Loading /> : 'Registrarse'}
+              {signingUp ? <Loading /> : t('auth.signup.button.signUp')} {/* Use translation */}
             </Button>
           </>
         )}

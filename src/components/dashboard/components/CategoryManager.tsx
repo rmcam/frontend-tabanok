@@ -31,6 +31,7 @@ const CategoryManager = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [editCategory, setEditCategory] = useState<Category | null>(null);
   const [categoryName, setCategoryName] = useState("");
+  const [categoryNameError, setCategoryNameError] = useState(""); // Add state for validation error
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -40,8 +41,10 @@ const CategoryManager = () => {
   useEffect(() => {
     if (editCategory) {
       setCategoryName(editCategory.name);
+      setCategoryNameError(""); // Clear error when editing
     } else {
       setCategoryName("");
+      setCategoryNameError(""); // Clear error when creating new
     }
   }, [editCategory]);
 
@@ -50,8 +53,9 @@ const CategoryManager = () => {
     try {
       const data = await api.get("/categories"); // Use api.get
       setCategories(data);
-    } catch (error: any) {
-      toast.error(`Error al cargar las categorías: ${error.message}`);
+    } catch (error: unknown) { // Change any to unknown
+      const errorMessage = error instanceof Error ? error.message : "Error desconocido al cargar categorías.";
+      toast.error(`Error al cargar las categorías: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
@@ -59,10 +63,11 @@ const CategoryManager = () => {
 
   const handleSave = async () => {
     if (!categoryName.trim()) {
-      toast.warning("El nombre de la categoría no puede estar vacío.");
+      setCategoryNameError("El nombre de la categoría es obligatorio."); // Set validation error state
       return;
     }
 
+    setCategoryNameError(""); // Clear error if validation passes
     setIsLoading(true);
     try {
       if (editCategory) {
@@ -73,9 +78,10 @@ const CategoryManager = () => {
         toast.success("Categoría creada exitosamente.");
       }
       fetchCategories(); // Refresh the list
-    } catch (error: any) {
+    } catch (error: unknown) { // Change any to unknown
+      const errorMessage = error instanceof Error ? error.message : "Error desconocido al guardar categoría.";
       const action = editCategory ? "actualizar" : "crear";
-      toast.error(`Error al ${action} la categoría: ${error.message}`);
+      toast.error(`Error al ${action} la categoría: ${errorMessage}`);
     } finally {
       setIsLoading(false);
       setShowForm(false);
@@ -90,8 +96,9 @@ const CategoryManager = () => {
       await api.delete(`/categories/${id}`); // Use api.delete
       toast.success("Categoría eliminada exitosamente.");
       fetchCategories(); // Refresh the list
-    } catch (error: any) {
-      toast.error(`Error al eliminar la categoría: ${error.message}`);
+    } catch (error: unknown) { // Change any to unknown
+      const errorMessage = error instanceof Error ? error.message : "Error desconocido al eliminar categoría.";
+      toast.error(`Error al eliminar la categoría: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
@@ -126,14 +133,20 @@ const CategoryManager = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
-            <div className="grid gap-2">
+          <div className="grid gap-2">
               <Label htmlFor="name">Nombre</Label>
               <Input
                 id="name"
                 value={categoryName}
-                onChange={(e) => setCategoryName(e.target.value)}
+                onChange={(e) => {
+                  setCategoryName(e.target.value);
+                  setCategoryNameError(""); // Clear error on input change
+                }}
                 disabled={isLoading}
+                aria-invalid={!!categoryNameError} // Add aria-invalid
+                aria-describedby={categoryNameError ? "category-name-error" : undefined} // Add aria-describedby
               />
+              {categoryNameError && <p id="category-name-error" className="text-red-500 text-sm">{categoryNameError}</p>} {/* Add id to error message */}
             </div>
           </CardContent>
           <CardFooter className="flex justify-end">

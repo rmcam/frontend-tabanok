@@ -11,6 +11,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*.tsx", "src/lib/api.ts", "src/lib/authService.ts", "src/vite-env.d.ts", "src/**/*.ts", "src/components/ui/button.tsx"],
+  "include": ["src/**/*.tsx", "src/lib/api.ts", "src/lib/authService.ts", "src/vite-env.d.ts", "src/**/*.ts", "src/components/ui/button.tsx", "src/**/*.json"],
   "exclude": ["src/hooks/useAuth.ts", "src/**/*.test.ts", "src/**/*.spec.ts"]
 }

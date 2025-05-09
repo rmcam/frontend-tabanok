@@ -4,6 +4,7 @@ import useFormValidation from '@/hooks/useFormValidation';
 import React, { FormEvent, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { useAuth } from '../../auth/hooks/useAuth'; // Import useAuth from hooks
+import { useTranslation } from 'react-i18next'; // Import useTranslation
 
 interface SigninFormProps {
   identifier: string;
@@ -12,6 +13,8 @@ interface SigninFormProps {
 }
 
 const SigninForm: React.FC = () => {
+  const { t } = useTranslation(); // Initialize useTranslation
+
   const initialValues: SigninFormProps = {
     identifier: '',
     password: '',
@@ -47,45 +50,45 @@ const SigninForm: React.FC = () => {
       <form onSubmit={submitHandler} className="w-full max-w-sm space-y-6"> {/* Increased space-y, Adjusted max-width */}
         <div className="grid gap-3"> {/* Increased gap */}
           <Label htmlFor="identifier" className="text-sm">
-            Usuario
+            {t('auth.signin.label.username')} 
           </Label>
-<Input
+          <Input
             id="identifier"
             type="text"
-            placeholder="Email or Username"
+            placeholder={t('auth.signin.placeholder.username')} 
             name="identifier"
             value={values.identifier}
             onChange={handleChange}
             className={`w-full rounded-lg border ${errors.identifier ? 'border-red-500' : 'border-gray-300'} focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50`}
-            aria-label="Usuario"
+            aria-label={t('auth.signin.label.username')} 
             aria-describedby="identifier-error"
           />
           {errors.identifier && <p id="identifier-error" className="text-red-500 text-sm mt-1">{errors.identifier}</p>}
         </div>
         <div className="grid gap-3">
           <Label htmlFor="password" className="text-sm text-gray-700">
-            Contraseña
+            {t('auth.signin.label.password')} 
           </Label>
           <Input
             id="password"
             type="password"
-            placeholder="Password"
+            placeholder={t('auth.signin.placeholder.password')} 
             name="password"
             value={values.password}
             onChange={handleChange}
             className={`w-full rounded-lg border ${errors.password ? 'border-red-500' : 'border-gray-300'} focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50`}
-            aria-label="Contraseña"
+            aria-label={t('auth.signin.label.password')} 
             aria-describedby="password-error"
           />
           {errors.password && <p id="password-error" className="text-red-500 text-sm mt-1">{errors.password}</p>}
           <div className="text-right text-sm mt-1">
             <a href="/forgot-password" className="text-blue-600 hover:underline">
-              ¿Olvidaste tu contraseña?
+              {t('auth.signin.link.forgotPassword')} 
             </a>
           </div>
         </div>
         <Button type="submit" className="w-full rounded-lg py-2" disabled={!isValid || signingIn}>
-          {signingIn ? <Loading /> : 'Iniciar Sesión'}
+          {signingIn ? <Loading /> : t('auth.signin.button.signIn')} 
         </Button>
       </form>
     </div>

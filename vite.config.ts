@@ -18,23 +18,34 @@ export default defineConfig(() => {
         output: {
           manualChunks: (id) => {
             if (id.includes("node_modules")) {
-              // Separa las dependencias grandes en un chunk 'vendor'
-              const modulesToSplit = [
-                "react",
-                "react-dom",
-                "lucide-react",
-                "recharts",
-                "framer-motion",
-                "date-fns",
-              ];
-              const matchedModule = modulesToSplit.find((module) =>
-                id.includes(module)
-              );
-              if (matchedModule) {
-                return "vendor";
+              if (id.includes("lodash")) {
+                return "lodash";
               }
-              // Opcional: agrupar otras dependencias de node_modules
-              // return 'vendor';
+              if (id.includes("date-fns")) {
+                return "date-fns";
+              }
+              if (id.includes("d3")) {
+                return "d3";
+              }
+              if (id.includes("recharts")) {
+                return "recharts";
+              }
+              if (id.includes("framer-motion")) {
+                return "framer-motion";
+              }
+              if (id.includes("lucide-react")) {
+                return "lucide-react";
+              }
+              if (id.includes("react") || id.includes("react-dom")) {
+                return "react-vendor";
+              }
+
+              const parts = id.split("/");
+              let packageName = parts[parts.indexOf("node_modules") + 1];
+              if (packageName.startsWith("@")) {
+                packageName = `${packageName}/${parts[parts.indexOf("node_modules") + 2]}`;
+              }
+              return packageName;
             }
           },
         },

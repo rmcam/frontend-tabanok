@@ -6,7 +6,7 @@ import {
   BreadcrumbList,
 } from "@/components/ui/breadcrumb";
 import React, { Suspense, lazy } from "react";
-import ContentManager from "./components/ContentManager";
+const ContentManager = lazy(() => import("./components/ContentManager"));
 const StudentProgress = lazy(() => import("./components/StudentProgress"));
 const ActivityCreator = lazy(() => import("./components/ActivityCreator"));
 const ReportViewer = lazy(() => import("./components/ReportViewer"));

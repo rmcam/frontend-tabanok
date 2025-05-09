@@ -31,6 +31,7 @@ const TagManager = () => {
   const [tags, setTags] = useState<Tag[]>([]);
   const [editTag, setEditTag] = useState<Tag | null>(null);
   const [tagName, setTagName] = useState("");
+  const [tagNameError, setTagNameError] = useState(""); // Add state for validation error
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -40,8 +41,10 @@ const TagManager = () => {
   useEffect(() => {
     if (editTag) {
       setTagName(editTag.name);
+      setTagNameError(""); // Clear error when editing
     } else {
       setTagName("");
+      setTagNameError(""); // Clear error when creating new
     }
   }, [editTag]);
 
@@ -50,8 +53,9 @@ const TagManager = () => {
     try {
       const data = await api.get("/tags"); // Use api.get
       setTags(data);
-    } catch (error: any) {
-      toast.error(`Error al cargar las etiquetas: ${error.message}`);
+    } catch (error: unknown) { // Change any to unknown
+      const errorMessage = error instanceof Error ? error.message : "Error desconocido al cargar etiquetas.";
+      toast.error(`Error al cargar las etiquetas: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
@@ -59,10 +63,11 @@ const TagManager = () => {
 
   const handleSave = async () => {
     if (!tagName.trim()) {
-      toast.warning("El nombre de la etiqueta no puede estar vacío.");
+      setTagNameError("El nombre de la etiqueta es obligatorio."); // Set validation error state
       return;
     }
 
+    setTagNameError(""); // Clear error if validation passes
     setIsLoading(true);
     try {
       if (editTag) {
@@ -73,9 +78,10 @@ const TagManager = () => {
         toast.success("Etiqueta creada exitosamente.");
       }
       fetchTags(); // Refresh the list
-    } catch (error: any) {
+    } catch (error: unknown) { // Change any to unknown
+      const errorMessage = error instanceof Error ? error.message : "Error desconocido al guardar etiqueta.";
       const action = editTag ? "actualizar" : "crear";
-      toast.error(`Error al ${action} la etiqueta: ${error.message}`);
+      toast.error(`Error al ${action} la etiqueta: ${errorMessage}`);
     } finally {
       setIsLoading(false);
       setShowForm(false);
@@ -90,8 +96,9 @@ const TagManager = () => {
       await api.delete(`/tags/${id}`); // Use api.delete
       toast.success("Etiqueta eliminada exitosamente.");
       fetchTags(); // Refresh the list
-    } catch (error: any) {
-      toast.error(`Error al eliminar la etiqueta: ${error.message}`);
+    } catch (error: unknown) { // Change any to unknown
+      const errorMessage = error instanceof Error ? error.message : "Error desconocido al eliminar etiqueta.";
+      toast.error(`Error al eliminar la etiqueta: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
@@ -131,9 +138,15 @@ const TagManager = () => {
               <Input
                 id="name"
                 value={tagName}
-                onChange={(e) => setTagName(e.target.value)}
+                onChange={(e) => {
+                  setTagName(e.target.value);
+                  setTagNameError(""); // Clear error on input change
+                }}
                 disabled={isLoading}
+                aria-invalid={!!tagNameError} // Add aria-invalid
+                aria-describedby={tagNameError ? "tag-name-error" : undefined} // Add aria-describedby
               />
+              {tagNameError && <p id="tag-name-error" className="text-red-500 text-sm">{tagNameError}</p>} {/* Add id to error message */}
             </div>
           </CardContent>
           <CardFooter className="flex justify-end">

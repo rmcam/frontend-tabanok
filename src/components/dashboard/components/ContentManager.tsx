@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import api from "@/lib/api";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import clsx from 'clsx'; // Import clsx
 import MultimediaPlayer from "../../common/MultimediaPlayer"; // Import MultimediaPlayer
 
 // Define a type for multimedia items (copied from MultimediaGallery.tsx)
@@ -51,10 +52,10 @@ interface Category {
   name: string;
 }
 
-interface Tag {
-  id: number;
-  name: string;
-}
+// interface Tag { // Removed as it's not used
+//   id: number;
+//   name: string;
+// }
 
 
 const ContentManager = () => {
@@ -66,7 +67,7 @@ const ContentManager = () => {
   const [isLoadingSave, setIsLoadingSave] = useState(false); // Loading state for save operation
   const [isLoadingDelete, setIsLoadingDelete] = useState(false); // Loading state for delete operation
   const [categories, setCategories] = useState<Category[]>([]); // State for categories
-  const [availableTags, setAvailableTags] = useState<Tag[]>([]); // State for available tags
+  // const [availableTags, setAvailableTags] = useState<Tag[]>([]); // State for available tags - Removed as it's not used
   const [associatedMultimedia, setAssociatedMultimedia] = useState<MultimediaItem[]>([]); // State for associated multimedia
 
 
@@ -86,16 +87,16 @@ const ContentManager = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [contentsData, categoriesData, tagsData] = await Promise.all([
+        const [contentsData, categoriesData] = await Promise.all([ // Removed tagsData from destructuring
           api.get("/contents"),
           api.get("/categories"),
-          api.get("/tags"),
+          api.get("/tags"), // Still fetch tags if needed elsewhere, but not assigned to availableTags state
         ]);
         setContents(contentsData);
         setCategories(categoriesData);
-        setAvailableTags(tagsData);
+        // setAvailableTags(tagsData); // Removed setting availableTags state
       } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : "Error desconocido";
+        const errorMessage = error instanceof Error ? error.message : "Error desconocido al cargar datos iniciales.";
         toast.error(`Error al cargar los contenidos: ${errorMessage}`);
         console.error("Error fetching initial data:", error);
       } finally {
@@ -116,6 +117,12 @@ const ContentManager = () => {
       setContentType(editContent.type);
       setContent(editContent.type === "texto" ? editContent.content : null);
       setAssociatedMultimedia(editContent.multimediaItems || []); // Set associated multimedia
+      // Clear errors when editing
+      setTitleError("");
+      setDescriptionError("");
+      setCategoryError("");
+      setContentTypeError("");
+      setContentError("");
     } else {
       setTitle("");
       setDescription("");
@@ -125,6 +132,12 @@ const ContentManager = () => {
       setContentType("");
       setContent(null);
       setAssociatedMultimedia([]); // Clear associated multimedia when creating new
+      // Clear errors when creating new
+      setTitleError("");
+      setDescriptionError("");
+      setCategoryError("");
+      setContentTypeError("");
+      setContentError("");
     }
   }, [editContent]);
 
@@ -136,12 +149,12 @@ const ContentManager = () => {
     setContentTypeError("");
     setContentError("");
 
-    if (!title) {
+    if (!title.trim()) { // Add trim() for title validation
       setTitleError("El título es obligatorio.");
       isValid = false;
     }
 
-    if (!description) {
+    if (!description.trim()) { // Add trim() for description validation
       setDescriptionError("La descripción es obligatoria.");
       isValid = false;
     }
@@ -156,7 +169,7 @@ const ContentManager = () => {
       isValid = false;
     }
 
-    if (contentType === "texto" && !content) {
+    if (contentType === "texto" && (!content || (typeof content === 'string' && !content.trim()))) { // Add trim() for text content validation
       setContentError("El contenido es obligatorio.");
       isValid = false;
     }
@@ -170,6 +183,8 @@ const ContentManager = () => {
       setContentError("El archivo es obligatorio.");
       isValid = false;
     }
+
+    // Add validation for tags if needed (e.g., minimum number of tags)
 
     return isValid;
   };
@@ -284,13 +299,13 @@ const ContentManager = () => {
       setContentType("");
       setContent(null);
       setAssociatedMultimedia([]); // Clear associated multimedia after saving
-      setTitleError("");
+      setTitleError(""); // Clear errors on success
       setDescriptionError("");
       setCategoryError("");
       setContentTypeError("");
       setContentError("");
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Error desconocido";
+      const errorMessage = error instanceof Error ? error.message : "Error desconocido al guardar contenido.";
       const action = editContent ? "actualizar" : "guardar";
       toast.error(`Error al ${action} el contenido: ${errorMessage}`);
       console.error("Error al guardar el contenido:", error);
@@ -310,7 +325,7 @@ const ContentManager = () => {
 
       setContents(contents.filter((c) => c.id !== id));
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Error desconocido";
+      const errorMessage = error instanceof Error ? error.message : "Error desconocido al eliminar contenido.";
       toast.error(`Error al eliminar el contenido: ${errorMessage}`);
       console.error("Error al eliminar el contenido:", error);
     } finally {
@@ -360,6 +375,12 @@ const ContentManager = () => {
     setContentType(content.type);
     setContent(content.type === "texto" ? content.content : null);
     setAssociatedMultimedia(content.multimediaItems || []); // Set associated multimedia
+    // Clear errors when editing
+    setTitleError("");
+    setDescriptionError("");
+    setCategoryError("");
+    setContentTypeError("");
+    setContentError("");
   };
 
   const handleAddTag = () => {
@@ -421,45 +442,64 @@ const ContentManager = () => {
             setContentError("");
           }}
         >
-          <div className="grid gap-2">
-            <Label htmlFor="title">Título</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              disabled={isLoadingSave} // Disable input while saving
-            />
-            {titleError && <p className="text-red-500">{titleError}</p>}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> {/* Use grid for layout */}
+            <div className="grid gap-2">
+              <Label htmlFor="title">Título</Label>
+              <Input
+                id="title"
+                value={title}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                  setTitleError(""); // Clear error on input change
+                }}
+                disabled={isLoadingSave} // Disable input while saving
+                aria-invalid={!!titleError} // Add aria-invalid
+                aria-describedby={titleError ? "content-title-error" : undefined} // Add aria-describedby
+                className={titleError ? "border-red-500" : ""} // Add red border on error
+              />
+              {titleError && <p id="content-title-error" className="text-red-500 text-sm">{titleError}</p>} {/* Add id to error message */}
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="category">Categoría</Label>
+              <Select
+                value={category}
+                onValueChange={(value) => {
+                  setCategory(value);
+                  setCategoryError(""); // Clear error on select change
+                }}
+                disabled={isLoadingSave} // Disable select while saving
+                aria-invalid={!!categoryError} // Add aria-invalid
+                aria-describedby={categoryError ? "content-category-error" : undefined} // Add aria-describedby
+              >
+                <SelectTrigger id="category" className={categoryError ? "border-red-500" : ""}> {/* Add red border on error */}
+                  <SelectValue placeholder="Seleccione una categoría" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id.toString()}> {/* Assuming category value should be ID */}
+                      {cat.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {categoryError && <p id="content-category-error" className="text-red-500 text-sm">{categoryError}</p>} {/* Add id to error message */}
+            </div>
           </div>
           <div className="grid gap-2">
             <Label htmlFor="description">Descripción</Label>
             <Textarea
               id="description"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => {
+                setDescription(e.target.value);
+                setDescriptionError(""); // Clear error on input change
+              }}
               disabled={isLoadingSave} // Disable textarea while saving
+              aria-invalid={!!descriptionError} // Add aria-invalid
+              aria-describedby={descriptionError ? "content-description-error" : undefined} // Add aria-describedby
+              className={descriptionError ? "border-red-500" : ""} // Add red border on error
             />
-            {descriptionError && <p className="text-red-500">{descriptionError}</p>}
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="category">Categoría</Label>
-            <Select
-              value={category}
-              onValueChange={setCategory}
-              disabled={isLoadingSave} // Disable select while saving
-            >
-              <SelectTrigger id="category">
-                <SelectValue placeholder="Seleccione una categoría" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.id.toString()}> {/* Assuming category value should be ID */}
-                    {cat.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {categoryError && <p className="text-red-500">{categoryError}</p>}
+            {descriptionError && <p id="content-description-error" className="text-red-500 text-sm">{descriptionError}</p>} {/* Add id to error message */}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="tags">Etiquetas</Label>
@@ -475,6 +515,7 @@ const ContentManager = () => {
                   }
                 }}
                 disabled={isLoadingSave} // Disable input while saving
+                // Add aria-invalid and aria-describedby if tags validation is added
               />
               <Button type="button" onClick={handleAddTag} disabled={isLoadingSave}>Agregar</Button>
             </div>
@@ -486,15 +527,23 @@ const ContentManager = () => {
                 </span>
               ))}
             </div>
+            {/* Add tagsError display if needed */}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="type">Tipo de Contenido</Label>
             <Select
-              onValueChange={setContentType}
+              onValueChange={(value) => {
+                setContentType(value);
+                setContentTypeError(""); // Clear error on select change
+                setContent(null); // Clear content/file when type changes
+                setContentError(""); // Clear content error when type changes
+              }}
               value={contentType}
               disabled={isLoadingSave} // Disable select while saving
+              aria-invalid={!!contentTypeError} // Add aria-invalid
+              aria-describedby={contentTypeError ? "content-type-error" : undefined} // Add aria-describedby
             >
-              <SelectTrigger id="type">
+              <SelectTrigger id="type" className={contentTypeError ? "border-red-500" : ""}> {/* Add red border on error */}
                 <SelectValue placeholder="Seleccione un tipo de contenido" />
               </SelectTrigger>
               <SelectContent>
@@ -504,7 +553,7 @@ const ContentManager = () => {
                 <SelectItem value="audio">Audio</SelectItem>
               </SelectContent>
             </Select>
-            {contentTypeError && <p className="text-red-500">{contentTypeError}</p>}
+            {contentTypeError && <p id="content-type-error" className="text-red-500 text-sm">{contentTypeError}</p>} {/* Add id to error message */}
           </div>
           {/* Display associated multimedia when editing */}
           {editContent && associatedMultimedia.length > 0 && (
@@ -537,10 +586,18 @@ const ContentManager = () => {
               <ReactQuill
                 id="content"
                 value={content as string}
-                onChange={setContent}
-                className="h-32 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-popover file:text-popover-foreground file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                onChange={(value) => {
+                  setContent(value);
+                  setContentError(""); // Clear error on content change
+                }}
+                className={clsx(
+                  "h-32 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-popover file:text-popover-foreground file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                  contentError ? "border-red-500" : "" // Add red border on error
+                )}
+                aria-invalid={!!contentError} // Add aria-invalid
+                aria-describedby={contentError ? "content-content-error" : undefined} // Add aria-describedby
               />
-              {contentError && <p className="text-red-500">{contentError}</p>}
+              {contentError && <p id="content-content-error" className="text-red-500 text-sm">{contentError}</p>} {/* Add id to error message */}
             </div>
           ) : contentType === "imagen" ||
             contentType === "video" ||
@@ -556,10 +613,14 @@ const ContentManager = () => {
                     ? Array.from(e.target.files)
                     : null;
                   setContent(files);
+                  setContentError(""); // Clear error on file selection
                 }}
                 disabled={isLoadingSave} // Disable file input while saving
+                aria-invalid={!!contentError} // Add aria-invalid
+                aria-describedby={contentError ? "content-content-error" : undefined} // Add aria-describedby
+                className={contentError ? "border-red-500" : ""} // Add red border on error
               />
-              {contentError && <p className="text-red-500">{contentError}</p>}
+              {contentError && <p id="content-content-error" className="text-red-500 text-sm">{contentError}</p>} {/* Add id to error message */}
               {Array.isArray(content) && content.length > 0 && (
                 <div>
                   <h4>Archivos seleccionados:</h4>

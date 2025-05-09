@@ -16,12 +16,20 @@ interface QuizData {
   questions: QuizQuestion[];
 }
 
+interface QuizResult {
+  score: number;
+  feedback?: string;
+  questionResults?: { questionId: string; isCorrect: boolean; correctAnswer?: string }[];
+  pointsEarned?: number; // Added for gamification
+  unlockedBadges?: { id: string; name: string }[]; // Added for gamification
+}
+
 const QuizActivity: React.FC<{ activityId: string; onActivityComplete?: () => void }> = ({ activityId, onActivityComplete }) => {
   const [quizData, setQuizData] = useState<QuizData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({}); // To store user's selected answers
-  const [quizResults, setQuizResults] = useState<any>(null); // State to store quiz results from backend (using 'any' for flexibility for now)
+  const [quizResults, setQuizResults] = useState<QuizResult | null>(null); // Updated state type
 
   const navigate = useNavigate(); // Get navigate function
 
@@ -60,17 +68,17 @@ const QuizActivity: React.FC<{ activityId: string; onActivityComplete?: () => vo
     setError(null); // Clear previous errors
     try {
       // Assuming backend endpoint for submitting quiz answers is POST /activities/quiz/:id/submit
-      const results = await api.post(`/activities/quiz/${activityId}/submit`, { answers: selectedAnswers });
+      const results: QuizResult = await api.post(`/activities/quiz/${activityId}/submit`, { answers: selectedAnswers }); // Cast response to QuizResult
       console.log("Resultados del quiz:", results);
       setQuizResults(results); // Store the results
-      // TODO: Handle gamification updates based on results (e.g., points earned, badges unlocked)
+      // TODO: Handle gamification updates based on results (e.g., points earned, badges unlocked) - Now displaying in UI
       if (onActivityComplete) {
         onActivityComplete(); // Call the callback to refresh student data
       }
       toast.success("Quiz completado!", { // Display success message with score
         description: `Tu puntuación: ${results.score}`,
       });
-      navigate('/dashboard'); // Redirect to dashboard after completion
+      // navigate('/dashboard'); // Decide whether to redirect immediately or let user see results
     } catch (err: unknown) {
       setError(
         "Error al enviar las respuestas del quiz: " +
@@ -124,10 +132,26 @@ const QuizActivity: React.FC<{ activityId: string; onActivityComplete?: () => vo
           <button onClick={handleSubmitQuiz} disabled={loading}>Enviar Respuestas</button>
         </>
       ) : (
-        // Render quiz results if available
+        // Render quiz results if available, including gamification updates
         <div>
           <h3>Resultados del Quiz</h3>
           <p>Tu puntuación: {quizResults.score}</p>
+
+          {/* Display gamification updates */}
+          {quizResults.pointsEarned !== undefined && (
+            <p>Puntos ganados: {quizResults.pointsEarned}</p>
+          )}
+          {quizResults.unlockedBadges && quizResults.unlockedBadges.length > 0 && (
+            <div>
+              <h4>Insignias desbloqueadas:</h4>
+              <ul>
+                {quizResults.unlockedBadges.map(badge => (
+                  <li key={badge.id}>{badge.name}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {/* Display general feedback if provided */}
           {quizResults.feedback && (
             <div>
@@ -151,6 +175,7 @@ const QuizActivity: React.FC<{ activityId: string; onActivityComplete?: () => vo
               </ul>
             </div>
           )}
+           <button onClick={() => navigate('/dashboard')}>Volver al Dashboard</button> {/* Button to return to dashboard */}
         </div>
       )}
     </div>

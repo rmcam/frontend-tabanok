@@ -17,5 +17,14 @@ export default defineConfig({
     coverage: {
       reporter: ["text", "json", "html"],
     },
+    environmentOptions: {
+      jsdom: {
+        resources: 'usable',
+        runScripts: 'dangerously',
+        // Vitest does not have a direct tsconfig option under test.environmentOptions.
+        // The tsconfig is usually inferred or configured via the build tool (Vite).
+        // Removing the invalid tsconfig option here.
+      },
+    },
   },
 });

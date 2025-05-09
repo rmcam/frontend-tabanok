@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button';
 import Loading from '@/components/common/Loading'; // Import Loading component
 import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
+import { useTranslation } from 'react-i18next'; // Import useTranslation
 
 const ForgotPasswordForm: React.FC = () => {
+  const { t } = useTranslation(); // Initialize useTranslation
   const [email, setEmail] = useState('');
   // Use useAuth hook from context and get forgotPassword and requestingPasswordReset state
   const { forgotPassword, requestingPasswordReset } = useAuth();
@@ -16,13 +18,13 @@ const ForgotPasswordForm: React.FC = () => {
     setLocalError(null); // Clear previous local errors
 
     if (!email) {
-      setLocalError('Por favor, ingresa tu correo electrónico.');
+      setLocalError(t('auth.forgotPassword.validation.emailRequired'));
       return;
     }
 
     // Basic email format validation
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setLocalError('Por favor, ingresa un correo electrónico válido.');
+      setLocalError(t('auth.forgotPassword.validation.emailInvalid'));
       return;
     }
 
@@ -40,22 +42,23 @@ const ForgotPasswordForm: React.FC = () => {
       <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-6">
         <div className="grid gap-3">
           <Label htmlFor="email" className="text-sm text-gray-700">
-            Correo electrónico
+            {t('auth.forgotPassword.label.email')} {/* Use translation */}
           </Label>
           <Input
             type="email"
             id="email"
-            placeholder="Ingresa tu correo electrónico"
+            placeholder={t('auth.forgotPassword.placeholder.email')}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required // Keep HTML required for basic browser validation
+            required
             className={`w-full rounded-lg border ${localError ? 'border-red-500' : 'border-gray-300'} focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50`}
-            aria-invalid={!!localError} // Indicate invalid state based on local error
+            aria-invalid={!!localError}
+            aria-describedby={localError ? 'email-error' : undefined}
           />
         </div>
-        {localError && <p className="text-red-500 text-sm mt-1">{localError}</p>} {/* Display local validation error */}
+        {localError && <p id="email-error" className="text-red-500 text-sm mt-1">{localError}</p>} {/* Display local validation error */}
         <Button type="submit" className="w-full rounded-lg py-2" disabled={requestingPasswordReset}>
-          {requestingPasswordReset ? <Loading /> : 'Enviar enlace de restablecimiento'} {/* Use context loading state */}
+          {requestingPasswordReset ? <Loading /> : t('auth.forgotPassword.button.sendResetLink')} {/* Use context loading state */}
         </Button>
       </form>
     </div>

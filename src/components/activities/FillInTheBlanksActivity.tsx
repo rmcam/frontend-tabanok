@@ -24,7 +24,8 @@ interface BlankResult {
 interface FillInTheBlanksResultsData {
   score: number; // Assuming a score for the activity
   blankResults?: BlankResult[]; // Optional: feedback per blank
-  // Add other relevant results fields
+  pointsEarned?: number; // Added for gamification
+  unlockedBadges?: { id: string; name: string }[]; // Added for gamification
 }
 
 
@@ -66,29 +67,23 @@ const FillInTheBlanksActivity: React.FC<{ activityId: string; onActivityComplete
     fetchActivityData();
   }, [activityId]); // Refetch when activityId changes
 
-  const handleInputChange = (blankId: string, value: string) => {
-    setUserAnswers({
-      ...userAnswers,
-      [blankId]: value,
-    });
-  };
 
   const handleSubmit = async () => {
     setLoading(true); // Indicate loading while submitting
     setError(null); // Clear previous errors
     try {
       // Assuming backend endpoint for completing fill-in-the-blanks activity is POST /activities/fill-in-the-blanks/:id/complete
-      const finalResults = await api.post(`/activities/fill-in-the-blanks/${activityId}/complete`, { answers: userAnswers });
+      const finalResults: FillInTheBlanksResultsData = await api.post(`/activities/fill-in-the-blanks/${activityId}/complete`, { answers: userAnswers }); // Cast response
       console.log("Resultados finales de la actividad de completar espacios en blanco:", finalResults);
       setResults(finalResults); // Store the final results
-      // TODO: Handle gamification updates based on final results (e.g., points earned, badges unlocked)
+      // TODO: Display overall score and gamification updates - Now displaying in UI
       if (onActivityComplete) {
         onActivityComplete(); // Call the callback to refresh student data
       }
       toast.success("Actividad completada!", { // Display success message
         description: `Puntuación: ${finalResults.score}`, // Assuming score is available in results
       });
-      navigate('/dashboard'); // Redirect to dashboard after completion
+      // navigate('/dashboard'); // Decide whether to redirect immediately or let user see results
     } catch (err: unknown) {
       setError(
         "Error al completar la actividad de completar espacios en blanco: " +
@@ -137,9 +132,26 @@ const FillInTheBlanksActivity: React.FC<{ activityId: string; onActivityComplete
           <button onClick={handleSubmit} disabled={loading}>Enviar Respuestas</button>
         </>
       ) : (
-        // Render results if available
+        // Render results if available, including gamification updates
         <div>
           <h3>Resultados de la Actividad</h3>
+          <p>Puntuación: {results.score}</p>
+
+          {/* Display gamification updates */}
+          {results.pointsEarned !== undefined && (
+            <p>Puntos ganados: {results.pointsEarned}</p>
+          )}
+          {results.unlockedBadges && results.unlockedBadges.length > 0 && (
+            <div>
+              <h4>Insignias desbloqueadas:</h4>
+              <ul>
+                {results.unlockedBadges.map(badge => (
+                  <li key={badge.id}>{badge.name}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {/* Display detailed results */}
           {results.blankResults && (
             <div>
@@ -147,7 +159,7 @@ const FillInTheBlanksActivity: React.FC<{ activityId: string; onActivityComplete
               <ul>
                 {results.blankResults.map(br => (
                   <li key={br.blankId}>
-                    Espacio en blanco {br.blankId}: {br.isCorrect ? 'Correcto' : 'Incorrecto'}
+                    Espacio en blanco {br.isCorrect ? 'Correcto' : 'Incorrecto'}
                     {!br.isCorrect && br.correctAnswer && (
                       <span> (Respuesta correcta: {br.correctAnswer})</span>
                     )}
@@ -156,7 +168,7 @@ const FillInTheBlanksActivity: React.FC<{ activityId: string; onActivityComplete
               </ul>
             </div>
           )}
-          {/* TODO: Display overall score and gamification updates */}
+           <button onClick={() => navigate('/dashboard')}>Volver al Dashboard</button> {/* Button to return to dashboard */}
         </div>
       )}
     </div>
