@@ -6,17 +6,14 @@ Este documento lista las tareas pendientes y los próximos pasos planificados pa
 
 ## Pendientes Clave
 
+- **Diseño Responsive:**
+  - Realizar una verificación exhaustiva del comportamiento responsive en diferentes dispositivos y tamaños de pantalla, utilizando herramientas de desarrollo del navegador o pruebas de interfaz de usuario automatizadas con control de viewport.
 - **Accesibilidad:**
   - Finalizar auditorías manuales de accesibilidad según WCAG 2.1.
   - Validar nuevamente la accesibilidad con herramientas automáticas y manuales después de implementar mejoras.
-- **Accesibilidad:**
-  - Finalizar auditorías manuales de accesibilidad según WCAG 2.1.
-  - Validar nuevamente la accesibilidad con herramientas automáticas y manuales después de implementar mejoras.
-  - Mejorar el contraste entre el texto y la imagen de fondo en la Hero Section. (Completado)
-  - Añadir descripciones accesibles para iconos de react-icons y elementos visuales que aún no las tengan. (Verificado que ya estaban manejados)
-  - Mejorar la navegación por teclado en menús y diálogos si es necesario.
-  - Asegurar que los formularios tengan etiquetas asociadas a cada campo y mensajes de error accesibles (`aria-invalid`, `aria-describedby`). (Mejorado en ForgotPasswordForm, verificado en otros)
-  - Mejorar la lectura por lectores de pantalla añadiendo descripciones y roles adecuados.
+  - Mejorar la navegación por teclado en menús y diálogos si es necesario. (En progreso: Se ha verificado que los componentes de UI basados en Radix UI proporcionan una buena base para la navegación por teclado).
+  - Asegurar que los formularios tengan etiquetas asociadas a cada campo y mensajes de error accesibles (`aria-invalid`, `aria-describedby`). (Completado: Se ha verificado que los componentes de formulario genéricos en `src/components/ui/Form.tsx` implementan estas prácticas).
+  - Mejorar la lectura por lectores de pantalla añadiendo descripciones y roles adecuados. (En progreso: Se ha verificado que los componentes de UI basados en Radix UI y el uso de `sr-only` contribuyen a esto).
 - **Testing:**
   - Mejorar la cobertura de tests en el frontend, especialmente en rutas protegidas y hooks personalizados. (En progreso - creados tests para useFetchData, useFetchUnits, useMultimedia)
   - Mejorar la cobertura de tests en el backend. (Completado)
@@ -25,34 +22,21 @@ Este documento lista las tareas pendientes y los próximos pasos planificados pa
 - **Planificación y Desarrollo de Nuevas Funcionalidades:**
   - Planificar nuevas funcionalidades y mejoras detalladas.
   - Prototipar la UI de los paneles (docente y estudiante) en Figma antes de codificar.
-  - Diseñar e integrar la interfaz de usuario del Panel Docente con el backend.
+  - Diseñar e integrar la interfaz de usuario del Panel Docente con el backend. (Completado: La integración inicial de los componentes del dashboard con los endpoints del backend se ha completado).
   - Proteger las rutas del Panel Docente con el rol `teacher` o `admin`. (Completado)
-  - Implementar la lógica para guardar los datos del formulario en el backend del Panel Docente.
-  - Implementar la lógica para la gestión de categorías y etiquetas en el Panel Docente.
+  - Implementar la lógica para guardar los datos del formulario en el backend del Panel Docente. (Completado: La lógica en el frontend para enviar datos a los endpoints del backend se ha implementado).
+  - Implementar la lógica para la gestión de categorías y etiquetas en el Panel Docente. (Completado: Los componentes `CategoryManager` y `TagManager` han sido modificados para usar los endpoints del backend).
   - Mejorar la interfaz de usuario del formulario en el Panel Docente. (Completado - mejoras de layout y estilos en ContentManager)
   - Implementar la lógica en el frontend para la subida y visualización de archivos multimedia. (Completado: Se ha implementado la validación del tipo de archivo en el componente `MultimediaUploadForm` y se han agregado filtros por tipo en el componente `MultimediaGallery`. Se ha implementado la previsualización del archivo seleccionado, la barra de progreso durante la subida y la selección de tipos de archivo permitidos, y la adición de metadatos al archivo).
   - Usar un componente `MultimediaPlayer` reutilizable en el frontend. (Completado: El componente `MultimediaPlayer` ya es reutilizable y se utiliza en `MultimediaGallery`).
   - Desarrollar la galería multimedia accesible en el frontend. (Completado: Se ha añadido una región ARIA live para mensajes de carga y error).
   - Escribir pruebas unitarias y de integración para las nuevas funcionalidades del Panel Docente. (En progreso: Se han añadido pruebas unitarias para `CategoryManager` y `TagManager`).
   - Implementar la lógica para la gestión de contenidos, progreso de estudiantes, creación de actividades y acceso a reportes en el Panel Docente. (Completado: Se ha implementado las funcionalidades de crear, leer, actualizar y eliminar contenido en el componente `ContentManager`, utilizando la API definida en `src/lib/api.ts`. Se ha implementado la subida de múltiples archivos, la previsualización de archivos subidos y el editor de texto enriquecido).
-- Se agregó el componente `LatestActivities` para mostrar las últimas actividades realizadas por los estudiantes.
-- Se han añadido indicadores de carga a los componentes `ActivityCreator`, `StudentProgress` y `ReportViewer`.
-- Se movió la verificación de la variable de entorno `VITE_API_URL` al componente `App.tsx` para que se realice solo una vez al inicio de la aplicación.
+- Se agregó el componente `LatestActivities` para mostrar las últimas actividades realizadas por los estudiantes. (Completado: El componente ha sido integrado y modificado para usar el endpoint del backend).
+- Se han añadido indicadores de carga a los componentes `ActivityCreator`, `StudentProgress` y `ReportViewer`. (Completado: Los indicadores de carga han sido añadidos).
+- Se movió la verificación de la variable de entorno `VITE_API_URL` al componente `App.tsx` para que se realice solo una vez al inicio de la aplicación. (Completado: La verificación ha sido movida).
   - Implementar la funcionalidad de edición de contenido en el componente `ContentManager`. (Completado: Se ha implementado la funcionalidad de edición de contenido).
-  - **Implementar la lógica completa para las vistas de actividades específicas:** (Completado)
-    - Completar la lógica para cargar y ejecutar actividades de Quiz (`QuizActivity.tsx`), incluyendo el envío de respuestas al backend y el manejo de resultados.
-    - Completar la lógica para cargar y ejecutar actividades de Matching (`MatchingActivity.tsx`), incluyendo la validación de pares en el backend y el envío de resultados finales.
-    - Implementar la vista y la lógica para la actividad de Fill-in-the-Blanks (`FillInTheBlanksActivity.tsx`).
-  - **Implementar la lógica completa para las vistas de Gamificación:** (Completado)
-    - Implementar la obtención y visualización de datos en la página principal de Gamificación (`GamificationPage.tsx`).
-    - Implementar la obtención y visualización de datos en la vista de Leaderboard (`LeaderboardPage.tsx`).
-    - Implementar la obtención y visualización de datos en la vista de Logros (`AchievementsPage.tsx`).
-  - **Implementar la lógica completa para la vista de Multimedia:** (Completado)
-    - Completar el manejo de diferentes tipos de multimedia (video, audio) en `MultimediaPage.tsx`.
-    - Implementar la funcionalidad de reproducción o visualización de los elementos multimedia.
-  - **Implementar la lógica completa para la vista de Detalle de Unidad:** (Completado)
-    - Mostrar más detalles de la unidad en `UnitDetail.tsx`, incluyendo lecciones y actividades asociadas de una manera más interactiva.
-    - **Funcionalidades Incompletas Identificadas (Backend):**
+  - **Funcionalidades Incompletas Identificadas (Backend):**
     - **Module:** Se ha creado la estructura básica del módulo (`module.module.ts`), controlador (`module.controller.ts`), servicio (`module.service.ts`) y entidad (`entities/module.entity.ts`), y se ha registrado en `AppModule`. La lógica del servicio para interactuar con la base de datos está implementada. (Completado)
 - **Validación Lingüística:**
   - Internacionalizar mensajes existentes en formularios y otros componentes del frontend. (En progreso: Se ha iniciado la internacionalización en los formularios de autenticación, pero se han encontrado errores persistentes de parsing/formato que impiden completarla actualmente).

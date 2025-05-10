@@ -22,7 +22,7 @@ import { toast } from "sonner"; // Assuming sonner is used for notifications
 import api from "@/lib/api"; // Import the api object
 
 interface Tag {
-  id: number;
+  id: string; // Cambiado a string asumiendo UUIDs en el backend
   name: string;
 }
 
@@ -90,7 +90,7 @@ const TagManager = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => { // Cambiado a string
     setIsLoading(true);
     try {
       await api.delete(`/tags/${id}`); // Use api.delete

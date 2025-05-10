@@ -33,24 +33,24 @@ interface MultimediaItem {
   type: "video" | "audio" | "image";
   url: string;
   lessonId: string; // Assuming multimedia is linked to lessons, might need adjustment
-  metadata: object;
+  metadata: object; // TODO: Define a more specific type for metadata
 }
 
 // Define a type for content items
 interface ContentItem {
-  id: number;
+  id: string; // Cambiado a string asumiendo UUIDs en el backend
   title: string;
   description: string;
-  category: string; // Assuming category is represented by name or ID
+  category: string; // Assuming category is represented by ID (string)
   tags: string[]; // Assuming tags are an array of strings
-  type: string;
-  content: string | null; // Store text content or file name
+  type: string; // TODO: Define a union type for content types (e.g., 'text', 'image', 'video', 'audio')
+  content: string | null; // Store text content or file name/path
   multimediaItems?: MultimediaItem[]; // Optional list of associated multimedia items
 }
 
-interface Category {
-  id: number;
-  name: string;
+interface Category { // Mapeado a 'Topic' en el backend
+  id: string; // Cambiado a string asumiendo UUIDs en el backend
+  name: string; // Asumiendo que el campo se llama 'name' o 'title' en el backend
 }
 
 // interface Tag { // Removed as it's not used
@@ -68,12 +68,13 @@ interface ContentFormValues {
 
 const ContentManager = () => {
   const [showForm, setShowForm] = useState(false);
+  const [contentType, setContentType] = useState("");
   const [contents, setContents] = useState<ContentItem[]>([]);
   const [editContent, setEditContent] = useState<ContentItem | null>(null); // Use the defined type
   const [loading, setLoading] = useState(true);
   const [isLoadingSave, setIsLoadingSave] = useState(false); // Loading state for save operation
   const [isLoadingDelete, setIsLoadingDelete] = useState(false); // Loading state for delete operation
-  const [categories, setCategories] = useState<Category[]>([]); // State for categories
+  const [categories, setCategories] = useState<Category[]>([]); // State for categories (Topics)
   // const [availableTags, setAvailableTags] = useState<Tag[]>([]); // State for available tags - Removed as it's not used
   const [associatedMultimedia, setAssociatedMultimedia] = useState<MultimediaItem[]>([]); // State for associated multimedia
 
@@ -82,9 +83,6 @@ const ContentManager = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState(""); // Store selected category ID or name
-  const [contentType, setContentType] = useState(""); // Store selected content type
-
-  // State for tags and content file/text
   const [tags, setTags] = useState<string[]>([]); // Store selected tags as array of strings
   const [tagInput, setTagInput] = useState(""); // Input for adding tags
   const [content, setContent] = useState<string | File[] | File | null>(null); // Updated state type
@@ -121,13 +119,14 @@ const ContentManager = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // TODO: Verificar la estructura exacta de la respuesta de /content, /topics y /tags
         const [contentsData, categoriesData] = await Promise.all([ // Removed tagsData from destructuring
-          api.get("/contents"),
-          api.get("/categories"),
-          api.get("/tags"), // Still fetch tags if needed elsewhere, but not assigned to availableTags state
+          api.get("/content"), // Usar endpoint /content (singular)
+          api.get("/topics"), // Usar endpoint /topics (plural)
+          api.get("/tags"), // Usar endpoint /tags (plural)
         ]);
-        setContents(contentsData);
-        setCategories(categoriesData);
+        setContents(contentsData); // Asumiendo que contentsData es un array de ContentItem
+        setCategories(categoriesData); // Asumiendo que categoriesData es un array de Category (Topic)
         // setAvailableTags(tagsData); // Removed setting availableTags state
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : "Error desconocido al cargar datos iniciales.";
@@ -144,10 +143,9 @@ const ContentManager = () => {
 
   useEffect(() => {
     if (editContent) {
-      setTitle(editContent.title); // Update individual state
-      setDescription(editContent.description); // Update individual state
-      setCategory(editContent.category); // Update individual state
-      setContentType(editContent.type); // Update individual state
+      setTitle(editContent.title);
+      setDescription(editContent.description);
+      setCategory(editContent.category); // Assuming editContent.category is the ID or name
       setTags(editContent.tags);
       setContent(editContent.type === "texto" ? editContent.content : null);
       setAssociatedMultimedia(editContent.multimediaItems || []); // Set associated multimedia
@@ -204,16 +202,16 @@ const ContentManager = () => {
 
     try {
       const contentData = {
-        title, // Use individual state
-        description, // Use individual state
-        category, // Use individual state
+        title,
+        description,
+        category, // Send category ID or name
         tags, // Send tags as array of strings
         type: contentType, // Use individual state
         content: contentType === "texto" ? (content as string | null) : null,
       };
 
-      const method = editContent ? "PUT" : "POST";
-      const url = editContent ? `/contents/${editContent.id}` : `/contents`;
+      const method = editContent ? "PUT" : "POST"; // Backend uses PUT for update
+      const url = editContent ? `/content/${editContent.id}` : `/content`; // Usar endpoint /content (singular)
 
       let body;
       if (contentType === "texto") { // Use individual state
@@ -227,16 +225,16 @@ const ContentManager = () => {
         } else if (content instanceof File) {
           formData.append("files", content); // Assuming backend expects 'files' for multimedia files
         }
-        formData.append("title", title); // Use individual state
-        formData.append("description", description); // Use individual state
-        formData.append("category", category); // Use individual state
+        formData.append("title", title);
+        formData.append("description", description);
+        formData.append("category", category); // Send category ID or name
         tags.forEach(tag => {
           formData.append("tags[]", tag); // Assuming backend expects 'tags[]' for array
         });
         formData.append("type", contentType); // Use individual state
         // If editing, include content ID
         if (editContent) {
-          formData.append("id", editContent.id.toString());
+          formData.append("id", editContent.id); // ID is string
           // Include IDs of associated multimedia to keep
           associatedMultimedia.forEach(media => {
             formData.append("existingMultimediaIds[]", media.id);
@@ -246,13 +244,15 @@ const ContentManager = () => {
       }
 
       if (method === "PUT") {
+        // TODO: Verificar el payload y el endpoint de actualización de content
         await api.put(url, body as unknown)
           .then(() => {
             toast.success("Contenido actualizado!", {
               description: "El contenido se ha actualizado correctamente.",
             });
             // After successfully updating, refetch the list of contents
-            api.get("/contents")
+            // TODO: Verificar la estructura exacta de la respuesta de /content
+            api.get("/content") // Usar endpoint /content (singular)
               .then((data: ContentItem[]) => {
                 setContents(data);
               })
@@ -269,14 +269,16 @@ const ContentManager = () => {
             });
             console.error("Error al actualizar el contenido:", error);
           });
-      } else {
+      } else { // POST for creation
+        // TODO: Verificar el payload y el endpoint de creación de content
         await api.post(url, body as unknown)
           .then(() => {
             toast.success("Contenido guardado!", {
               description: "El contenido se ha guardado correctamente.",
             });
             // After successfully creating a new content, fetch the updated list of contents
-            api.get("/contents")
+            // TODO: Verificar la estructura exacta de la respuesta de /content
+            api.get("/content") // Usar endpoint /content (singular)
               .then((data: ContentItem[]) => {
                 setContents(data);
               })
@@ -317,10 +319,11 @@ const ContentManager = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => { // Cambiado a string
     setIsLoadingDelete(true); // Set loading state for delete
     try {
-      await api.delete(`/contents/${id}`);
+      // TODO: Verificar el endpoint de eliminación de content
+      await api.delete(`/content/${id}`); // Usar endpoint /content (singular)
 
       toast.success("Contenido eliminado!", {
         description: "El contenido se ha eliminado correctamente.",
@@ -338,6 +341,7 @@ const ContentManager = () => {
 
   const handleDeleteMultimedia = async (multimediaId: string) => {
     try {
+      // TODO: Verificar el endpoint de eliminación de multimedia
       await api.delete(`/multimedia/${multimediaId}`); // Assuming DELETE /multimedia/:id endpoint
 
       toast.success("Archivo multimedia eliminado!", {
@@ -348,7 +352,8 @@ const ContentManager = () => {
       setAssociatedMultimedia(associatedMultimedia.filter(media => media.id !== multimediaId));
 
       // Optionally, refetch contents to ensure the table is updated
-      api.get("/contents")
+      // TODO: Verificar la estructura exacta de la respuesta de /content
+      api.get("/content") // Usar endpoint /content (singular)
         .then((data: ContentItem[]) => {
           setContents(data);
         })
@@ -371,10 +376,9 @@ const ContentManager = () => {
     // Add type for content
     setEditContent(content);
     setShowForm(true);
-    setTitle(content.title); // Update individual state
-    setDescription(content.description); // Update individual state
-    setCategory(content.category); // Update individual state
-    setContentType(content.type); // Update individual state
+    setTitle(content.title);
+    setDescription(content.description);
+    setCategory(content.category); // Assuming content.category is the ID or name
     setTags(content.tags);
     setContent(content.type === "texto" ? content.content : null);
     setAssociatedMultimedia(content.multimediaItems || []); // Set associated multimedia
@@ -470,7 +474,7 @@ const ContentManager = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id.toString()}> {/* Assuming category value should be ID */}
+                    <SelectItem key={cat.id} value={cat.id}> {/* Assuming category value should be ID */}
                       {cat.name}
                     </SelectItem>
                   ))}
@@ -586,7 +590,7 @@ const ContentManager = () => {
                   setContentError(""); // Clear error on content change
                 }}
                 className={clsx(
-                  "h-32 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-popover file:text-popover-foreground file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                  "h-32 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-popover file:text-popover-foreground file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity50",
                   contentError ? "border-red-500" : "" // Add red border on error
                 )}
                 aria-invalid={!!contentError} // Add aria-invalid
@@ -613,7 +617,7 @@ const ContentManager = () => {
                 disabled={isLoadingSave} // Disable file input while saving
                 aria-invalid={!!contentError} // Add aria-invalid
                 aria-describedby={contentError ? "content-content-error" : undefined} // Add aria-describedby
-                className={contentError ? "border-red-500" : ""} // Add red border on error
+                className={contentError ? "border-red-500" : ""}// Add red border on error
               />
               {contentError && <p id="content-content-error" className="text-red-500 text-sm">{contentError}</p>} {/* Add id to error message */}
               {Array.isArray(content) && content.length > 0 && (
@@ -656,10 +660,11 @@ const ContentManager = () => {
       )}
       <div>
         <h3>Contenidos Existentes</h3>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Título</TableHead>
+        <div className="overflow-x-auto"> {/* Add overflow-x-auto for responsive tables */}
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Título</TableHead>
               <TableHead>Descripción</TableHead>
               <TableHead>Categoría</TableHead>
               <TableHead>Etiquetas</TableHead>
@@ -689,8 +694,9 @@ const ContentManager = () => {
                 </TableRow>
               ))
             )}
-          </TableBody>
-        </Table>
+            </TableBody>
+          </Table>
+        </div> {/* Add closing div for overflow-x-auto */}
       </div>
       {/* Aquí se implementará la lógica para la gestión de contenidos */}
     </div>

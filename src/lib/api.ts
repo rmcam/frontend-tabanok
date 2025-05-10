@@ -16,7 +16,7 @@ const api = {
 
     return response.json();
   },
-  post: async (path: string, data: Record<string, any>) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+  post: async (path: string, data: Record<string, any>, config: any = {}) => { // eslint-disable-line @typescript-eslint/no-explicit-any
     const response = await fetch(`${import.meta.env.VITE_API_URL}${path}`, {
       method: "POST",
       headers: {
@@ -24,6 +24,7 @@ const api = {
       },
       body: JSON.stringify(data),
       credentials: "include",
+      ...config, // Añadir configuración opcional
     });
 
     if (!response.ok) {
@@ -69,6 +70,25 @@ const api = {
     }
 
     return;
+  },
+  patch: async (path: string, data: any, config: any = {}): Promise<any> => { // eslint-disable-line @typescript-eslint/no-explicit-any
+    const response = await fetch(`${import.meta.env.VITE_API_URL}${path}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: data instanceof FormData ? data : JSON.stringify(data),
+      credentials: "include",
+      ...config,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      const errorMessage = errorData.message || `Error patching to ${path}`;
+      throw new Error(errorMessage);
+    }
+
+    return response.json();
   },
 };
 

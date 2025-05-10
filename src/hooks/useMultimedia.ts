@@ -15,7 +15,8 @@ function useMultimedia() {
   const { data, isLoading, isError, error } = useQuery<MultimediaItem[], Error>({
     queryKey: ['multimedia'],
     queryFn: async () => {
-      const result = await api.get('/api/multimedia');
+      // TODO: Verificar la estructura exacta de la respuesta de /multimedia
+      const result = await api.get('/multimedia'); // Corregido el endpoint
       return result;
     },
   });
