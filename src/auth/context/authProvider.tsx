@@ -156,6 +156,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  // Nueva función para refrescar los datos del usuario
+  const refetchUser = useCallback(async () => {
+    setLoading(true); // Opcional: mostrar estado de carga mientras se refresca
+    try {
+      const authenticatedUser = await verifySessionService();
+      setUser(authenticatedUser);
+    } catch (error) {
+      console.error("Error refetching user:", error);
+      // Manejar el error según sea necesario, quizás invalidar la sesión si falla
+      setUser(null); // Considerar invalidar la sesión si no se puede refrescar el usuario
+    } finally {
+      setLoading(false); // Opcional: ocultar estado de carga
+    }
+  }, [verifySessionService]);
+
+
   return (
     <AuthContext.Provider
       value={{
@@ -170,6 +186,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         signout,
         forgotPassword,
         resetPassword, // Include new function
+        refetchUser, // Provide refetchUser in the context
       }}
     >
       {children}

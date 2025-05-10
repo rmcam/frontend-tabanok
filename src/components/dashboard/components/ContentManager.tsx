@@ -16,13 +16,14 @@ import {
   TableRow,
   Textarea,
 } from "@/components/ui/";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react"; // Import useMemo
 import { toast } from "sonner";
 import api from "@/lib/api";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import clsx from 'clsx'; // Import clsx
 import MultimediaPlayer from "../../common/MultimediaPlayer"; // Import MultimediaPlayer
+import useFormValidation from "@/hooks/useFormValidation"; // Import useFormValidation
 
 // Define a type for multimedia items (copied from MultimediaGallery.tsx)
 interface MultimediaItem {
@@ -57,10 +58,16 @@ interface Category {
 //   name: string;
 // }
 
+interface ContentFormValues {
+  title: string;
+  description: string;
+  category: string;
+  contentType: string;
+}
+
 
 const ContentManager = () => {
   const [showForm, setShowForm] = useState(false);
-  const [contentType, setContentType] = useState("");
   const [contents, setContents] = useState<ContentItem[]>([]);
   const [editContent, setEditContent] = useState<ContentItem | null>(null); // Use the defined type
   const [loading, setLoading] = useState(true);
@@ -71,18 +78,45 @@ const ContentManager = () => {
   const [associatedMultimedia, setAssociatedMultimedia] = useState<MultimediaItem[]>([]); // State for associated multimedia
 
 
-  // State for form fields
+  // State for form fields (reverted to individual states)
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState(""); // Store selected category ID or name
+  const [contentType, setContentType] = useState(""); // Store selected content type
+
+  // State for tags and content file/text
   const [tags, setTags] = useState<string[]>([]); // Store selected tags as array of strings
   const [tagInput, setTagInput] = useState(""); // Input for adding tags
-  const [titleError, setTitleError] = useState("");
-  const [descriptionError, setDescriptionError] = useState("");
-  const [categoryError, setCategoryError] = useState("");
-  const [contentTypeError, setContentTypeError] = useState("");
-  const [contentError, setContentError] = useState("");
   const [content, setContent] = useState<string | File[] | File | null>(null); // Updated state type
+  const [contentError, setContentError] = useState(""); // Error for content file/text
+
+
+  // Use useFormValidation for validation and error handling
+  const initialFormValues: ContentFormValues = useMemo(() => ({
+    title: title, // Use individual state
+    description: description, // Use individual state
+    category: category, // Use individual state
+    contentType: contentType, // Use individual state
+  }), [title, description, category, contentType]); // Add dependencies
+
+  const validationRules = useMemo(() => ({
+    title: (value: string) => (value.trim() ? undefined : 'El título es obligatorio.'),
+    description: (value: string) => (value.trim() ? undefined : 'La descripción es obligatoria.'),
+    category: (value: string) => (value ? undefined : 'La categoría es obligatoria.'),
+    contentType: (value: string) => (value ? undefined : 'El tipo de contenido es obligatorio.'),
+  }), []);
+
+
+  const {
+    errors,
+    handleSubmit,
+    setErrors,
+  } = useFormValidation<ContentFormValues>(initialFormValues); // Explicitly set the generic type
+
+
+  // Destructure errors for easier access
+  const { title: titleError, description: descriptionError, category: categoryError, contentType: contentTypeError } = errors;
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -110,87 +144,59 @@ const ContentManager = () => {
 
   useEffect(() => {
     if (editContent) {
-      setTitle(editContent.title);
-      setDescription(editContent.description);
-      setCategory(editContent.category); // Assuming editContent.category is the ID or name
+      setTitle(editContent.title); // Update individual state
+      setDescription(editContent.description); // Update individual state
+      setCategory(editContent.category); // Update individual state
+      setContentType(editContent.type); // Update individual state
       setTags(editContent.tags);
-      setContentType(editContent.type);
       setContent(editContent.type === "texto" ? editContent.content : null);
       setAssociatedMultimedia(editContent.multimediaItems || []); // Set associated multimedia
-      // Clear errors when editing
-      setTitleError("");
-      setDescriptionError("");
-      setCategoryError("");
-      setContentTypeError("");
-      setContentError("");
+      setErrors({}); // Clear errors when editing
+      setContentError(""); // Clear content error
     } else {
-      setTitle("");
-      setDescription("");
-      setCategory("");
+      setTitle(""); // Reset individual state
+      setDescription(""); // Reset individual state
+      setCategory(""); // Reset individual state
+      setContentType(""); // Reset individual state
       setTags([]);
       setTagInput("");
-      setContentType("");
       setContent(null);
       setAssociatedMultimedia([]); // Clear associated multimedia when creating new
-      // Clear errors when creating new
-      setTitleError("");
-      setDescriptionError("");
-      setCategoryError("");
-      setContentTypeError("");
-      setContentError("");
+      setErrors({}); // Clear errors when creating new
+      setContentError(""); // Clear content error
     }
-  }, [editContent]);
+  }, [editContent, setErrors]); // Add dependencies
 
-  const validateForm = () => {
-    let isValid = true;
-    setTitleError("");
-    setDescriptionError("");
-    setCategoryError("");
-    setContentTypeError("");
-    setContentError("");
 
-    if (!title.trim()) { // Add trim() for title validation
-      setTitleError("El título es obligatorio.");
-      isValid = false;
-    }
+  const handleSave = async () => {
+    // Use handleSubmit from the hook for initial validation
+    // Adjusting the mock event type for compatibility
+    const formValidationResult = handleSubmit(validationRules)({
+      preventDefault: () => {},
+      currentTarget: { elements: {} } // Provide a mock currentTarget
+    } as unknown as React.FormEvent);
 
-    if (!description.trim()) { // Add trim() for description validation
-      setDescriptionError("La descripción es obligatoria.");
-      isValid = false;
-    }
 
-    if (!category) {
-      setCategoryError("La categoría es obligatoria.");
-      isValid = false;
-    }
+    // Perform additional validation for content file/text
+    let isContentValid = true;
+    setContentError(""); // Clear previous content error
 
-    if (!contentType) {
-      setContentTypeError("El tipo de contenido es obligatorio.");
-      isValid = false;
-    }
-
-    if (contentType === "texto" && (!content || (typeof content === 'string' && !content.trim()))) { // Add trim() for text content validation
+    if (contentType === "texto" && (!content || (typeof content === 'string' && !content.trim()))) {
       setContentError("El contenido es obligatorio.");
-      isValid = false;
+      isContentValid = false;
     }
 
     if (
       (contentType === "imagen" ||
         contentType === "video" ||
         contentType === "audio") &&
-      !content && (!editContent || (editContent && associatedMultimedia.length === 0)) // File is required only if creating or no associated multimedia when editing
+      !content && (!editContent || (editContent && associatedMultimedia.length === 0))
     ) {
       setContentError("El archivo es obligatorio.");
-      isValid = false;
+      isContentValid = false;
     }
 
-    // Add validation for tags if needed (e.g., minimum number of tags)
-
-    return isValid;
-  };
-
-  const handleSave = async () => {
-    if (!validateForm()) {
+    if (!formValidationResult.isValid || !isContentValid) {
       return;
     }
 
@@ -198,11 +204,11 @@ const ContentManager = () => {
 
     try {
       const contentData = {
-        title,
-        description,
-        category, // Send category ID or name
+        title, // Use individual state
+        description, // Use individual state
+        category, // Use individual state
         tags, // Send tags as array of strings
-        type: contentType,
+        type: contentType, // Use individual state
         content: contentType === "texto" ? (content as string | null) : null,
       };
 
@@ -210,7 +216,7 @@ const ContentManager = () => {
       const url = editContent ? `/contents/${editContent.id}` : `/contents`;
 
       let body;
-      if (contentType === "texto") {
+      if (contentType === "texto") { // Use individual state
         body = JSON.stringify(contentData);
       } else {
         const formData = new FormData();
@@ -221,13 +227,13 @@ const ContentManager = () => {
         } else if (content instanceof File) {
           formData.append("files", content); // Assuming backend expects 'files' for multimedia files
         }
-        formData.append("title", title);
-        formData.append("description", description);
-        formData.append("category", category); // Send category ID or name
+        formData.append("title", title); // Use individual state
+        formData.append("description", description); // Use individual state
+        formData.append("category", category); // Use individual state
         tags.forEach(tag => {
           formData.append("tags[]", tag); // Assuming backend expects 'tags[]' for array
         });
-        formData.append("type", contentType);
+        formData.append("type", contentType); // Use individual state
         // If editing, include content ID
         if (editContent) {
           formData.append("id", editContent.id.toString());
@@ -291,19 +297,16 @@ const ContentManager = () => {
 
       setShowForm(false);
       setEditContent(null);
-      setTitle("");
-      setDescription("");
-      setCategory("");
+      setTitle(""); // Reset individual state
+      setDescription(""); // Reset individual state
+      setCategory(""); // Reset individual state
+      setContentType(""); // Reset individual state
       setTags([]);
       setTagInput("");
-      setContentType("");
       setContent(null);
       setAssociatedMultimedia([]); // Clear associated multimedia after saving
-      setTitleError(""); // Clear errors on success
-      setDescriptionError("");
-      setCategoryError("");
-      setContentTypeError("");
-      setContentError("");
+      setErrors({}); // Clear errors on success
+      setContentError(""); // Clear content error on success
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Error desconocido al guardar contenido.";
       const action = editContent ? "actualizar" : "guardar";
@@ -368,19 +371,15 @@ const ContentManager = () => {
     // Add type for content
     setEditContent(content);
     setShowForm(true);
-    setTitle(content.title);
-    setDescription(content.description);
-    setCategory(content.category); // Assuming content.category is the ID or name
+    setTitle(content.title); // Update individual state
+    setDescription(content.description); // Update individual state
+    setCategory(content.category); // Update individual state
+    setContentType(content.type); // Update individual state
     setTags(content.tags);
-    setContentType(content.type);
     setContent(content.type === "texto" ? content.content : null);
     setAssociatedMultimedia(content.multimediaItems || []); // Set associated multimedia
-    // Clear errors when editing
-    setTitleError("");
-    setDescriptionError("");
-    setCategoryError("");
-    setContentTypeError("");
-    setContentError("");
+    setErrors({}); // Clear errors when editing
+    setContentError(""); // Clear content error
   };
 
   const handleAddTag = () => {
@@ -402,19 +401,16 @@ const ContentManager = () => {
         onClick={() => {
           setShowForm(!showForm);
           setEditContent(null);
-          setTitle("");
-          setDescription("");
-          setCategory("");
+          setTitle(""); // Reset individual state
+          setDescription(""); // Reset individual state
+          setCategory(""); // Reset individual state
+          setContentType(""); // Reset individual state
           setTags([]);
           setTagInput("");
-          setContentType("");
           setContent(null);
           setAssociatedMultimedia([]); // Clear associated multimedia when creating new
-          setTitleError("");
-          setDescriptionError("");
-          setCategoryError("");
-          setContentTypeError("");
-          setContentError("");
+          setErrors({}); // Clear errors when creating new
+          setContentError(""); // Clear content error
         }}
       >
         Crear Nuevo Contenido
@@ -427,19 +423,16 @@ const ContentManager = () => {
           onCancel={() => {
             setShowForm(false);
             setEditContent(null);
-            setTitle("");
-            setDescription("");
-            setCategory("");
+            setTitle(""); // Reset individual state
+            setDescription(""); // Reset individual state
+            setCategory(""); // Reset individual state
+            setContentType(""); // Reset individual state
             setTags([]);
             setTagInput("");
-            setContentType("");
             setContent(null);
             setAssociatedMultimedia([]); // Clear associated multimedia on cancel
-            setTitleError("");
-            setDescriptionError("");
-            setCategoryError("");
-            setContentTypeError("");
-            setContentError("");
+            setErrors({}); // Clear errors on cancel
+            setContentError(""); // Clear content error
           }}
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> {/* Use grid for layout */}
@@ -447,10 +440,11 @@ const ContentManager = () => {
               <Label htmlFor="title">Título</Label>
               <Input
                 id="title"
+                name="title" // Add name attribute
                 value={title}
-                onChange={(e) => {
+                onChange={(e) => { // Use individual state handler
                   setTitle(e.target.value);
-                  setTitleError(""); // Clear error on input change
+                  setErrors({}); // Clear errors on change
                 }}
                 disabled={isLoadingSave} // Disable input while saving
                 aria-invalid={!!titleError} // Add aria-invalid
@@ -463,9 +457,9 @@ const ContentManager = () => {
               <Label htmlFor="category">Categoría</Label>
               <Select
                 value={category}
-                onValueChange={(value) => {
+                onValueChange={(value) => { // Use individual state handler
                   setCategory(value);
-                  setCategoryError(""); // Clear error on select change
+                  setErrors({}); // Clear errors on change
                 }}
                 disabled={isLoadingSave} // Disable select while saving
                 aria-invalid={!!categoryError} // Add aria-invalid
@@ -489,10 +483,11 @@ const ContentManager = () => {
             <Label htmlFor="description">Descripción</Label>
             <Textarea
               id="description"
+              name="description" // Add name attribute
               value={description}
-              onChange={(e) => {
+              onChange={(e) => { // Use individual state handler
                 setDescription(e.target.value);
-                setDescriptionError(""); // Clear error on input change
+                setErrors({}); // Clear errors on change
               }}
               disabled={isLoadingSave} // Disable textarea while saving
               aria-invalid={!!descriptionError} // Add aria-invalid
@@ -532,13 +527,13 @@ const ContentManager = () => {
           <div className="grid gap-2">
             <Label htmlFor="type">Tipo de Contenido</Label>
             <Select
-              onValueChange={(value) => {
+              value={contentType}
+              onValueChange={(value) => { // Use individual state handler
                 setContentType(value);
-                setContentTypeError(""); // Clear error on select change
+                setErrors({}); // Clear errors on change
                 setContent(null); // Clear content/file when type changes
                 setContentError(""); // Clear content error when type changes
               }}
-              value={contentType}
               disabled={isLoadingSave} // Disable select while saving
               aria-invalid={!!contentTypeError} // Add aria-invalid
               aria-describedby={contentTypeError ? "content-type-error" : undefined} // Add aria-describedby

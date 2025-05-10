@@ -192,6 +192,35 @@ export const resetPassword = async (token: string, newPassword: string): Promise
   }
 };
 
+// Nueva función para actualizar el perfil del usuario
+export const updateProfile = async (profileData: { firstName?: string; secondName?: string; firstLastName?: string; secondLastName?: string; email?: string; username?: string; avatar?: string }): Promise<User> => {
+  try {
+    const response = await fetch(`${API_URL}/auth/profile`, { // Asumiendo endpoint PUT/PATCH para actualizar perfil
+      method: 'PUT', // O 'PATCH' dependiendo de la implementación del backend
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(profileData),
+      credentials: 'include', // Incluir cookies para autenticación
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      const errorMessage = import.meta.env.NODE_ENV === 'production'
+        ? 'Error al actualizar el perfil. Por favor, inténtalo de nuevo.'
+        : errorData.message || 'Error al actualizar el perfil';
+      throw new Error(errorMessage);
+    }
+
+    const updatedUser: User = await response.json();
+    return updatedUser;
+
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Error al actualizar el perfil';
+    throw new Error(errorMessage);
+  }
+};
+
 
 // Nueva función para verificar la sesión actual usando la cookie HttpOnly
 export const verifySession = async (): Promise<User | null> => {

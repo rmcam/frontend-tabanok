@@ -1,118 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useAuth } from '@/auth/hooks/useAuth'; // Assuming useAuth is in this path
-import api from '@/lib/api';
 import MultimediaPlayer from "../common/MultimediaPlayer"; // Import MultimediaPlayer
 import { Link } from 'react-router-dom'; // Import Link
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"; // Import Card components
 import { Badge } from "@/components/ui/badge"; // Import Badge component
-
-interface StudentProgressData {
-  completedLessons: number;
-  totalLessons: number;
-  overallScore: number;
-  // Add other relevant progress fields
-}
-
-interface Achievement {
-  id: string;
-  name: string;
-  description: string;
-  // Add other relevant achievement fields (e.g., icon, criteria)
-}
-
-interface RecommendedActivity {
-  id: string;
-  title: string;
-  // Add other relevant recommendation fields (e.g., type, link)
-}
-
-interface RecommendedActivity {
-  id: string;
-  title: string;
-  // Add other relevant recommendation fields (e.g., type, link)
-}
-
-interface CulturalNarrative {
-  id: string;
-  title: string;
-  description: string;
-  multimediaUrl?: string; // Assuming a URL for associated multimedia
-  multimediaType?: "video" | "audio" | "image"; // Assuming type for associated multimedia
-  // Add other relevant fields for narratives
-}
+import useFetchStudentData from '@/hooks/useFetchStudentData'; // Import the new hook
 
 const StudentPanel: React.FC = () => {
   const { user } = useAuth(); // Get authenticated user
-  const [progressData, setProgressData] = useState<StudentProgressData | null>(null);
-  const [achievements, setAchievements] = useState<Achievement[]>([]);
-  const [recommendedActivities, setRecommendedActivities] = useState<RecommendedActivity[]>([]);
-  const [culturalNarratives, setCulturalNarratives] = useState<CulturalNarrative[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!user) {
-        setLoading(false);
-        setError("Usuario no autenticado.");
-        return;
-      }
-
-      setLoading(true);
-      setError(null);
-      try {
-        // Assuming backend endpoints for student data
-        const [progress, achievementsData, recommendationsData, narrativesData] = await Promise.all([
-          api.get(`/students/${user.id}/progress`),
-          api.get(`/students/${user.id}/achievements`), // Assuming endpoint for achievements
-          api.get(`/recommendations/for-student/${user.id}`), // Assuming endpoint for recommendations
-          api.get(`/cultural-narratives`), // Assuming endpoint for cultural narratives
-        ]);
-        setProgressData(progress);
-        setAchievements(achievementsData);
-        setRecommendedActivities(recommendationsData);
-        setCulturalNarratives(narrativesData);
-      } catch (err: unknown) {
-        setError(
-          "Error al obtener los datos del estudiante: " +
-            (err instanceof Error ? err.message : String(err))
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [user]); // Refetch when user changes
-
-  const refreshStudentData = async () => {
-    if (!user) {
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    try {
-      const [progress, achievementsData, recommendationsData, narrativesData] = await Promise.all([
-        api.get(`/students/${user.id}/progress`),
-        api.get(`/students/${user.id}/achievements`),
-        api.get(`/recommendations/for-student/${user.id}`),
-        api.get(`/cultural-narratives`),
-      ]);
-      setProgressData(progress);
-      setAchievements(achievementsData);
-      setRecommendedActivities(recommendationsData);
-      setCulturalNarratives(narrativesData);
-    } catch (err: unknown) {
-      setError(
-        "Error al refrescar los datos del estudiante: " +
-          (err instanceof Error ? err.message : String(err))
-      );
-      console.error("Error refreshing student data:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  const {
+    progressData,
+    achievements,
+    recommendedActivities,
+    culturalNarratives,
+    loading,
+    error,
+  } = useFetchStudentData(user); // Use the new hook
 
   if (loading) {
     return <div>Cargando datos del estudiante...</div>;

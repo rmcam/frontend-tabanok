@@ -33,6 +33,9 @@ Los componentes del frontend se organizan en el directorio `src/components/` con
 *   `home/`: Componentes utilizados en la página de inicio (`HomePage`) y sus subcomponentes (ej. `HeroSection`, `FeaturedLessonCard`, `ContactForm`, `FAQ`, `HomeNavbar`).
 *   `layout/`: Componentes de layout (ej. `AuthenticatedLayout`).
 *   `navigation/`: Componentes de navegación (ej. Sidebar).
+*   `gamification/`: Componentes específicos del módulo de gamificación (ej. `GamificationPage`, `LeaderboardPage`, `AchievementsPage`).
+*   `settings/`: Componentes específicos del módulo de configuración (ej. `SettingsPage`, `ProfilePage`).
+*   `units/`: Componentes específicos del módulo de unidades (ej. `UnitDetail`).
 *   `ui/`: Componentes base de Shadcn UI y componentes personalizados basados en ellos (ej. `Button`, `Carousel`, `Sidebar`).
 
 ### Gestión de Rutas

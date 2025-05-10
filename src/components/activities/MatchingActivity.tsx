@@ -1,21 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import api from '@/lib/api';
 import { toast } from "sonner"; // Import toast
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import * as activityService from '@/services/activityService'; // Importar el servicio de actividades
+import { Activity } from '@/types/activityTypes'; // Importar el tipo Activity
 
+// Definir interfaces específicas para los datos de la actividad de emparejamiento
 interface MatchingPair {
   id: string;
   item1: string;
   item2: string;
 }
 
-interface MatchingActivityData {
-  id: string;
-  title: string;
+// Extender el tipo Activity para incluir detalles específicos de emparejamiento
+interface MatchingActivityData extends Activity {
   pairs: MatchingPair[];
+  // Asegurarse de que las propiedades de Activity (id, title, description, type) también estén aquí
 }
 
-interface MatchingActivityResult {
+export interface MatchingActivityResult { // Exportar la interfaz
   correctMatches: number;
   totalPairs: number;
   pointsEarned?: number; // Added for gamification
@@ -24,7 +26,7 @@ interface MatchingActivityResult {
 
 const MatchingActivity: React.FC<{ activityId: string; onActivityComplete?: () => void }> = ({ activityId, onActivityComplete }) => {
   const [activityData, setActivityData] = useState<MatchingActivityData | null>(null);
-const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedItems, setSelectedItems] = useState<string[]>([]); // To store selected item IDs for matching
   const [matchedPairs, setMatchedPairs] = useState<string[]>([]); // To store IDs of successfully matched pairs
@@ -39,8 +41,12 @@ const [loading, setLoading] = useState(true);
       setError(null);
       setResults(null); // Clear previous results
       try {
-        // Assuming backend endpoint for matching activity data is /activities/matching/:id
-        const data: MatchingActivityData = await api.get(`/activities/matching/${activityId}`);
+        // Usar el nuevo servicio activityService para obtener los detalles de la actividad
+        const data: MatchingActivityData = await activityService.getActivityById(activityId) as MatchingActivityData; // Cast to MatchingActivityData
+        // Verificar si la actividad obtenida es realmente de emparejamiento
+        if (data.type !== 'matching') {
+           throw new Error(`La actividad ${activityId} no es de emparejamiento.`);
+        }
         setActivityData(data);
       } catch (err: unknown) {
         setError(
@@ -58,20 +64,16 @@ const [loading, setLoading] = useState(true);
   const handleItemClick = async (itemId: string) => {
     if (selectedItems.length === 1 && selectedItems[0] !== itemId) {
       // Attempt to match the two selected items
-      const item1Id = selectedItems[0];
-      const item2Id = itemId;
 
       setLoading(true); // Indicate loading while validating
       setError(null); // Clear previous errors
 
       try {
-        // Assuming backend endpoint for validating a pair is POST /activities/matching/:id/validate-pair
-        const validationResult = await api.post(`/activities/matching/${activityId}/validate-pair`, { item1Id, item2Id });
+        // Call the backend service to validate the pair
+        const validationResult = await activityService.validateMatchingPair(activityId, selectedItems[0], itemId);
 
         if (validationResult.isCorrect) {
-          // Find the pair ID based on the item IDs (assuming item IDs are unique across pairs or backend returns pair ID)
-          // For simplicity, let's assume the backend response includes the pair ID if correct
-          const matchedPairId = validationResult.pairId; // Assuming backend returns pairId
+          const matchedPairId = validationResult.pairId;
           if (matchedPairId && !matchedPairs.includes(matchedPairId)) {
             setMatchedPairs([...matchedPairs, matchedPairId]);
             toast.success("¡Pareja correcta!");
@@ -105,8 +107,8 @@ const [loading, setLoading] = useState(true);
     setLoading(true); // Indicate loading while submitting
     setError(null); // Clear previous errors
     try {
-      // Assuming backend endpoint for completing matching activity is POST /activities/matching/:id/complete
-      const finalResults: MatchingActivityResult = await api.post(`/activities/matching/${activityId}/complete`, { matchedPairs }); // Cast response
+      // Usar la nueva función submitMatchingAnswers del servicio activityService
+      const finalResults: MatchingActivityResult = await activityService.submitMatchingAnswers(activityId, matchedPairs);
       console.log("Resultados finales de la actividad de emparejamiento:", finalResults);
       setResults(finalResults); // Store the final results
       // TODO: Handle gamification updates based on final results (e.g., points earned, badges unlocked) - Now displaying in UI

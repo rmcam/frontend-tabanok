@@ -39,7 +39,20 @@ Este documento lista las tareas pendientes y los próximos pasos planificados pa
 - Se han añadido indicadores de carga a los componentes `ActivityCreator`, `StudentProgress` y `ReportViewer`.
 - Se movió la verificación de la variable de entorno `VITE_API_URL` al componente `App.tsx` para que se realice solo una vez al inicio de la aplicación.
   - Implementar la funcionalidad de edición de contenido en el componente `ContentManager`. (Completado: Se ha implementado la funcionalidad de edición de contenido).
-  - **Funcionalidades Incompletas Identificadas (Backend):**
+  - **Implementar la lógica completa para las vistas de actividades específicas:** (Completado)
+    - Completar la lógica para cargar y ejecutar actividades de Quiz (`QuizActivity.tsx`), incluyendo el envío de respuestas al backend y el manejo de resultados.
+    - Completar la lógica para cargar y ejecutar actividades de Matching (`MatchingActivity.tsx`), incluyendo la validación de pares en el backend y el envío de resultados finales.
+    - Implementar la vista y la lógica para la actividad de Fill-in-the-Blanks (`FillInTheBlanksActivity.tsx`).
+  - **Implementar la lógica completa para las vistas de Gamificación:** (Completado)
+    - Implementar la obtención y visualización de datos en la página principal de Gamificación (`GamificationPage.tsx`).
+    - Implementar la obtención y visualización de datos en la vista de Leaderboard (`LeaderboardPage.tsx`).
+    - Implementar la obtención y visualización de datos en la vista de Logros (`AchievementsPage.tsx`).
+  - **Implementar la lógica completa para la vista de Multimedia:** (Completado)
+    - Completar el manejo de diferentes tipos de multimedia (video, audio) en `MultimediaPage.tsx`.
+    - Implementar la funcionalidad de reproducción o visualización de los elementos multimedia.
+  - **Implementar la lógica completa para la vista de Detalle de Unidad:** (Completado)
+    - Mostrar más detalles de la unidad en `UnitDetail.tsx`, incluyendo lecciones y actividades asociadas de una manera más interactiva.
+    - **Funcionalidades Incompletas Identificadas (Backend):**
     - **Module:** Se ha creado la estructura básica del módulo (`module.module.ts`), controlador (`module.controller.ts`), servicio (`module.service.ts`) y entidad (`entities/module.entity.ts`), y se ha registrado en `AppModule`. La lógica del servicio para interactuar con la base de datos está implementada. (Completado)
 - **Validación Lingüística:**
   - Internacionalizar mensajes existentes en formularios y otros componentes del frontend. (En progreso: Se ha iniciado la internacionalización en los formularios de autenticación, pero se han encontrado errores persistentes de parsing/formato que impiden completarla actualmente).

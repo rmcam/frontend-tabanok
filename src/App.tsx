@@ -12,6 +12,12 @@ const UnitDetail = lazy(() => import("./components/units/UnitDetail"));
 const QuizActivity = lazy(() => import("./components/activities/QuizActivity"));
 const MatchingActivity = lazy(() => import("./components/activities/MatchingActivity"));
 const FillInTheBlanksActivity = lazy(() => import("./components/activities/FillInTheBlanksActivity"));
+const ProfilePage = lazy(() => import("./components/settings/ProfilePage")); // Import ProfilePage
+const ActivitiesPage = lazy(() => import("./components/activities/ActivitiesPage")); // Import ActivitiesPage
+const GamificationPage = lazy(() => import("./components/gamification/GamificationPage")); // Import GamificationPage
+const LeaderboardPage = lazy(() => import("./components/gamification/LeaderboardPage")); // Import LeaderboardPage
+const AchievementsPage = lazy(() => import("./components/gamification/AchievementsPage")); // Import AchievementsPage
+const SettingsPage = lazy(() => import("./components/settings/SettingsPage")); // Import SettingsPage
 
 
 function App() {
@@ -70,7 +76,7 @@ function App() {
             element={
               <PrivateRoute requiredRoles={["user", "student", "teacher"]}>
                 <AuthenticatedLayout>
-                  <div>Actividades</div>
+                  <ActivitiesPage /> {/* Render ActivitiesPage component */}
                 </AuthenticatedLayout>
               </PrivateRoute>
             }
@@ -105,7 +111,7 @@ function App() {
             element={
               <PrivateRoute requiredRoles={["student"]}> {/* Only students can access fill-in-the-blanks activities */}
                 <AuthenticatedLayout>
-                  {/* Pass activityId from URL params to FillInTheBlanksActivity */}
+                  {/* Pass activityId from URL params to ActivityComponent */}
                   <FillInTheBlanksActivity activityId={useParams().activityId as string} />
                 </AuthenticatedLayout>
               </PrivateRoute>
@@ -116,21 +122,55 @@ function App() {
             element={
               <PrivateRoute requiredRoles={["user", "student", "teacher"]}>
                 <AuthenticatedLayout>
-                  <div>Gamificación</div>
+                  <GamificationPage /> {/* Render GamificationPage component */}
                 </AuthenticatedLayout>
               </PrivateRoute>
             }
-          />
+          >
+             {/* Nested route for Leaderboard */}
+             <Route
+              path="leaderboard"
+              element={
+                <PrivateRoute requiredRoles={["user", "student", "teacher"]}>
+                   <AuthenticatedLayout> {/* Wrap with AuthenticatedLayout */}
+                    <LeaderboardPage />
+                  </AuthenticatedLayout>
+                </PrivateRoute>
+              }
+            />
+             {/* Nested route for Achievements */}
+             <Route
+              path="achievements"
+              element={
+                <PrivateRoute requiredRoles={["user", "student", "teacher"]}>
+                   <AuthenticatedLayout> {/* Wrap with AuthenticatedLayout */}
+                    <AchievementsPage />
+                  </AuthenticatedLayout>
+                </PrivateRoute>
+              }
+            />
+          </Route>
           <Route
             path="/settings"
             element={
               <PrivateRoute requiredRoles={["user", "student", "teacher"]}>
                 <AuthenticatedLayout>
-                  <div>Configuración</div>
+                  <SettingsPage /> {/* Render SettingsPage component */}
                 </AuthenticatedLayout>
               </PrivateRoute>
             }
-          />
+          >
+             <Route
+              path="profile" // Nested route for profile
+              element={
+                <PrivateRoute requiredRoles={["user", "student", "teacher"]}>
+                   <AuthenticatedLayout> {/* Wrap with AuthenticatedLayout */}
+                    <ProfilePage />
+                  </AuthenticatedLayout>
+                </PrivateRoute>
+              }
+            />
+          </Route>
           {/* Ruta para acceso no autorizado */}
         </Routes>
       </Suspense>

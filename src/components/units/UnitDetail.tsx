@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import api from '@/lib/api';
 import Loading from '@/components/common/Loading';
+import * as unitService from '@/services/unitService'; // Importar el servicio de unidades
+import * as recommendationService from '@/services/recommendationService'; // Importar el servicio de recomendaciones
+import { Unit } from '@/types/unitTypes'; // Importar el tipo Unit
+import { Activity } from '@/types/activityTypes'; // Importar el tipo Activity
+import { Recommendation } from '@/types/recommendationTypes'; // Importar el tipo Recommendation
 
-interface Activity {
-  id: string;
-  type: 'quiz' | 'matching' | 'fill-in-the-blanks'; // Specify possible activity types
-  title: string;
-  // Add other activity properties as needed
-}
-
+// Mantener interfaces existentes si son más detalladas que el tipo Unit básico
 interface Lesson {
   id: string;
   title: string;
@@ -17,31 +15,37 @@ interface Lesson {
   // Add other lesson properties as needed
 }
 
-interface UnitDetailData {
-  id: string;
-  name: string;
-  description?: string;
-  lessons: Lesson[]; // Assuming lessons are included in unit detail
-  // Add other unit properties as needed
+// Ajustar UnitDetailData para que coincida con el tipo Unit o fusionar si es necesario
+// Por ahora, asumiremos que el servicio devuelve algo compatible con UnitDetailData
+export interface UnitDetailData extends Unit { // Extender de Unit si Unit es un subconjunto
+  lessons: Lesson[]; // Asumiendo lessons son parte del detalle de la unidad
+  // Asegurarse de que las propiedades de Unit (id, title, description) también estén aquí
 }
+
 
 const UnitDetail: React.FC = () => {
   const { unitId } = useParams<{ unitId: string }>();
   const [unitData, setUnitData] = useState<UnitDetailData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
 
   useEffect(() => {
-    const fetchUnitDetail = async () => {
+    const fetchData = async () => {
       setLoading(true);
       setError(null);
       try {
-        // Assuming backend endpoint for unit detail is /units/:id
-        const data: UnitDetailData = await api.get(`/units/${unitId}`);
-        setUnitData(data);
+        // Usar el nuevo servicio unitService para obtener los detalles de la unidad
+        const unitDetails: UnitDetailData = await unitService.getUnitById(unitId as string); // Cast unitId to string
+        setUnitData(unitDetails);
+
+        // Obtener recomendaciones para la unidad
+        const unitRecommendations = await recommendationService.getRecommendationsByUnitId(unitId as string);
+        setRecommendations(unitRecommendations);
+
       } catch (err: unknown) {
         setError(
-          "Error al obtener los datos de la unidad: " +
+          "Error al obtener los datos de la unidad o recomendaciones: " +
             (err instanceof Error ? err.message : String(err))
         );
       } finally {
@@ -50,7 +54,7 @@ const UnitDetail: React.FC = () => {
     };
 
     if (unitId) {
-      fetchUnitDetail();
+      fetchData();
     }
   }, [unitId]);
 
@@ -81,7 +85,7 @@ const UnitDetail: React.FC = () => {
 
   return (
     <div>
-      <h2>{unitData.name}</h2>
+      <h2>{unitData.title}</h2> {/* Usar unitData.title en lugar de unitData.name */}
       {unitData.description && <p>{unitData.description}</p>}
 
       <h3>Lecciones</h3>
@@ -110,7 +114,26 @@ const UnitDetail: React.FC = () => {
         </ul>
       )}
 
-      {/* TODO: Display recommendations */}
+      {/* Display recommendations */}
+      {recommendations.length > 0 && (
+        <div className="mt-8">
+          <h3>Recomendaciones</h3>
+          <ul>
+            {recommendations.map(rec => (
+              <li key={rec.id}>
+                <h4>{rec.title}</h4>
+                {rec.description && <p>{rec.description}</p>}
+                {rec.link && <a href={rec.link} target="_blank" rel="noopener noreferrer">{rec.link}</a>}
+                {rec.relatedActivityId && (
+                  <Link to={getActivityRoute({ id: rec.relatedActivityId, type: rec.relatedActivityType || 'unknown', title: 'Actividad Recomendada', description: 'Actividad recomendada relacionada con esta unidad.' } as Activity)}> {/* Assuming a basic Activity structure for routing */}
+                    Ver Actividad Relacionada
+                  </Link>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };

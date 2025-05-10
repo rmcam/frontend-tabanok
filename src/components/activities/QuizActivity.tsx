@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import api from '@/lib/api';
 import { toast } from "sonner"; // Import toast
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import * as activityService from '@/services/activityService'; // Importar el servicio de actividades
+import { Activity } from '@/types/activityTypes'; // Importar el tipo Activity
 
+// Definir interfaces específicas para los datos del quiz si son diferentes del tipo Activity general
 interface QuizQuestion {
   id: string;
   text: string;
@@ -10,13 +12,14 @@ interface QuizQuestion {
   // The correct answer should ideally not be in the frontend data
 }
 
-interface QuizData {
-  id: string;
-  title: string;
+// Extender el tipo Activity si es necesario para incluir detalles específicos del quiz
+interface QuizData extends Activity {
   questions: QuizQuestion[];
+  // Asegurarse de que las propiedades de Activity (id, title, description, type) también estén aquí
 }
 
-interface QuizResult {
+
+export interface QuizResult { // Exportar la interfaz
   score: number;
   feedback?: string;
   questionResults?: { questionId: string; isCorrect: boolean; correctAnswer?: string }[];
@@ -40,8 +43,12 @@ const QuizActivity: React.FC<{ activityId: string; onActivityComplete?: () => vo
       setError(null);
       setQuizResults(null); // Clear previous results when fetching new quiz data
       try {
-        // Assuming backend endpoint for quiz data is /activities/quiz/:id
-        const data: QuizData = await api.get(`/activities/quiz/${activityId}`);
+        // Usar el nuevo servicio activityService para obtener los detalles de la actividad
+        const data: QuizData = await activityService.getActivityById(activityId) as QuizData; // Cast to QuizData
+        // Verificar si la actividad obtenida es realmente un quiz
+        if (data.type !== 'quiz') {
+           throw new Error(`La actividad ${activityId} no es un quiz.`);
+        }
         setQuizData(data);
       } catch (err: unknown) {
         setError(
@@ -67,8 +74,8 @@ const QuizActivity: React.FC<{ activityId: string; onActivityComplete?: () => vo
     setLoading(true); // Indicate loading while submitting
     setError(null); // Clear previous errors
     try {
-      // Assuming backend endpoint for submitting quiz answers is POST /activities/quiz/:id/submit
-      const results: QuizResult = await api.post(`/activities/quiz/${activityId}/submit`, { answers: selectedAnswers }); // Cast response to QuizResult
+      // Usar la nueva función submitQuizAnswers del servicio activityService
+      const results: QuizResult = await activityService.submitQuizAnswers(activityId, selectedAnswers);
       console.log("Resultados del quiz:", results);
       setQuizResults(results); // Store the results
       // TODO: Handle gamification updates based on results (e.g., points earned, badges unlocked) - Now displaying in UI

@@ -33,6 +33,17 @@ El frontend es una aplicación **React + Vite** con una estructura modular bien 
 *   Se han añadido indicadores de carga a los componentes `ActivityCreator`, `StudentProgress` y `ReportViewer`.
 *   Se movió la verificación de la variable de entorno `VITE_API_URL` al componente `App.tsx` para que se realice solo una vez al inicio de la aplicación.
   - Implementar la funcionalidad de edición de contenido en el componente `ContentManager`. (Completado: Se ha implementado la funcionalidad de edición de contenido).
+*   **Módulos/Vistas Implementadas (Configuración Inicial o Integración Básica de Datos):** Se ha completado la implementación inicial o la integración básica de datos para 10 módulos/vistas del frontend, incluyendo la configuración de rutas y la obtención básica de datos donde fue aplicable. Los módulos implementados son:
+    1.  Vista de Administración de Perfil (`ProfilePage.tsx`)
+    2.  Vista de Actividades (`ActivitiesPage.tsx`)
+    3.  Vista principal de Gamificación (`GamificationPage.tsx`)
+    4.  Sub-vista de Gamificación - Leaderboard (`LeaderboardPage.tsx`)
+    5.  Sub-vista de Gamificación - Logros (`AchievementsPage.tsx`)
+    6.  Vista principal de Configuración (`SettingsPage.tsx`)
+    7.  Vista de Detalle de Unidad (`UnitDetail.tsx`)
+    8.  Vista de Multimedia (`MultimediaPage.tsx`)
+    9.  Vista de Actividad - Quiz (`QuizActivity.tsx`)
+    10. Vista de Actividad - Matching (`MatchingActivity.tsx`)
 
 ### Estado del Backend
 

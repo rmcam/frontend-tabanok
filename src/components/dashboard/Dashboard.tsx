@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import React, { Suspense, lazy } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ActivityCreator = lazy(() => import("./components/ActivityCreator"));
 const CategoryManager = lazy(() => import("./components/CategoryManager"));
@@ -52,41 +53,41 @@ const UnifiedDashboard = () => {
         </TabsList>
         <TabsContent value="overview">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Suspense fallback={<div>Cargando estadísticas...</div>}>
+            <Suspense fallback={<Skeleton className="h-32 w-full" />}>
               <DashboardStatistics />
             </Suspense>
-            <Suspense fallback={<div>Cargando últimas actividades...</div>}>
+            <Suspense fallback={<Skeleton className="h-32 w-full" />}>
               <LatestActivities />
             </Suspense>
           </div>
         </TabsContent>
         <TabsContent value="content">
-          <Suspense fallback={<div>Cargando gestión de contenido...</div>}>
+          <Suspense fallback={<Skeleton className="h-32 w-full" />}>
             <ContentManager />
           </Suspense>
-          <Suspense fallback={<div>Cargando gestión de categorías...</div>}>
+          <Suspense fallback={<Skeleton className="h-32 w-full" />}>
             <CategoryManager />
           </Suspense>
-          <Suspense fallback={<div>Cargando gestión de etiquetas...</div>}>
+          <Suspense fallback={<Skeleton className="h-32 w-full" />}>
             <TagManager />
           </Suspense>
         </TabsContent>
         <TabsContent value="activities">
-          <Suspense fallback={<div>Cargando creador de actividades...</div>}>
+          <Suspense fallback={<Skeleton className="h-32 w-full" />}>
             <ActivityCreator />
           </Suspense>
         </TabsContent>
         <TabsContent value="multimedia">
-          <Suspense fallback={<div>Cargando gestión multimedia...</div>}>
+          <Suspense fallback={<Skeleton className="h-32 w-full" />}>
             <MultimediaUploadForm />
             <MultimediaGallery />
           </Suspense>
         </TabsContent>
         <TabsContent value="progress">
-          <Suspense fallback={<div>Cargando seguimiento de estudiantes...</div>}>
+          <Suspense fallback={<Skeleton className="h-32 w-full" />}>
             <StudentProgress />
           </Suspense>
-          <Suspense fallback={<div>Cargando reportes...</div>}>
+          <Suspense fallback={<Skeleton className="h-32 w-full" />}>
             <ReportViewer />
           </Suspense>
         </TabsContent>

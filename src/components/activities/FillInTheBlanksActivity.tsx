@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import api from '@/lib/api';
 import { toast } from "sonner"; // Import toast
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
-
+import * as activityService from '@/services/activityService'; // Importar el servicio de actividades
+import { Activity } from '@/types/activityTypes'; // Importar el tipo Activity
+// Definir interfaces específicas para los datos de la actividad de completar espacios en blanco
 interface Blank {
   id: string;
   // The correct answer should ideally not be in the frontend data
 }
 
-interface FillInTheBlanksActivityData {
-  id: string;
-  title: string;
+// Extender el tipo Activity para incluir detalles específicos de completar espacios en blanco
+interface FillInTheBlanksActivityData extends Activity {
   text: string; // Text with placeholders for blanks
   blanks: Blank[]; // Information about the blanks
+  // Asegurarse de que las propiedades de Activity (id, title, description, type) también estén aquí
 }
 
 interface BlankResult {
@@ -21,7 +22,7 @@ interface BlankResult {
   correctAnswer?: string; // Optional: backend might provide the correct answer
 }
 
-interface FillInTheBlanksResultsData {
+export interface FillInTheBlanksResultsData { // Exportar la interfaz
   score: number; // Assuming a score for the activity
   blankResults?: BlankResult[]; // Optional: feedback per blank
   pointsEarned?: number; // Added for gamification
@@ -45,8 +46,12 @@ const FillInTheBlanksActivity: React.FC<{ activityId: string; onActivityComplete
       setError(null);
       setResults(null); // Clear previous results
       try {
-        // Assuming backend endpoint for fill-in-the-blanks activity data is /activities/fill-in-the-blanks/:id
-        const data: FillInTheBlanksActivityData = await api.get(`/activities/fill-in-the-blanks/${activityId}`);
+        // Usar el nuevo servicio activityService para obtener los detalles de la actividad
+        const data: FillInTheBlanksActivityData = await activityService.getActivityById(activityId) as FillInTheBlanksActivityData; // Cast to FillInTheBlanksActivityData
+        // Verificar si la actividad obtenida es realmente de completar espacios en blanco
+        if (data.type !== 'fill-in-the-blanks') {
+           throw new Error(`La actividad ${activityId} no es de completar espacios en blanco.`);
+        }
         setActivityData(data);
         // Initialize user answers state based on the blanks
         const initialAnswers: Record<string, string> = {};
@@ -67,21 +72,28 @@ const FillInTheBlanksActivity: React.FC<{ activityId: string; onActivityComplete
     fetchActivityData();
   }, [activityId]); // Refetch when activityId changes
 
+  const handleInputChange = (blankId: string, value: string) => {
+    setUserAnswers({
+      ...userAnswers,
+      [blankId]: value,
+    });
+  };
+
 
   const handleSubmit = async () => {
     setLoading(true); // Indicate loading while submitting
     setError(null); // Clear previous errors
     try {
-      // Assuming backend endpoint for completing fill-in-the-blanks activity is POST /activities/fill-in-the-blanks/:id/complete
-      const finalResults: FillInTheBlanksResultsData = await api.post(`/activities/fill-in-the-blanks/${activityId}/complete`, { answers: userAnswers }); // Cast response
-      console.log("Resultados finales de la actividad de completar espacios en blanco:", finalResults);
-      setResults(finalResults); // Store the final results
+      // Usar la nueva función submitFillInTheBlanksAnswers del servicio activityService
+      const results: FillInTheBlanksResultsData = await activityService.submitFillInTheBlanksAnswers(activityId, userAnswers);
+      console.log("Resultados finales de la actividad de completar espacios en blanco:", results);
+      setResults(results); // Store the final results
       // TODO: Display overall score and gamification updates - Now displaying in UI
       if (onActivityComplete) {
         onActivityComplete(); // Call the callback to refresh student data
       }
       toast.success("Actividad completada!", { // Display success message
-        description: `Puntuación: ${finalResults.score}`, // Assuming score is available in results
+        description: `Puntuación: ${results.score}`, // Assuming score is available in results
       });
       // navigate('/dashboard'); // Decide whether to redirect immediately or let user see results
     } catch (err: unknown) {
@@ -111,25 +123,38 @@ const FillInTheBlanksActivity: React.FC<{ activityId: string; onActivityComplete
 
   // Function to render the text with input fields for blanks
   const renderTextWithBlanks = () => {
-    let renderedText = activityData.text;
-    activityData.blanks.forEach(blank => {
-      const input = `<input type="text" value="${userAnswers[blank.id] || ''}" onChange={(e) => handleInputChange('${blank.id}', e.target.value)} />`;
-      // Assuming blanks are represented by a specific placeholder in the text, e.g., [BLANK_${blank.id}]
-      renderedText = renderedText.replace(`[BLANK_${blank.id}]`, input);
-    });
-    // Using dangerouslySetInnerHTML for rendering HTML from string. Be cautious with this.
-    return <div dangerouslySetInnerHTML={{ __html: renderedText }} />;
+    const parts = activityData.text.split(/\[BLANK_([^\]]+)\]/g); // Dividir el texto por los placeholders
+    const elements = [];
+    for (let i = 0; i < parts.length; i++) {
+      if (i % 2 === 0) {
+        // Texto normal
+        elements.push(<span key={`text-${i}`}>{parts[i]}</span>);
+      } else {
+        // Placeholder, renderizar input
+        const blankId = parts[i];
+        elements.push(
+          <input
+            key={`input-${blankId}`}
+            type="text"
+            value={userAnswers[blankId] || ''}
+            onChange={(e) => handleInputChange(blankId, e.target.value)}
+            className="border-b border-gray-400 mx-1 px-1 focus:outline-none focus:border-blue-500" // Estilos básicos para el input
+          />
+        );
+      }
+    }
+    return <div>{elements}</div>;
   };
 
 
   return (
-    <div>
+    <div className="container mx-auto py-8">
       <h3>{activityData.title}</h3>
       {/* Render text with blanks if results are not available */}
       {!results ? (
         <>
           {renderTextWithBlanks()}
-          <button onClick={handleSubmit} disabled={loading}>Enviar Respuestas</button>
+          <button onClick={handleSubmit} disabled={loading} className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Enviar Respuestas</button>
         </>
       ) : (
         // Render results if available, including gamification updates
@@ -168,7 +193,7 @@ const FillInTheBlanksActivity: React.FC<{ activityId: string; onActivityComplete
               </ul>
             </div>
           )}
-           <button onClick={() => navigate('/dashboard')}>Volver al Dashboard</button> {/* Button to return to dashboard */}
+           <button onClick={() => navigate('/dashboard')} className="mt-4 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">Volver al Dashboard</button> {/* Button to return to dashboard */}
         </div>
       )}
     </div>

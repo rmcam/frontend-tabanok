@@ -5,7 +5,7 @@ interface ValidationResult {
   errors: { [key: string]: string };
 }
 
-interface UseFormValidationResult<T> {
+interface UseFormValidationResult<T extends object> { // Relaxed type constraint
   values: T;
   errors: { [key: string]: string };
   isValid: boolean;
@@ -13,13 +13,13 @@ interface UseFormValidationResult<T> {
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
   handleSubmit: (validationRules: {
-    [key: string]: (value: string) => string | undefined;
-  }) => (event: React.FormEvent) => ValidationResult; // Corrected return type
-  setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>; // Add setErrors to the interface
-  resetForm: () => void; // Add resetForm to the interface
+    [key: string]: (value: unknown) => string | undefined; // Use unknown instead of any
+  }) => (event?: React.FormEvent, formValues?: T) => ValidationResult; // Allow optional event and formValues
+  setErrors: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>;
+  resetForm: () => void;
 }
 
-const useFormValidation = <T extends { [key: string]: string }>(
+const useFormValidation = <T extends object>( // Relaxed type constraint
   initialValues: T
 ): UseFormValidationResult<T> => {
   const [values, setValues] = useState<T>(initialValues);
@@ -35,11 +35,12 @@ const useFormValidation = <T extends { [key: string]: string }>(
 
   const handleSubmit =
     (validationRules: {
-      [key: string]: (value: string) => string | undefined;
+      [key: string]: (value: unknown) => string | undefined; // Use unknown instead of any
     }) =>
-    (event: React.FormEvent) => {
-      event.preventDefault();
-      const validationResult = validate(values, validationRules);
+    (event?: React.FormEvent, formValues?: T) => { // Allow optional event and formValues
+      event?.preventDefault(); // Prevent default only if event is provided
+      const valuesToValidate = formValues || values; // Use provided values or internal state
+      const validationResult = validate(valuesToValidate, validationRules);
       setErrors(validationResult.errors);
       setIsValid(validationResult.isValid);
       return validationResult;
@@ -47,18 +48,22 @@ const useFormValidation = <T extends { [key: string]: string }>(
 
   const validate = (
     currentValues: T,
-    validationRules: { [key: string]: (value: string) => string | undefined }
+    validationRules: { [key: string]: (value: unknown) => string | undefined } // Use unknown instead of any
   ): ValidationResult => {
     let isValid = true;
     const errors: { [key: string]: string } = {};
 
     for (const key in validationRules) {
-      const rule = validationRules[key];
-      const value = currentValues[key];
-      const error = rule(value);
-      if (error) {
-        errors[key] = error;
-        isValid = false;
+      // Ensure the key exists in currentValues and validationRules
+      if (Object.prototype.hasOwnProperty.call(currentValues, key) && Object.prototype.hasOwnProperty.call(validationRules, key)) {
+        const rule = validationRules[key];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const value = (currentValues as any)[key]; // Keep as any for property access
+        const error = rule(value);
+        if (error) {
+          errors[key] = error;
+          isValid = false;
+        }
       }
     }
 
@@ -77,8 +82,8 @@ const useFormValidation = <T extends { [key: string]: string }>(
     isValid,
     handleChange,
     handleSubmit,
-    setErrors, // Include setErrors in the returned object
-    resetForm, // Include resetForm in the returned object
+    setErrors,
+    resetForm,
   };
 };
 
