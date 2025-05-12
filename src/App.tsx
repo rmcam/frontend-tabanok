@@ -18,6 +18,7 @@ const GamificationPage = lazy(() => import("./components/gamification/Gamificati
 const LeaderboardPage = lazy(() => import("./components/gamification/LeaderboardPage")); // Import LeaderboardPage
 const AchievementsPage = lazy(() => import("./components/gamification/AchievementsPage")); // Import AchievementsPage
 const SettingsPage = lazy(() => import("./components/settings/SettingsPage")); // Import SettingsPage
+const StudentPanel = lazy(() => import("./components/student/StudentPanel")); // Import StudentPanel
 
 
 function App() {
@@ -35,6 +36,16 @@ function App() {
               <PrivateRoute requiredRoles={["user", "student", "teacher", "admin"]}> {/* Added 'admin' role */}
                 <AuthenticatedLayout>
                   <UnifiedDashboard />
+                </AuthenticatedLayout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/student-panel" // New route for StudentPanel
+            element={
+              <PrivateRoute requiredRoles={["user", "student"]}> {/* Only users and students can access student panel */}
+                <AuthenticatedLayout>
+                  <StudentPanel />
                 </AuthenticatedLayout>
               </PrivateRoute>
             }

@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'; // Import Link
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"; // Import Card components
 import { Badge } from "@/components/ui/badge"; // Import Badge component
 import useFetchStudentData from '@/hooks/useFetchStudentData'; // Import the new hook
+import { Activity, Award, ListTodo, BookOpen } from 'lucide-react'; // Importar iconos
 
 const StudentPanel: React.FC = () => {
   const { user } = useAuth(); // Get authenticated user
@@ -31,7 +32,8 @@ const StudentPanel: React.FC = () => {
 
       {progressData && (
         <Card className="mb-6">
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center space-x-2"> {/* Usar flex para alinear icono y título */}
+            <Activity className="size-6" /> {/* Icono para Progreso General */}
             <CardTitle>Progreso General</CardTitle>
           </CardHeader>
           <CardContent>
@@ -43,9 +45,10 @@ const StudentPanel: React.FC = () => {
       )}
 
       <Card className="mb-6">
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center space-x-2"> {/* Usar flex para alinear icono y título */}
+          <Award className="size-6" /> {/* Icono para Logros */}
           <CardTitle>Logros</CardTitle>
-        </CardHeader>
+          </CardHeader>
         <CardContent>
           {achievements.length === 0 ? (
             <p>No hay logros disponibles.</p>
@@ -68,7 +71,8 @@ const StudentPanel: React.FC = () => {
       </Card>
 
       <Card className="mb-6">
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center space-x-2"> {/* Usar flex para alinear icono y título */}
+          <ListTodo className="size-6" /> {/* Icono para Actividades Recomendadas */}
           <CardTitle>Actividades Recomendadas</CardTitle>
         </CardHeader>
         <CardContent>
@@ -102,7 +106,8 @@ const StudentPanel: React.FC = () => {
         </Card>
 
       <Card className="mb-6">
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center space-x-2"> {/* Usar flex para alinear icono y título */}
+          <BookOpen className="size-6" /> {/* Icono para Narrativas Culturales */}
           <CardTitle>Narrativas Culturales</CardTitle>
         </CardHeader>
         <CardContent>

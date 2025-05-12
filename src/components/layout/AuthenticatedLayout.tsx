@@ -21,7 +21,7 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
           </div>
         )}
         <PageContainer> {/* Contenedor de la página */}
-          <div className="flex-1 p-4 overflow-y-auto"> {/* Permitir desbordamiento vertical si es necesario */}
+          <div className="flex-1 px-4 sm:px-6 lg:px-8 py-4 overflow-y-auto"> {/* Ajustar padding horizontal y mantener padding vertical */}
             {children} {/* Renderizar el contenido de la página (Dashboard, etc.) */}
           </div>
         </PageContainer>

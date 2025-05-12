@@ -26,7 +26,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onOpenChange, title, description,
           {trigger}
         </DialogTrigger>
       )}
-      <DialogContent>
+      <DialogContent className="bg-k-blanco-50 border border-k-negro-100 shadow-lg p-6 max-w-md"> {/* Estilos mejorados */}
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}

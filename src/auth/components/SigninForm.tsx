@@ -24,7 +24,7 @@ const SigninForm: React.FC = () => {
     useFormValidation<SigninFormProps>(initialValues);
 
   const navigate = useNavigate(); // Get navigate function
-  const { signin, signingIn } = useAuth(); // Use useAuth hook from context and get signin and signingIn state
+  const { signin, signingIn, user } = useAuth(); // Use useAuth hook from context and get signin, signingIn state, and user
 
   const submitHandler = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
@@ -35,14 +35,22 @@ const SigninForm: React.FC = () => {
           identifier: values.identifier,
           password: values.password,
         });
-        navigate('/dashboard'); // Redirigir al dashboard después del inicio de sesión exitoso
+        // Después de un inicio de sesión exitoso, verificar el rol del usuario para redirigir
+        if (user?.roles.includes('teacher') || user?.roles.includes('admin')) {
+          navigate('/dashboard'); // Redirigir a docentes/admins al dashboard unificado
+        } else if (user?.roles.includes('student')) {
+          navigate('/student-panel'); // Redirigir a estudiantes a su panel
+        } else {
+          // Opcional: redirigir a una página por defecto o mostrar un mensaje si el rol no es reconocido
+          navigate('/');
+        }
       } catch (error) {
         console.error('Error al iniciar sesión:', error);
         // El AuthProvider ya maneja la visualización de los toasts de error.
         // No necesitamos establecer un estado de error local aquí.
       }
     },
-    [values, signin, navigate], // Add signin and navigate to dependencies
+    [values, signin, navigate, user], // Add signin, navigate, and user to dependencies
   );
 
   return (
