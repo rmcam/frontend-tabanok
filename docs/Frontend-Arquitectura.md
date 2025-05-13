@@ -36,7 +36,7 @@ Los componentes del frontend se organizan en el directorio `src/components/` con
 *   `home/`: Componentes utilizados en la página de inicio (`HomePage`) y sus subcomponentes (ej. `HeroSection`, `FeaturedLessonCard`, `ContactForm`, `FAQ`, `HomeNavbar`).
 *   `layout/`: Componentes de layout (ej. `AuthenticatedLayout`).
 *   `navigation/`: Componentes de navegación.
-*   `gamification/`: Componentes específicos del módulo de gamificación (ej. `GamificationPage`, `LeaderboardPage`, `AchievementsPage`).
+*   `gamification/`: Componentes específicos del módulo de gamificación (ej. `GamificationPage`, `LeaderboardPage`, `AchievementsPage`). Se ha corregido el manejo de errores en estos componentes para mostrar correctamente los mensajes de error.
 *   `settings/`: Componentes específicos del módulo de configuración (ej. `SettingsPage`, `ProfilePage`).
 *   `units/`: Componentes específicos del módulo de unidades (ej. `UnitDetail`).
 *   `ui/`: Componentes base de Shadcn UI y componentes personalizados basados en ellos (ej. `Button`, `Carousel`).
@@ -46,7 +46,7 @@ Los componentes del frontend se organizan en el directorio `src/components/` con
 
 ### Hooks Personalizados
 
-Se utilizan hooks personalizados como `useAuth` (`src/auth/hooks/useAuth.ts`) para gestionar el estado de autenticación y `useUnits` (`src/hooks/useFetchUnits.ts`) para obtener datos de unidades, incluyendo almacenamiento en caché con `sessionStorage`.
+Se utilizan hooks personalizados como `useAuth` (`src/auth/hooks/useAuth.ts`), `useUnits` (`src/hooks/useFetchUnits.ts`) y `useGamificationData` (`src/hooks/useGamificationData.ts`) para gestionar el estado y obtener datos, incluyendo almacenamiento en caché con `sessionStorage` para unidades y multimedia. El hook `useGamificationData` ha sido refactorizado para utilizar el hook `useFetchData` del proyecto.
 
 *   `useSidebar.ts`: Hook para acceder al contexto de la Sidebar.
 *   `useSidebarCookie.ts`: Hook para gestionar la persistencia del estado de la Sidebar en cookies.
@@ -89,4 +89,4 @@ El frontend consume la API RESTful proporcionada por el backend para obtener dat
 
 ---
 
-Última actualización: 7/5/2025, 12:35 a. m. (America/Bogota, UTC-5:00)
+Última actualización: 12/5/2025, 11:59 p. m. (America/Bogota, UTC-5:00)

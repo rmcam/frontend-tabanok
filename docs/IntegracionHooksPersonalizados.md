@@ -121,4 +121,68 @@ function MyComponent() {
 
 ---
 
-Última actualización: 24/4/2025, 8:51 p. m. (America/Bogota, UTC-5:00)
+## `useGamificationData`
+
+Acceso a los datos de gamificación del usuario autenticado.
+
+*   **Ubicación:** `src/hooks/useGamificationData.ts` (en el repositorio frontend)
+*   **Descripción:** Hook personalizado para obtener el resumen de gamificación, la lista de logros y los datos del leaderboard para el usuario autenticado. Este hook ha sido refactorizado para utilizar el hook `useFetchData` del proyecto para manejar la lógica de fetching, carga y manejo de errores.
+*   **Uso:**
+
+```typescript
+import useGamificationData from '@/hooks/useGamificationData';
+
+function MyComponent() {
+  const { summary, achievements, leaderboard, loading, error } = useGamificationData();
+  // ...
+}
+```
+
+*   **Retorno:**
+    *   `summary`: Resumen de gamificación (`GamificationSummary | null`).
+    *   `achievements`: Array de logros (`Achievement[]`).
+    *   `leaderboard`: Array de entradas del leaderboard (`LeaderboardEntry[]`).
+    *   `loading`: Booleano que indica si los datos están cargando.
+    *   `error`: Objeto de error (`Error | null`) si ocurre un problema durante la carga.
+
+*   **Ejemplo:**
+
+```typescript
+import useGamificationData from '@/hooks/useGamificationData';
+import Loading from '@/components/common/Loading';
+
+function GamificationDashboard() {
+  const { summary, achievements, leaderboard, loading, error } = useGamificationData();
+
+  if (loading) {
+    return <Loading />;
+  }
+
+  if (error) {
+    return <p>Error al cargar los datos de gamificación: {error.message}</p>;
+  }
+
+  return (
+    <div>
+      <h1>Datos de Gamificación</h1>
+      {summary && <p>Puntos totales: {summary.totalPoints}</p>}
+      <h2>Logros</h2>
+      <ul>
+        {achievements.map(ach => (
+          <li key={ach.id}>{ach.name} ({ach.unlocked ? 'Desbloqueado' : 'Bloqueado'})</li>
+        ))}
+      </ul>
+      <h2>Leaderboard</h2>
+      <ul>
+        {leaderboard.map(entry => (
+          <li key={entry.userId}>{entry.username}: {entry.totalPoints} puntos</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
+
+---
+
+Última actualización: 12/5/2025, 11:59 p. m. (America/Bogota, UTC-5:00)

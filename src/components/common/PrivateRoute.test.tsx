@@ -25,6 +25,7 @@ describe('PrivateRoute', () => {
       forgotPassword: vi.fn(),
       resetPassword: vi.fn(),
       resettingPassword: false,
+      refetchUser: vi.fn(), // Añadir mock para refetchUser
     };
 
     render(
@@ -54,6 +55,7 @@ describe('PrivateRoute', () => {
       forgotPassword: vi.fn(),
       resetPassword: vi.fn(),
       resettingPassword: false,
+      refetchUser: vi.fn(), // Añadir mock para refetchUser
     };
 
     render(
@@ -83,6 +85,7 @@ describe('PrivateRoute', () => {
       forgotPassword: vi.fn(),
       resetPassword: vi.fn(),
       resettingPassword: false,
+      refetchUser: vi.fn(), // Añadir mock para refetchUser
     };
 
     render(
@@ -112,6 +115,7 @@ describe('PrivateRoute', () => {
       forgotPassword: vi.fn(),
       resetPassword: vi.fn(),
       resettingPassword: false,
+      refetchUser: vi.fn(), // Añadir mock para refetchUser
     };
 
     render(
@@ -141,6 +145,7 @@ describe('PrivateRoute', () => {
       forgotPassword: vi.fn(),
       resetPassword: vi.fn(),
       resettingPassword: false,
+      refetchUser: vi.fn(), // Añadir mock para refetchUser
     };
 
     render(
@@ -154,8 +159,70 @@ describe('PrivateRoute', () => {
     );
 
     // Assuming there's a test id or text for the Loading component
-    // expect(screen.getByTestId('loading')).toBeInTheDocument();
+    expect(screen.getByTestId('loading')).toBeInTheDocument();
     expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('navigate')).not.toBeInTheDocument();
+  });
+
+  it('should show loading state if authentication is loading and required roles are specified', () => {
+    const mockAuthContext: AuthContextType = {
+      user: null,
+      loading: true, // Authentication is loading
+      signingIn: false,
+      signingUp: false,
+      requestingPasswordReset: false,
+      signin: vi.fn(),
+      signup: vi.fn(),
+      signout: vi.fn(),
+      forgotPassword: vi.fn(),
+      resetPassword: vi.fn(),
+      resettingPassword: false,
+      refetchUser: vi.fn(),
+    };
+
+    render(
+      <AuthContext.Provider value={mockAuthContext}>
+        <Router>
+          <PrivateRoute requiredRoles={['admin']}> {/* Required roles specified */}
+            <div>Protected Content</div>
+          </PrivateRoute>
+        </Router>
+      </AuthContext.Provider>
+    );
+
+    // Assuming there's a test id or text for the Loading component
+    expect(screen.getByTestId('loading')).toBeInTheDocument();
+    expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('navigate')).not.toBeInTheDocument();
+  });
+
+  it('should render the component if requiredRoles is an empty array and user is authenticated', () => {
+    const mockAuthContext: AuthContextType = {
+      user: { id: '1', username: 'testuser', roles: ['student'], email: 'test@example.com', firstName: 'Test', secondName: '', firstLastName: 'User', secondLastName: '' }, // Mock authenticated user
+      loading: false,
+      signingIn: false,
+      signingUp: false,
+      requestingPasswordReset: false,
+      signin: vi.fn(),
+      signup: vi.fn(),
+      signout: vi.fn(),
+      forgotPassword: vi.fn(),
+      resetPassword: vi.fn(),
+      resettingPassword: false,
+      refetchUser: vi.fn(),
+    };
+
+    render(
+      <AuthContext.Provider value={mockAuthContext}>
+        <Router>
+          <PrivateRoute requiredRoles={[]}> {/* Empty requiredRoles array */}
+            <div>Protected Content</div>
+          </PrivateRoute>
+        </Router>
+      </AuthContext.Provider>
+    );
+
+    expect(screen.getByText('Protected Content')).toBeInTheDocument();
     expect(screen.queryByTestId('navigate')).not.toBeInTheDocument();
   });
 });

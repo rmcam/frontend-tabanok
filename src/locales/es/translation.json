@@ -1,0 +1,79 @@
+{
+  "auth": {
+    "signin": {
+      "label": {
+        "username": "Nombre de usuario",
+        "password": "Contraseña"
+      },
+      "placeholder": {
+        "username": "Correo electrónico o nombre de usuario",
+        "password": "Contraseña"
+      },
+      "link": {
+        "forgotPassword": "¿Olvidaste tu contraseña?"
+      },
+      "button": {
+        "signIn": "Iniciar sesión"
+      }
+    },
+    "signup": {
+      "validation": {
+        "emailRequired": "El correo electrónico es obligatorio",
+        "emailInvalid": "El correo electrónico no es válido",
+        "passwordRequired": "La contraseña es obligatoria",
+        "passwordMinLength": "La contraseña debe tener al menos 6 caracteres",
+        "usernameRequired": "El nombre de usuario es obligatorio",
+        "firstNameRequired": "El nombre es obligatorio",
+        "lastNameRequired": "El apellido es obligatorio"
+      },
+      "step": "Paso {{step}} de 3",
+      "label": {
+        "email": "Correo electrónico",
+        "password": "Contraseña",
+        "username": "Nombre de usuario",
+        "firstName": "Primer nombre",
+        "secondName": "Segundo nombre",
+        "firstLastName": "Primer apellido",
+        "secondLastName": "Segundo apellido"
+      },
+      "placeholder": {
+        "email": "Correo electrónico",
+        "password": "Contraseña",
+        "username": "Nombre de usuario",
+        "firstName": "Primer nombre",
+        "secondName": "Segundo nombre",
+        "firstLastName": "Primer apellido",
+        "secondLastName": "Segundo apellido"
+      },
+      "button": {
+        "next": "Siguiente",
+        "previous": "Anterior",
+        "signUp": "Registrarse"
+      },
+      "confirmation": {
+        "title": "Confirma tus datos:",
+        "email": "Correo electrónico: {{email}}",
+        "username": "Nombre de usuario: {{username}}",
+        "firstName": "Primer nombre: {{firstName}}",
+        "secondName": "Segundo nombre: {{secondName}}",
+        "firstLastName": "Primer apellido: {{firstLastName}}",
+        "secondLastName": "Segundo apellido: {{secondLastName}}"
+      }
+    },
+    "forgotPassword": {
+      "validation": {
+        "emailRequired": "Por favor, introduce tu dirección de correo electrónico.",
+        "emailInvalid": "Por favor, introduce una dirección de correo electrónico válida."
+      },
+      "label": {
+        "email": "Dirección de correo electrónico"
+      },
+      "placeholder": {
+        "email": "Introduce tu dirección de correo electrónico"
+      },
+      "button": {
+        "sendResetLink": "Enviar enlace de restablecimiento"
+      }
+    }
+  }
+}

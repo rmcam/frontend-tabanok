@@ -9,20 +9,20 @@ interface StudentProgressData {
   // Add other relevant progress fields
 }
 
-interface Achievement {
+export interface Achievement {
   id: string;
   name: string;
   description: string;
   // Add other relevant achievement fields (e.g., icon, criteria)
 }
 
-interface RecommendedActivity {
+export interface RecommendedActivity {
   id: string;
   title: string;
   // Add other relevant recommendation fields (e.g., type, link)
 }
 
-interface CulturalNarrative {
+export interface CulturalNarrative {
   id: string;
   title: string;
   description: string;

@@ -12,6 +12,6 @@
     "jsx": "react-jsx",
     "composite": true,
     "lib": [],
-    "types": ["vitest/globals", "vitest/react/with-resolvers"]
+    "types": ["vitest/globals", "vitest/react/with-resolvers", "@testing-library/react"]
   }
 }

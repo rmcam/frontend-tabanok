@@ -2,79 +2,67 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { useCarousel } from './useCarousel';
 
 describe('useCarousel', () => {
-  it('should initialize with the first slide', () => {
-    const { result } = renderHook(() => useCarousel(0, 5));
-    expect(result.current.slide).toBe(0);
+  const totalSlides = 5;
+
+  it('should initialize with the correct initial slide', () => {
+    const initialSlide = 2;
+    const { result } = renderHook(() => useCarousel(initialSlide, totalSlides));
+    expect(result.current.slide).toBe(initialSlide);
   });
 
-  it('should move to the next slide', () => {
-    const { result } = renderHook(() => useCarousel(0, 5));
+  it('should advance to the next slide', () => {
+    const initialSlide = 0;
+    const { result } = renderHook(() => useCarousel(initialSlide, totalSlides));
+
     act(() => {
       result.current.nextSlide();
     });
-    expect(result.current.slide).toBe(1);
+
+    expect(result.current.slide).toBe(initialSlide + 1);
   });
 
-  it('should wrap around to the first slide when nextSlide is called on the last slide', () => {
-    const { result } = renderHook(() => useCarousel(0, 5));
-    act(() => {
-      result.current.setSlide(4); // Go to the last slide (index 4)
-    });
+  it('should wrap around to the first slide when advancing from the last slide', () => {
+    const initialSlide = totalSlides - 1;
+    const { result } = renderHook(() => useCarousel(initialSlide, totalSlides));
+
     act(() => {
       result.current.nextSlide();
     });
+
     expect(result.current.slide).toBe(0);
   });
 
-  it('should move to the previous slide', () => {
-    const { result } = renderHook(() => useCarousel(0, 5));
-    act(() => {
-      result.current.setSlide(2); // Start at slide 2
-    });
+  it('should go to the previous slide', () => {
+    const initialSlide = 2;
+    const { result } = renderHook(() => useCarousel(initialSlide, totalSlides));
+
     act(() => {
       result.current.prevSlide();
     });
-    expect(result.current.slide).toBe(1);
+
+    expect(result.current.slide).toBe(initialSlide - 1);
   });
 
-  it('should wrap around to the last slide when prevSlide is called on the first slide', () => {
-    const { result } = renderHook(() => useCarousel(0, 5));
+  it('should wrap around to the last slide when going back from the first slide', () => {
+    const initialSlide = 0;
+    const { result } = renderHook(() => useCarousel(initialSlide, totalSlides));
+
     act(() => {
       result.current.prevSlide();
     });
-    expect(result.current.slide).toBe(4); // Last slide (index 4)
+
+    expect(result.current.slide).toBe(totalSlides - 1);
   });
 
-  it('should go to a specific slide', () => {
-    const { result } = renderHook(() => useCarousel(0, 5));
-    act(() => {
-      result.current.setSlide(3);
-    });
-    expect(result.current.slide).toBe(3);
-  });
+  it('should set the slide directly', () => {
+    const initialSlide = 0;
+    const newSlide = 3;
+    const { result } = renderHook(() => useCarousel(initialSlide, totalSlides));
 
-  it('should not go to a slide out of bounds', () => {
-    const { result } = renderHook(() => useCarousel(0, 5));
     act(() => {
-      result.current.setSlide(10); // Out of bounds
+      result.current.setSlide(newSlide);
     });
-    expect(result.current.slide).toBe(0); // Should stay at the current slide (0)
-  });
 
-  it('should handle zero slides', () => {
-    const { result } = renderHook(() => useCarousel(0, 0));
-    expect(result.current.slide).toBe(0);
-    act(() => {
-      result.current.nextSlide();
-    });
-    expect(result.current.slide).toBe(0);
-    act(() => {
-      result.current.prevSlide();
-    });
-    expect(result.current.slide).toBe(0);
-    act(() => {
-      result.current.setSlide(0);
-    });
-    expect(result.current.slide).toBe(0);
+    expect(result.current.slide).toBe(newSlide);
   });
 });

@@ -15,7 +15,7 @@ Este documento lista las tareas pendientes y los próximos pasos planificados pa
   - Asegurar que los formularios tengan etiquetas asociadas a cada campo y mensajes de error accesibles (`aria-invalid`, `aria-describedby`). (Completado: Se ha verificado que los componentes de formulario genéricos en `src/components/ui/Form.tsx` implementan estas prácticas).
   - Mejorar la lectura por lectores de pantalla añadiendo descripciones y roles adecuados. (En progreso: Se ha verificado que los componentes de UI basados en Radix UI y el uso de `sr-only` contribuyen a esto).
 - **Testing:**
-  - Mejorar la cobertura de tests en el frontend, especialmente en rutas protegidas y hooks personalizados. (En progreso - creados tests para useFetchData, useFetchUnits, useMultimedia)
+  - Mejorar la cobertura de tests en el frontend, especialmente en rutas protegidas y hooks personalizados. (Completado - Cobertura mejorada en hooks personalizados y rutas protegidas, incluyendo use-mobile, useCarousel, useFormValidation, useFetchData, useFetchUnits, useFetchStudentData, useSidebar, useSidebarCookie, useAuth, useAuthService y PrivateRoute). El hook `useGamificationData` ha sido refactorizado para utilizar `useFetchData`.
   - Mejorar la cobertura de tests en el backend. (Completado)
 - **Despliegue:**
   - Automatizar despliegues a producción (el pipeline CI/CD ya construye y sube imágenes, falta activar el paso SSH). (Configurado con Docker Hub y GitHub Actions)
@@ -39,14 +39,14 @@ Este documento lista las tareas pendientes y los próximos pasos planificados pa
   - **Funcionalidades Incompletas Identificadas (Backend):**
     - **Module:** Se ha creado la estructura básica del módulo (`module.module.ts`), controlador (`module.controller.ts`), servicio (`module.service.ts`) y entidad (`entities/module.entity.ts`), y se ha registrado en `AppModule`. La lógica del servicio para interactuar con la base de datos está implementada. (Completado)
 - **Validación Lingüística:**
-  - Internacionalizar mensajes existentes en formularios y otros componentes del frontend. (En progreso: Se ha iniciado la internacionalización en los formularios de autenticación, pero se han encontrado errores persistentes de parsing/formato que impiden completarla actualmente).
+  - Internacionalizar mensajes existentes en formularios y otros componentes del frontend. (Completado: Se añadió el archivo de traducción en español y se actualizó la configuración de i18next).
   - Integrar control ortográfico y gramatical en inputs de contenido textual.
   - Documentar reglas y filtros personalizados para validación semántica.
   - Validar calidad lingüística en contenido generado por usuarios.
 - **Refactorización y Limpieza:**
   - Revisar y eliminar redundancias y campos obsoletos restantes en el código y la base de datos. (Se han abordado algunas redundancias en el módulo de autenticación).
   - Revisar redundancias y eliminar campos obsoletos restantes en el módulo de gamificación.
-- Refactorizar los componentes en `src/components` para mejorar la organización y seguir las buenas prácticas (esto ya se ha iniciado según `EstadoProyecto.md`).
+- Refactorizar los componentes en `src/components` para mejorar la organización y seguir las buenas prácticas (esto ya se ha iniciado según `EstadoProyecto.md`). Se ha corregido el manejo de errores en los componentes de gamificación (`AchievementsPage.tsx`, `GamificationPage.tsx`, `LeaderboardPage.tsx`).
 - ~~Corregir errores de TypeScript en el módulo de recomendaciones~~
 - **Módulo de Recomendaciones:**
   - ~~Corregir errores de TypeScript en `recommendations.service.ts` y `recommendations.controller.ts`~~
@@ -73,4 +73,4 @@ Este documento lista las tareas pendientes y los próximos pasos planificados pa
 
 ---
 
-Última actualización: 8/5/2025, 5:17 p. m. (America/Mexico_City, UTC-6:00)
+Última actualización: 12/5/2025, 11:59 p. m. (America/Bogota, UTC-5:00)

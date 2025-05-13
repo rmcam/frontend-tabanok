@@ -16,14 +16,14 @@ import {
   TableRow,
   Textarea,
 } from "@/components/ui/";
-import { useEffect, useState, useMemo } from "react"; // Import useMemo
+import { useState, useMemo, useCallback, useEffect } from "react"; // Keep useEffect for editContent
 import { toast } from "sonner";
 import api from "@/lib/api";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import clsx from 'clsx'; // Import clsx
 import MultimediaPlayer from "../../common/MultimediaPlayer"; // Import MultimediaPlayer
 import useFormValidation from "@/hooks/useFormValidation"; // Import useFormValidation
+import useFetchContentData from "@/hooks/useFetchContentData"; // Import the new hook
 
 // Define a type for multimedia items (copied from MultimediaGallery.tsx)
 interface MultimediaItem {
@@ -37,7 +37,7 @@ interface MultimediaItem {
 }
 
 // Define a type for content items
-interface ContentItem {
+export interface ContentItem {
   id: string; // Cambiado a string asumiendo UUIDs en el backend
   title: string;
   description: string;
@@ -48,7 +48,7 @@ interface ContentItem {
   multimediaItems?: MultimediaItem[]; // Optional list of associated multimedia items
 }
 
-interface Category { // Mapeado a 'Topic' en el backend
+export interface Category { // Mapeado a 'Topic' en el backend
   id: string; // Cambiado a string asumiendo UUIDs en el backend
   name: string; // Asumiendo que el campo se llama 'name' o 'title' en el backend
 }
@@ -58,7 +58,21 @@ interface Category { // Mapeado a 'Topic' en el backend
 //   name: string;
 // }
 
-interface ContentFormValues {
+// Define interface for consolidated form data
+interface ContentFormData {
+  title: string;
+  description: string;
+  category: string;
+  contentType: string;
+  tags: string[];
+  tagInput: string; // Input for adding tags
+  content: string | File[] | File | null; // Updated state type
+  associatedMultimedia: MultimediaItem[]; // State for associated multimedia
+  contentError: string; // Error for content file/text
+}
+
+// Define interface for useFormValidation
+interface ContentFormValidationValues {
   title: string;
   description: string;
   category: string;
@@ -68,34 +82,39 @@ interface ContentFormValues {
 
 const ContentManager = () => {
   const [showForm, setShowForm] = useState(false);
-  const [contentType, setContentType] = useState("");
-  const [contents, setContents] = useState<ContentItem[]>([]);
   const [editContent, setEditContent] = useState<ContentItem | null>(null); // Use the defined type
-  const [loading, setLoading] = useState(true);
   const [isLoadingSave, setIsLoadingSave] = useState(false); // Loading state for save operation
   const [isLoadingDelete, setIsLoadingDelete] = useState(false); // Loading state for delete operation
-  const [categories, setCategories] = useState<Category[]>([]); // State for categories (Topics)
-  // const [availableTags, setAvailableTags] = useState<Tag[]>([]); // State for available tags - Removed as it's not used
-  const [associatedMultimedia, setAssociatedMultimedia] = useState<MultimediaItem[]>([]); // State for associated multimedia
 
+  // Use the new hook for fetching content data
+  const { contents, categories, loading, refetch } = useFetchContentData();
 
-  // State for form fields (reverted to individual states)
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [category, setCategory] = useState(""); // Store selected category ID or name
-  const [tags, setTags] = useState<string[]>([]); // Store selected tags as array of strings
-  const [tagInput, setTagInput] = useState(""); // Input for adding tags
-  const [content, setContent] = useState<string | File[] | File | null>(null); // Updated state type
-  const [contentError, setContentError] = useState(""); // Error for content file/text
+  // Consolidated state for form fields
+  const [formData, setFormData] = useState<ContentFormData>({
+    title: "",
+    description: "",
+    category: "",
+    contentType: "",
+    tags: [],
+    tagInput: "",
+    content: null,
+    associatedMultimedia: [],
+    contentError: "",
+  });
+
+  // Helper function to update form data
+  const updateFormData = useCallback((updates: Partial<ContentFormData>) => {
+    setFormData(prevData => ({ ...prevData, ...updates }));
+  }, []);
 
 
   // Use useFormValidation for validation and error handling
-  const initialFormValues: ContentFormValues = useMemo(() => ({
-    title: title, // Use individual state
-    description: description, // Use individual state
-    category: category, // Use individual state
-    contentType: contentType, // Use individual state
-  }), [title, description, category, contentType]); // Add dependencies
+  const initialFormValidationValues: ContentFormValidationValues = useMemo(() => ({
+    title: formData.title,
+    description: formData.description,
+    category: formData.category,
+    contentType: formData.contentType,
+  }), [formData.title, formData.description, formData.category, formData.contentType]);
 
   const validationRules = useMemo(() => ({
     title: (value: string) => (value.trim() ? undefined : 'El título es obligatorio.'),
@@ -109,59 +128,42 @@ const ContentManager = () => {
     errors,
     handleSubmit,
     setErrors,
-  } = useFormValidation<ContentFormValues>(initialFormValues); // Explicitly set the generic type
+  } = useFormValidation<ContentFormValidationValues>(initialFormValidationValues); // Explicitly set the generic type
 
 
   // Destructure errors for easier access
   const { title: titleError, description: descriptionError, category: categoryError, contentType: contentTypeError } = errors;
 
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // TODO: Verificar la estructura exacta de la respuesta de /content, /topics y /tags
-        const [contentsData, categoriesData] = await Promise.all([ // Removed tagsData from destructuring
-          api.get("/content"), // Usar endpoint /content (singular)
-          api.get("/topics"), // Usar endpoint /topics (plural)
-          api.get("/tags"), // Usar endpoint /tags (plural)
-        ]);
-        setContents(contentsData); // Asumiendo que contentsData es un array de ContentItem
-        setCategories(categoriesData); // Asumiendo que categoriesData es un array de Category (Topic)
-        // setAvailableTags(tagsData); // Removed setting availableTags state
-      } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : "Error desconocido al cargar datos iniciales.";
-        toast.error(`Error al cargar los contenidos: ${errorMessage}`);
-        console.error("Error fetching initial data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-
+  // Effect to populate form when editing existing content
   useEffect(() => {
     if (editContent) {
-      setTitle(editContent.title);
-      setDescription(editContent.description);
-      setCategory(editContent.category); // Assuming editContent.category is the ID or name
-      setTags(editContent.tags);
-      setContent(editContent.type === "texto" ? editContent.content : null);
-      setAssociatedMultimedia(editContent.multimediaItems || []); // Set associated multimedia
+      setFormData({
+        title: editContent.title,
+        description: editContent.description,
+        category: editContent.category, // Assuming editContent.category is the ID or name
+        contentType: editContent.type,
+        tags: editContent.tags,
+        tagInput: "", // Reset tag input
+        content: editContent.type === "texto" ? editContent.content : null,
+        associatedMultimedia: editContent.multimediaItems || [], // Set associated multimedia
+        contentError: "", // Clear content error
+      });
       setErrors({}); // Clear errors when editing
-      setContentError(""); // Clear content error
     } else {
-      setTitle(""); // Reset individual state
-      setDescription(""); // Reset individual state
-      setCategory(""); // Reset individual state
-      setContentType(""); // Reset individual state
-      setTags([]);
-      setTagInput("");
-      setContent(null);
-      setAssociatedMultimedia([]); // Clear associated multimedia when creating new
+      // Reset form data when creating new content
+      setFormData({
+        title: "",
+        description: "",
+        category: "",
+        contentType: "",
+        tags: [],
+        tagInput: "",
+        content: null,
+        associatedMultimedia: [],
+        contentError: "",
+      });
       setErrors({}); // Clear errors when creating new
-      setContentError(""); // Clear content error
     }
   }, [editContent, setErrors]); // Add dependencies
 
@@ -177,20 +179,20 @@ const ContentManager = () => {
 
     // Perform additional validation for content file/text
     let isContentValid = true;
-    setContentError(""); // Clear previous content error
+    updateFormData({ contentError: "" }); // Clear previous content error
 
-    if (contentType === "texto" && (!content || (typeof content === 'string' && !content.trim()))) {
-      setContentError("El contenido es obligatorio.");
+    if (formData.contentType === "texto" && (!formData.content || (typeof formData.content === 'string' && !formData.content.trim()))) {
+      updateFormData({ contentError: "El contenido es obligatorio." });
       isContentValid = false;
     }
 
     if (
-      (contentType === "imagen" ||
-        contentType === "video" ||
-        contentType === "audio") &&
-      !content && (!editContent || (editContent && associatedMultimedia.length === 0))
+      (formData.contentType === "imagen" ||
+        formData.contentType === "video" ||
+        formData.contentType === "audio") &&
+      !formData.content && (!editContent || (editContent && formData.associatedMultimedia.length === 0))
     ) {
-      setContentError("El archivo es obligatorio.");
+      updateFormData({ contentError: "El archivo es obligatorio." });
       isContentValid = false;
     }
 
@@ -202,45 +204,45 @@ const ContentManager = () => {
 
     try {
       const contentData = {
-        title,
-        description,
-        category, // Send category ID or name
-        tags, // Send tags as array of strings
-        type: contentType, // Use individual state
-        content: contentType === "texto" ? (content as string | null) : null,
+        title: formData.title,
+        description: formData.description,
+        category: formData.category, // Send category ID or name
+        tags: formData.tags, // Send tags as array of strings
+        type: formData.contentType,
+        content: formData.contentType === "texto" ? (formData.content as string | null) : null,
       };
 
       const method = editContent ? "PUT" : "POST"; // Backend uses PUT for update
       const url = editContent ? `/content/${editContent.id}` : `/content`; // Usar endpoint /content (singular)
 
       let body;
-      if (contentType === "texto") { // Use individual state
+      if (formData.contentType === "texto") {
         body = JSON.stringify(contentData);
       } else {
-        const formData = new FormData();
-        if (Array.isArray(content)) {
-          content.forEach((file) => {
-            formData.append("files", file); // Assuming backend expects 'files' for multimedia files
+        const formDataToSend = new FormData();
+        if (Array.isArray(formData.content)) {
+          formData.content.forEach((file) => {
+            formDataToSend.append("files", file); // Assuming backend expects 'files' for multimedia files
           });
-        } else if (content instanceof File) {
-          formData.append("files", content); // Assuming backend expects 'files' for multimedia files
+        } else if (formData.content instanceof File) {
+          formDataToSend.append("files", formData.content); // Assuming backend expects 'files' for multimedia files
         }
-        formData.append("title", title);
-        formData.append("description", description);
-        formData.append("category", category); // Send category ID or name
-        tags.forEach(tag => {
-          formData.append("tags[]", tag); // Assuming backend expects 'tags[]' for array
+        formDataToSend.append("title", formData.title);
+        formDataToSend.append("description", formData.description);
+        formDataToSend.append("category", formData.category); // Send category ID or name
+        formData.tags.forEach(tag => {
+          formDataToSend.append("tags[]", tag); // Assuming backend expects 'tags[]' for array
         });
-        formData.append("type", contentType); // Use individual state
+        formDataToSend.append("type", formData.contentType);
         // If editing, include content ID
         if (editContent) {
-          formData.append("id", editContent.id); // ID is string
+          formDataToSend.append("id", editContent.id); // ID is string
           // Include IDs of associated multimedia to keep
-          associatedMultimedia.forEach(media => {
-            formData.append("existingMultimediaIds[]", media.id);
+          formData.associatedMultimedia.forEach(media => {
+            formDataToSend.append("existingMultimediaIds[]", media.id);
           });
         }
-        body = formData;
+        body = formDataToSend;
       }
 
       if (method === "PUT") {
@@ -250,18 +252,8 @@ const ContentManager = () => {
             toast.success("Contenido actualizado!", {
               description: "El contenido se ha actualizado correctamente.",
             });
-            // After successfully updating, refetch the list of contents
-            // TODO: Verificar la estructura exacta de la respuesta de /content
-            api.get("/content") // Usar endpoint /content (singular)
-              .then((data: ContentItem[]) => {
-                setContents(data);
-              })
-              .catch((error: unknown) => {
-                toast.error("Error!", {
-                  description: "Hubo un error al obtener los contenidos actualizados.",
-                });
-                console.error("Error al obtener los contenidos actualizados:", error);
-              });
+            // After successfully updating, refetch the list of contents using the hook's refetch function
+            refetch();
           })
           .catch((error: unknown) => {
             toast.error("Error!", {
@@ -276,39 +268,32 @@ const ContentManager = () => {
             toast.success("Contenido guardado!", {
               description: "El contenido se ha guardado correctamente.",
             });
-            // After successfully creating a new content, fetch the updated list of contents
-            // TODO: Verificar la estructura exacta de la respuesta de /content
-            api.get("/content") // Usar endpoint /content (singular)
-              .then((data: ContentItem[]) => {
-                setContents(data);
-              })
-              .catch((error: unknown) => {
-                toast.error("Error!", {
-                  description: "Hubo un error al obtener los contenidos actualizados.",
-                });
-                console.error("Error al obtener los contenidos actualizados:", error);
-              });
+            // After successfully creating a new content, refetch the updated list of contents using the hook's refetch function
+            refetch();
           })
           .catch((error: unknown) => {
             toast.error("Error!", {
-              description: "Hubo un error al guardar el contenido.",
+              description: "Hubo un error al obtener los contenidos actualizados.",
             });
-            console.error("Error al guardar el contenido:", error);
+            console.error("Error al obtener los contenidos actualizados:", error);
           });
       }
 
       setShowForm(false);
       setEditContent(null);
-      setTitle(""); // Reset individual state
-      setDescription(""); // Reset individual state
-      setCategory(""); // Reset individual state
-      setContentType(""); // Reset individual state
-      setTags([]);
-      setTagInput("");
-      setContent(null);
-      setAssociatedMultimedia([]); // Clear associated multimedia after saving
+      // Reset form data on success
+      setFormData({
+        title: "",
+        description: "",
+        category: "",
+        contentType: "",
+        tags: [],
+        tagInput: "",
+        content: null,
+        associatedMultimedia: [],
+        contentError: "",
+      });
       setErrors({}); // Clear errors on success
-      setContentError(""); // Clear content error on success
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Error desconocido al guardar contenido.";
       const action = editContent ? "actualizar" : "guardar";
@@ -329,7 +314,8 @@ const ContentManager = () => {
         description: "El contenido se ha eliminado correctamente.",
       });
 
-      setContents(contents.filter((c) => c.id !== id));
+      // After successfully deleting, refetch the list of contents using the hook's refetch function
+      refetch();
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Error desconocido al eliminar contenido.";
       toast.error(`Error al eliminar el contenido: ${errorMessage}`);
@@ -349,20 +335,21 @@ const ContentManager = () => {
       });
 
       // Remove the deleted multimedia item from the associatedMultimedia state
-      setAssociatedMultimedia(associatedMultimedia.filter(media => media.id !== multimediaId));
+      updateFormData({ associatedMultimedia: formData.associatedMultimedia.filter(media => media.id !== multimediaId) });
 
       // Optionally, refetch contents to ensure the table is updated
       // TODO: Verificar la estructura exacta de la respuesta de /content
-      api.get("/content") // Usar endpoint /content (singular)
-        .then((data: ContentItem[]) => {
-          setContents(data);
-        })
-        .catch((error: unknown) => {
-          toast.error("Error!", {
-            description: "Hubo un error al obtener los contenidos actualizados después de eliminar multimedia.",
-          });
-          console.error("Error fetching updated contents after deleting multimedia:", error);
-        });
+      // Removed refetching contents here as it's handled after saving/deleting content
+      // api.get("/content") // Usar endpoint /content (singular)
+      //   .then((data: ContentItem[]) => {
+      //     setContents(data);
+      //   })
+      //   .catch((error: unknown) => {
+      //     toast.error("Error!", {
+      //       description: "Hubo un error al obtener los contenidos actualizados después de eliminar multimedia.",
+      //     });
+      //     console.error("Error fetching updated contents after deleting multimedia:", error);
+      //   });
 
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Error desconocido";
@@ -376,25 +363,28 @@ const ContentManager = () => {
     // Add type for content
     setEditContent(content);
     setShowForm(true);
-    setTitle(content.title);
-    setDescription(content.description);
-    setCategory(content.category); // Assuming content.category is the ID or name
-    setTags(content.tags);
-    setContent(content.type === "texto" ? content.content : null);
-    setAssociatedMultimedia(content.multimediaItems || []); // Set associated multimedia
+    setFormData({
+      title: content.title,
+      description: content.description,
+      category: content.category, // Assuming content.category is the ID or name
+      contentType: content.type,
+      tags: content.tags,
+      tagInput: "", // Reset tag input
+      content: content.type === "texto" ? content.content : null,
+      associatedMultimedia: content.multimediaItems || [], // Set associated multimedia
+      contentError: "", // Clear content error
+    });
     setErrors({}); // Clear errors when editing
-    setContentError(""); // Clear content error
   };
 
   const handleAddTag = () => {
-    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-      setTags([...tags, tagInput.trim()]);
-      setTagInput("");
+    if (formData.tagInput.trim() && !formData.tags.includes(formData.tagInput.trim())) {
+      updateFormData({ tags: [...formData.tags, formData.tagInput.trim()], tagInput: "" });
     }
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
-    setTags(tags.filter(tag => tag !== tagToRemove));
+    updateFormData({ tags: formData.tags.filter(tag => tag !== tagToRemove) });
   };
 
 
@@ -405,16 +395,19 @@ const ContentManager = () => {
         onClick={() => {
           setShowForm(!showForm);
           setEditContent(null);
-          setTitle(""); // Reset individual state
-          setDescription(""); // Reset individual state
-          setCategory(""); // Reset individual state
-          setContentType(""); // Reset individual state
-          setTags([]);
-          setTagInput("");
-          setContent(null);
-          setAssociatedMultimedia([]); // Clear associated multimedia when creating new
+          // Reset form data when creating new content
+          setFormData({
+            title: "",
+            description: "",
+            category: "",
+            contentType: "",
+            tags: [],
+            tagInput: "",
+            content: null,
+            associatedMultimedia: [],
+            contentError: "",
+          });
           setErrors({}); // Clear errors when creating new
-          setContentError(""); // Clear content error
         }}
       >
         Crear Nuevo Contenido
@@ -427,16 +420,19 @@ const ContentManager = () => {
           onCancel={() => {
             setShowForm(false);
             setEditContent(null);
-            setTitle(""); // Reset individual state
-            setDescription(""); // Reset individual state
-            setCategory(""); // Reset individual state
-            setContentType(""); // Reset individual state
-            setTags([]);
-            setTagInput("");
-            setContent(null);
-            setAssociatedMultimedia([]); // Clear associated multimedia on cancel
+            // Reset form data on cancel
+            setFormData({
+              title: "",
+              description: "",
+              category: "",
+              contentType: "",
+              tags: [],
+              tagInput: "",
+              content: null,
+              associatedMultimedia: [],
+              contentError: "",
+            });
             setErrors({}); // Clear errors on cancel
-            setContentError(""); // Clear content error
           }}
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> {/* Use grid for layout */}
@@ -445,9 +441,9 @@ const ContentManager = () => {
               <Input
                 id="title"
                 name="title" // Add name attribute
-                value={title}
-                onChange={(e) => { // Use individual state handler
-                  setTitle(e.target.value);
+                value={formData.title}
+                onChange={(e) => {
+                  updateFormData({ title: e.target.value });
                   setErrors({}); // Clear errors on change
                 }}
                 disabled={isLoadingSave} // Disable input while saving
@@ -460,9 +456,9 @@ const ContentManager = () => {
             <div className="grid gap-2">
               <Label htmlFor="category">Categoría</Label>
               <Select
-                value={category}
-                onValueChange={(value) => { // Use individual state handler
-                  setCategory(value);
+                value={formData.category}
+                onValueChange={(value) => {
+                  updateFormData({ category: value });
                   setErrors({}); // Clear errors on change
                 }}
                 disabled={isLoadingSave} // Disable select while saving
@@ -488,9 +484,9 @@ const ContentManager = () => {
             <Textarea
               id="description"
               name="description" // Add name attribute
-              value={description}
-              onChange={(e) => { // Use individual state handler
-                setDescription(e.target.value);
+              value={formData.description}
+              onChange={(e) => {
+                updateFormData({ description: e.target.value });
                 setErrors({}); // Clear errors on change
               }}
               disabled={isLoadingSave} // Disable textarea while saving
@@ -501,49 +497,19 @@ const ContentManager = () => {
             {descriptionError && <p id="content-description-error" className="text-red-500 text-sm">{descriptionError}</p>} {/* Add id to error message */}
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="tags">Etiquetas</Label>
-            <div className="flex items-center space-x-2">
-              <Input
-                id="tags"
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleAddTag();
-                  }
-                }}
-                disabled={isLoadingSave} // Disable input while saving
-                // Add aria-invalid and aria-describedby if tags validation is added
-              />
-              <Button type="button" onClick={handleAddTag} disabled={isLoadingSave}>Agregar</Button>
-            </div>
-            <div className="flex flex-wrap gap-1">
-              {tags.map((tag, index) => (
-                <span key={index} className="bg-gray-200 px-2 py-1 rounded-full text-sm flex items-center">
-                  {tag}
-                  <button type="button" className="ml-1 text-red-500" onClick={() => handleRemoveTag(tag)} disabled={isLoadingSave}>x</button>
-                </span>
-              ))}
-            </div>
-            {/* Add tagsError display if needed */}
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="type">Tipo de Contenido</Label>
+            <Label htmlFor="contentType">Tipo de Contenido</Label>
             <Select
-              value={contentType}
-              onValueChange={(value) => { // Use individual state handler
-                setContentType(value);
+              value={formData.contentType}
+              onValueChange={(value) => {
+                updateFormData({ contentType: value, content: null, associatedMultimedia: [], contentError: "" }); // Clear content and multimedia when type changes
                 setErrors({}); // Clear errors on change
-                setContent(null); // Clear content/file when type changes
-                setContentError(""); // Clear content error when type changes
               }}
-              disabled={isLoadingSave} // Disable select while saving
+              disabled={isLoadingSave || !!editContent} // Disable select while saving or editing
               aria-invalid={!!contentTypeError} // Add aria-invalid
               aria-describedby={contentTypeError ? "content-type-error" : undefined} // Add aria-describedby
             >
-              <SelectTrigger id="type" className={contentTypeError ? "border-red-500" : ""}> {/* Add red border on error */}
-                <SelectValue placeholder="Seleccione un tipo de contenido" />
+              <SelectTrigger id="contentType" className={contentTypeError ? "border-red-500" : ""}> {/* Add red border on error */}
+                <SelectValue placeholder="Seleccione un tipo" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="texto">Texto</SelectItem>
@@ -554,101 +520,91 @@ const ContentManager = () => {
             </Select>
             {contentTypeError && <p id="content-type-error" className="text-red-500 text-sm">{contentTypeError}</p>} {/* Add id to error message */}
           </div>
-          {/* Display associated multimedia when editing */}
-          {editContent && associatedMultimedia.length > 0 && (
-            <div className="grid gap-2">
-              <Label>Multimedia Asociada</Label>
-              <div className="flex flex-wrap gap-2">
-                {associatedMultimedia.map(media => (
-                  <div key={media.id} className="relative border rounded p-2">
-                     <MultimediaPlayer
-                        type={media.type}
-                        url={media.url}
-                        title={media.title}
-                        width={100} // Smaller size for display in form
-                      />
-                    <button
-                      className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
-                      onClick={() => handleDeleteMultimedia(media.id)}
-                      disabled={isLoadingDelete} // Disable delete multimedia button while deleting
-                    >
-                      X
-                    </button>
-                  </div>
-                ))}
-              </div>
+          <div className="grid gap-2">
+            <Label htmlFor="tags">Tags</Label>
+            <div className="flex items-center space-x-2">
+              <Input
+                id="tagInput"
+                value={formData.tagInput}
+                onChange={(e) => updateFormData({ tagInput: e.target.value })}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault(); // Prevent form submission
+                    handleAddTag();
+                  }
+                }}
+                placeholder="Agregar tag (presiona Enter)"
+                disabled={isLoadingSave} // Disable input while saving
+              />
+              <Button onClick={handleAddTag} type="button" disabled={isLoadingSave}>Agregar</Button> {/* Add type="button" */}
             </div>
-          )}
-          {contentType === "texto" ? (
+            <div className="flex flex-wrap gap-2">
+              {formData.tags.map((tag, index) => (
+                <span key={index} className="flex items-center bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-sm">
+                  {tag}
+                  <button
+                    type="button" // Add type="button"
+                    onClick={() => handleRemoveTag(tag)}
+                    className="ml-1 text-gray-600 hover:text-gray-900 focus:outline-none"
+                    disabled={isLoadingSave} // Disable button while saving
+                  >
+                    &times;
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
+          {/* Content Input based on contentType */}
+          {formData.contentType === "texto" ? (
             <div className="grid gap-2">
               <Label htmlFor="content">Contenido</Label>
               <ReactQuill
-                id="content"
-                value={content as string}
+                theme="snow"
+                value={formData.content as string} // Cast to string for ReactQuill
                 onChange={(value) => {
-                  setContent(value);
-                  setContentError(""); // Clear error on content change
+                  updateFormData({ content: value, contentError: "" }); // Clear content error on change
                 }}
-                className={clsx(
-                  "h-32 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-popover file:text-popover-foreground file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity50",
-                  contentError ? "border-red-500" : "" // Add red border on error
-                )}
-                aria-invalid={!!contentError} // Add aria-invalid
-                aria-describedby={contentError ? "content-content-error" : undefined} // Add aria-describedby
+                readOnly={isLoadingSave} // Disable editor while saving
               />
-              {contentError && <p id="content-content-error" className="text-red-500 text-sm">{contentError}</p>} {/* Add id to error message */}
+              {formData.contentError && <p className="text-red-500 text-sm">{formData.contentError}</p>} {/* Display content error */}
             </div>
-          ) : contentType === "imagen" ||
-            contentType === "video" ||
-            contentType === "audio" ? (
+          ) : formData.contentType === "imagen" ||
+            formData.contentType === "video" ||
+            formData.contentType === "audio" ? (
             <div className="grid gap-2">
-              <Label htmlFor="content">Archivo</Label>
+              <Label htmlFor="file">Archivo</Label>
               <Input
-                id="content"
+                id="file"
                 type="file"
-                multiple
                 onChange={(e) => {
-                  const files = e.target.files
-                    ? Array.from(e.target.files)
-                    : null;
-                  setContent(files);
-                  setContentError(""); // Clear error on file selection
+                  if (e.target.files) {
+                    // Handle multiple files if needed, for now assume single file
+                    updateFormData({ content: e.target.files[0], contentError: "" }); // Clear content error on change
+                  }
                 }}
-                disabled={isLoadingSave} // Disable file input while saving
-                aria-invalid={!!contentError} // Add aria-invalid
-                aria-describedby={contentError ? "content-content-error" : undefined} // Add aria-describedby
-                className={contentError ? "border-red-500" : ""}// Add red border on error
+                disabled={isLoadingSave} // Disable input while saving
+                aria-invalid={!!formData.contentError} // Add aria-invalid
+                aria-describedby={formData.contentError ? "content-file-error" : undefined} // Add aria-describedby
+                className={formData.contentError ? "border-red-500" : ""} // Add red border on error
               />
-              {contentError && <p id="content-content-error" className="text-red-500 text-sm">{contentError}</p>} {/* Add id to error message */}
-              {Array.isArray(content) && content.length > 0 && (
-                <div>
-                  <h4>Archivos seleccionados:</h4>
-                  <div className="flex flex-wrap">
-                    {content.map((file: File, index: number) => (
-                      <div
-                        key={index}
-                        className="w-24 h-24 m-1 border rounded relative"
-                      >
-                        {file.type.startsWith("image/") ? (
-                          <img
-                            src={URL.createObjectURL(file)}
-                            alt={file.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <p className="text-sm text-center">{file.name}</p>
-                        )}
-                        <button
-                          className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center"
-                          onClick={() => {
-                            const newContent = [...content];
-                            newContent.splice(index, 1);
-                            setContent(newContent);
-                          }}
-                          disabled={isLoadingSave} // Disable remove file button while saving
+              {formData.contentError && <p id="content-file-error" className="text-red-500 text-sm">{formData.contentError}</p>} {/* Display content error */}
+              {/* Display associated multimedia when editing */}
+              {editContent && formData.associatedMultimedia.length > 0 && (
+                <div className="mt-4">
+                  <h3 className="text-lg font-semibold mb-2">Archivos Multimedia Asociados:</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {formData.associatedMultimedia.map(media => (
+                      <div key={media.id} className="relative border rounded p-2">
+                        <MultimediaPlayer url={media.url} type={media.type} />
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-1 right-1"
+                          onClick={() => handleDeleteMultimedia(media.id)}
+                          disabled={isLoadingSave || isLoadingDelete} // Disable button while saving or deleting
                         >
-                          X
-                        </button>
+                          Eliminar
+                        </Button>
                       </div>
                     ))}
                   </div>
@@ -658,47 +614,60 @@ const ContentManager = () => {
           ) : null}
         </Form>
       )}
-      <div>
-        <h3>Contenidos Existentes</h3>
-        <div className="overflow-x-auto"> {/* Add overflow-x-auto for responsive tables */}
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Título</TableHead>
+      <div className="overflow-x-auto"> {/* Add overflow-x-auto for responsive tables */}
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Título</TableHead>
               <TableHead>Descripción</TableHead>
               <TableHead>Categoría</TableHead>
-              <TableHead>Etiquetas</TableHead>
               <TableHead>Tipo</TableHead>
+              <TableHead>Tags</TableHead>
               <TableHead>Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={6}>Cargando contenidos...</TableCell>
+                <TableCell colSpan={6} className="text-center">Cargando contenidos...</TableCell>
+              </TableRow>
+            ) : contents.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center">No hay contenidos disponibles.</TableCell>
               </TableRow>
             ) : (
               contents.map((content) => (
                 <TableRow key={content.id}>
                   <TableCell>{content.title}</TableCell>
                   <TableCell>{content.description}</TableCell>
-                  <TableCell>{content.category}</TableCell>
-                  <TableCell>{content.tags.join(', ')}</TableCell> {/* Display tags as comma-separated string */}
+                  <TableCell>{categories.find(cat => cat.id === content.category)?.name || content.category}</TableCell> {/* Display category name */}
                   <TableCell>{content.type}</TableCell>
+                  <TableCell>{content.tags.join(", ")}</TableCell>
                   <TableCell>
-                    <Button onClick={() => handleDelete(content.id)} disabled={isLoadingDelete}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(content)}
+                      disabled={isLoadingSave || isLoadingDelete} // Disable button while saving or deleting
+                      className="mr-2"
+                    >
+                      Editar
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDelete(content.id)}
+                      disabled={isLoadingSave || isLoadingDelete} // Disable button while saving or deleting
+                    >
                       Eliminar
                     </Button>
-                    <Button onClick={() => handleEdit(content)} disabled={isLoadingDelete}>Editar</Button>
                   </TableCell>
                 </TableRow>
               ))
             )}
-            </TableBody>
-          </Table>
-        </div> {/* Add closing div for overflow-x-auto */}
+          </TableBody>
+        </Table>
       </div>
-      {/* Aquí se implementará la lógica para la gestión de contenidos */}
     </div>
   );
 };

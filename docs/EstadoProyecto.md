@@ -17,7 +17,7 @@ El frontend es una aplicación **React + Vite** con una estructura modular bien 
     *   Implementación de `react-router-hash-link` para desplazamiento suave.
     *   Mejoras de diseño y estilo, incluyendo la paleta de colores Kamëntsá en `tailwind.config.js`.
 *   **Autenticación y Protección de Rutas:** Implementada completamente utilizando un Contexto de React (`AuthContext`) y un Proveedor (`AuthProvider`). La gestión de estado del usuario, estados de carga individuales y notificaciones (`sonner`) están centralizados. La interacción con la API de autenticación y el manejo de cookies HttpOnly se realizan en `src/auth/services/authService.ts`. Las rutas sensibles están protegidas con el componente `PrivateRoute`, que verifica autenticación y roles requeridos. Se ha añadido una ruta para la página "unauthorized". Se ha actualizado la ruta `/dashboard` para requerir los roles `user` y `student`. Ver [`./Autenticacion.md`](./Autenticacion.md) para más detalles.
-*   **Hooks Personalizados:** Se utilizan hooks como `useAuth` (`src/auth/hooks/useAuth.ts`) y `useFetchUnits` (`src/hooks/useFetchUnits.ts`) para gestionar el estado y obtener datos, con almacenamiento en caché en `sessionStorage` para unidades y multimedia. Ver [`./IntegracionHooksPersonalizados.md`](./IntegracionHooksPersonalizados.md) para más detalles.
+*   **Hooks Personalizados:** Se utilizan hooks como `useAuth` (`src/auth/hooks/useAuth.ts`), `useFetchUnits` (`src/hooks/useFetchUnits.ts`) y `useGamificationData` (`src/hooks/useGamificationData.ts`) para gestionar el estado y obtener datos, con almacenamiento en caché en `sessionStorage` para unidades y multimedia. El hook `useGamificationData` ha sido refactorizado para utilizar el hook `useFetchData` del proyecto. Ver [`./IntegracionHooksPersonalizados.md`](./IntegracionHooksPersonalizados.md) para más detalles.
 *   **Estilos:** Implementados con **Tailwind CSS** y componentes de **shadcn/ui**, con una configuración personalizada de colores inspirada en la cultura Kamëntsá. Recientemente, se han realizado ajustes en los componentes de UI básicos para mejorar la consistencia en el uso de colores, espaciado y tipografía.
 *   **Internacionalización:** Configurada con `react-i18next` y se ha iniciado la traducción de los formularios de autenticación (`SigninForm.tsx`, `ForgotPasswordForm.tsx`). Sin embargo, se han encontrado errores persistentes de parsing/formato que impiden completar esta tarea actualmente.
 *   **Validación Lingüística:** Validaciones básicas con **Zod** en formularios. La integración avanzada con APIs para control ortográfico y gramatical está en progreso. Ver [`./ValidacionLingüistica.md`](./ValidacionLingüistica.md) para más detalles.
@@ -42,6 +42,7 @@ El frontend es una aplicación **React + Vite** con una estructura modular bien 
     4.  Sub-vista de Gamificación - Leaderboard (`LeaderboardPage.tsx`)
     5.  Sub-vista de Gamificación - Logros (`AchievementsPage.tsx`)
     6.  Vista principal de Configuración (`SettingsPage.tsx`)
+    Se ha corregido el manejo de errores en los componentes de gamificación (`AchievementsPage.tsx`, `GamificationPage.tsx`, `LeaderboardPage.tsx`) para mostrar correctamente los mensajes de error.
     7.  Vista de Detalle de Unidad (`UnitDetail.tsx`)
     8.  Vista de Multimedia (`MultimediaPage.tsx`)
     9.  Vista de Actividad - Quiz (`QuizActivity.tsx`)
@@ -89,4 +90,4 @@ Ver lista detallada y estado de cumplimiento en [`./Pendientes.md`](./Pendientes
 
 ---
 
-Última actualización: 7/5/2025, 12:33 a. m. (America/Bogota, UTC-5:00)
+Última actualización: 12/5/2025, 11:59 p. m. (America/Bogota, UTC-5:00)
