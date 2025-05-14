@@ -16,15 +16,15 @@ const DashboardStatistics = () => {
     const fetchStatistics = async () => {
       try {
         // Llamar al endpoint correcto para las estadísticas del dashboard
-
-        // TODO: Ajustar el mapeo según la estructura real de la respuesta del backend /dashboard/statistics
         const data = await api.get('/statistics');
+        //const users = await api.get('/users');
+        //const activities = await api.get('/activities');
         console.log('Datos de estadísticas recibidos:', data); // Log para inspeccionar la respuesta
-        // Mapeo básico asumiendo una estructura de respuesta simple
+        // Mapeo basado en la estructura real de la respuesta del backend
         setStatisticsData([
-          { id: '1', label: 'Estudiantes', value: data.totalStudents || 0, icon: FaUsers },
-          { id: '2', label: 'Actividades', value: data.totalActivities || 0, icon: FaPlusCircle },
-          { id: '3', label: 'Reportes', value: data.totalReports || 0, icon: FaFileAlt },
+          { id: '1', label: 'Estudiantes', value: data.students || 0, icon: FaUsers },
+          { id: '2', label: 'Actividades', value: data.activities || 0, icon: FaPlusCircle },
+          { id: '3', label: 'Reportes', value: data.reports || 0, icon: FaFileAlt },
         ]);
       } catch (error: unknown) {
         if (error instanceof Error) {
@@ -48,7 +48,7 @@ const DashboardStatistics = () => {
           Nota: Las estadísticas pueden no estar completas debido a errores en el backend.
         </div>
       )}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {loading ? (
           <>
             <Skeleton className="h-[100px] w-full" />

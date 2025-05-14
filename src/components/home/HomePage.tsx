@@ -1,4 +1,3 @@
-import { useAuth } from '@/auth/hooks/useAuth'; // Importar useAuth
 import AuthModals from '@/components/common/AuthModals';
 import FeatureCard from '@/components/common/FeatureCard';
 import Loading from '@/components/common/Loading'; // Importar el componente Loading
@@ -8,10 +7,9 @@ import clsx from 'clsx';
 import Autoplay from 'embla-carousel-autoplay';
 import { motion, useAnimation } from 'framer-motion';
 import { Activity, Book, Gamepad2, Pause, Play } from 'lucide-react'; // Importar iconos de pausa/reproducción
-import { useCallback, useEffect, useState } from 'react'; // Importar useCallback
+import { useCallback, useEffect, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { HashLink } from 'react-router-hash-link';
-import { useNavigate } from 'react-router-dom'; // Importar useNavigate
 import { useCarousel } from '../../hooks/useCarousel';
 
 import ContactForm from './components/ContactForm';
@@ -19,6 +17,9 @@ import FAQ from './components/FAQ';
 import FeaturedLessonCard from './components/FeaturedLessonCard'; // Importar el nuevo componente
 import HeroSection from './components/HeroSection';
 import HomeNavbar from './components/HomeNavbar'; // Importar HomeNavbar
+import NewsSection from './components/NewsSection';
+import ResourcesSection from './components/ResourcesSection';
+import EventsSection from './components/EventsSection';
 import { heroCardsData } from './heroCards';
 import { Carousel, CarouselApi, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '../ui/carousel';
 import { Card, CardContent } from '../ui/card';
@@ -51,8 +52,6 @@ const testimonials = [
 ];
 
 const HomePage = () => {
-  const { user, loading } = useAuth(); // Obtener el estado de autenticación y loading
-  const navigate = useNavigate(); // Obtener la función de navegación
   const { slide, setSlide } = useCarousel(0, heroCardsData.length);
   const [featuredLessons, setFeaturedLessons] = useState<FeaturedLesson[]>([]); // Usar la interfaz definida
   const [loadingFeaturedLessons, setLoadingFeaturedLessons] = useState(true); // Estado de carga
@@ -167,28 +166,28 @@ const HomePage = () => {
   }, [inView, animation]);
 
   // Efecto para redirigir al usuario si ya está autenticado y la carga inicial ha terminado
-  useEffect(() => {
-    if (user && !loading) {
-      navigate('/dashboard');
-    }
-  }, [user, loading, navigate]); // Dependencias: user, loading, navigate
+  // useEffect(() => {
+  //   if (user && !loading) {
+  //     navigate('/dashboard');
+  //   }
+  // }, [user, loading, navigate]); // Dependencias: user, loading, navigate
 
   // Función para manejar el clic en "Empieza ahora"
   const handleComienzaAhoraClick = () => {
-    if (user) {
-      // Si está autenticado, redirigir al dashboard
-      navigate('/dashboard'); // Usar useNavigate
-    } else {
-      // Si no está autenticado, abrir el modal de iniciar sesión
-      handleOpenSigninModal();
-    }
+    // if (user) {
+    //   // Si está autenticado, redirigir al dashboard
+    //   navigate('/dashboard'); // Usar useNavigate
+    // } else {
+    //   // Si no está autenticado, abrir el modal de iniciar sesión
+    //   handleOpenSigninModal();
+    // }
   };
 
   // Si el usuario está cargando o ya autenticado, no renderizar el contenido de la página de inicio
   // Esto evita que la página de inicio parpadee antes de la redirección.
-  if (loading || user) {
-    return <Loading />; // O un spinner, etc.
-  }
+  // if (loading || user) {
+  //   return <Loading />; // O un spinner, etc.
+  // }
 
   return (
     <>
@@ -197,7 +196,7 @@ const HomePage = () => {
       <HomeNavbar
         onOpenSigninModal={handleOpenSigninModal}
         onOpenSignupModal={handleOpenSignupModal}
-        isAuthenticated={!!user} // Pasar el estado de autenticación
+        isAuthenticated={false} // Pasar el estado de autenticación
       />
       <motion.div
         className="container mx-auto px-4 sm:px-6 lg:px-8 py-8" // Añadido padding horizontal y mantenido padding vertical inicial
@@ -230,10 +229,10 @@ const HomePage = () => {
                 <HeroSection
                   title={card.title}
                   description={card.description}
-                  buttons={card.buttons}
+                  buttons={card.buttons.filter(button => button.action !== 'openSignupModal')}
                   imageSrc={card.imageSrc}
                   imageAlt={card.alt}
-                  isAuthenticated={!!user} // Pasar el estado de autenticación
+                  isAuthenticated={true} // Pasar el estado de autenticación
                   onComienzaAhoraClick={handleComienzaAhoraClick} // Pasar el nuevo manejador
                 />
               </CarouselItem>
@@ -246,7 +245,7 @@ const HomePage = () => {
               {heroCardsData.map((_, index) => (
                 <button
                   key={index}
-                  className={`w-2 h-2 rounded-full mx-1 transition-colors duration-300 ${
+                  className={`w-3 h-3 rounded-full mx-1 transition-colors duration-300 ${
                     slide === index
                       ? 'bg-red-500' // Color para el indicador activo
                       : 'bg-gray-300 hover:bg-gray-400' // Color simple para indicadores inactivos
@@ -258,12 +257,12 @@ const HomePage = () => {
             </div>
           </div>
         </Carousel>
-
+ 
         {/* Features Section */}
-        <section className="py-10 sm:py-16">
-          {' '}
-          {/* Ajustado espaciado vertical */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <section className="py-6 sm:py-10">
+         {' '}
+         {/* Ajustado espaciado vertical */}
+         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <FeatureCard
               title="Lecciones Interactivas"
               description="Descubre la riqueza de la cultura Kamëntsá a través de lecciones interactivas y atractivas."
@@ -299,12 +298,12 @@ const HomePage = () => {
             />
           </div>
         </section>
-
+ 
         {/* Featured Lessons Section */}
-        <section className="py-10 sm:py-16">
-          {' '}
-          {/* Ajustado espaciado vertical */}
-          <h2 className="text-2xl font-bold text-center mb-4">Lecciones Destacadas</h2>
+        <section className="py-6 sm:py-10">
+         {' '}
+         {/* Ajustado espaciado vertical */}
+         <h2 className="text-2xl font-bold text-center mb-4">Lecciones Destacadas</h2>
           {loadingFeaturedLessons && (
             <div className="flex justify-center items-center py-8">
               <Loading /> {/* Mostrar indicador de carga */}
@@ -342,12 +341,21 @@ const HomePage = () => {
           )}
         </section>
 
+        {/* News Section */}
+        <NewsSection />
+
+        {/* Resources Section */}
+        <ResourcesSection />
+
+        {/* Events Section */}
+        <EventsSection />
+
         {/* Testimonials Section */}
         {/* Testimonials Section */}
-        <section className="py-10 sm:py-16">
-          {' '}
-          {/* Ajustado espaciado vertical */}
-          <h2 className="text-2xl font-bold text-center mb-4">Testimonios</h2>
+        <section className="py-6 sm:py-10">
+         {' '}
+         {/* Ajustado espaciado vertical */}
+         <h2 className="text-2xl font-bold text-center mb-4">Testimonios</h2>
           <motion.div
             className="w-full max-w-2xl mx-auto relative" // Añadido relative para posicionar el botón
             initial={{ opacity: 0 }}
@@ -415,19 +423,19 @@ const HomePage = () => {
             )}
           </motion.div>
         </section>
-
+ 
         {/* FAQ Section */}
-        <section className="py-10 sm:py-16">
-          {' '}
-          {/* Ajustado espaciado vertical */}
-          <FAQ />
+        <section className="py-6 sm:py-10">
+         {' '}
+         {/* Ajustado espaciado vertical */}
+         <FAQ />
         </section>
-
+ 
         {/* Contact Section */}
-        <section className="py-10 sm:py-16 bg-white">
-          {' '}
-          {/* Ajustado espaciado vertical */}
-          <h2 className="text-2xl font-bold text-center mb-4">¿Tienes preguntas?</h2>
+        <section className="py-6 sm:py-10 bg-white">
+         {' '}
+         {/* Ajustado espaciado vertical */}
+         <h2 className="text-2xl font-bold text-center mb-4">¿Tienes preguntas?</h2>
           <ContactForm />
         </section>
 

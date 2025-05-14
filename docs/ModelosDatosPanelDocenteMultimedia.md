@@ -155,8 +155,8 @@ Los seeders mejorados incluyen:
 -   **Relaciones de Mentoría (`MentorshipRelation`):** Sembrados por `MentorshipRelationSeeder`.
 -   **Validación de Contenido (`ContentValidation`):** Sembrados por `ContentValidationSeeder`.
 -   **Notificaciones (`Notification`):** Sembrados por `NotificationSeeder`.
--   **Etiquetas (`Tag`):** Sembrados por `TagSeeder` (anteriormente `StatisticsTag`).
 -   **Suscripciones de Webhook (`WebhookSubscription`):** Sembrados por `WebhookSubscriptionSeeder`.
+
 
 Estos seeders proporcionan datos iniciales esenciales para probar y desarrollar las funcionalidades que dependen de estas entidades.
 

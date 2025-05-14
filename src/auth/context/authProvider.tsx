@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import useAuthService from "../hooks/useAuthService";
 import { SigninData, SignupData, User } from "../types/authTypes";
 import { AuthContext } from "./authContext";
+import { useLocation } from "react-router-dom"; // Import useLocation
 
 const showToast = (
   message: string,
@@ -36,6 +37,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     handleResetPassword: resetPasswordService, // Corrected import name
   } = useAuthService();
 
+  const location = useLocation(); // Get current location
+
   useEffect(() => {
     const verifyAuth = async () => {
       try {
@@ -51,8 +54,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     };
 
-    verifyAuth();
-  }, [verifySessionService]);
+    // Skip verifyAuth on homepage
+    if (location.pathname !== "/") {
+      verifyAuth();
+    } else {
+      setLoading(false); // Ensure loading is set to false on homepage
+    }
+  }, [verifySessionService, location.pathname]); // Include location.pathname as a dependency
 
   const signout = useCallback(async () => {
     try {

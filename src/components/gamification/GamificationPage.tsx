@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom'; // Importar Link para navegación
 import Loading from '@/components/common/Loading'; // Importar componente de carga
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"; // Importar componentes Card
 import { Button } from "@/components/ui/button"; // Importar componente Button
 import { useGamificationData } from '@/hooks/useGamificationData';
+import GamificationSummaryCards from './components/GamificationSummaryCards'; // Importar el nuevo componente
 
 
 const GamificationPage: React.FC = () => {
@@ -22,49 +22,7 @@ const GamificationPage: React.FC = () => {
       <h1 className="text-2xl font-bold mb-6">Gamificación</h1>
       {/* Contenido de la página principal de Gamificación */}
       {summary ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"> {/* Usar grid para las tarjetas */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Total de Puntos</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xl font-semibold">{summary.totalPoints}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Nivel</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xl font-semibold">{summary.level}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Racha</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xl font-semibold">{summary.streak}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Logros Desbloqueados</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xl font-semibold">{summary.achievementsUnlocked}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Misiones Completadas</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xl font-semibold">{summary.missionsCompleted}</p>
-            </CardContent>
-          </Card>
-          {/* Mostrar otros datos del resumen si están disponibles */}
-        </div>
+        <GamificationSummaryCards summary={summary} />
       ) : (
         <p>No se pudo cargar el resumen de gamificación.</p>
       )}

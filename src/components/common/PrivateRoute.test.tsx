@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import PrivateRoute from './PrivateRoute'; // Assuming PrivateRoute is the default export
 import { AuthContext, AuthContextType } from '../../auth/context/authContext'; // Import AuthContextType from authContext
+import { AuthProvider } from '@/auth/context/authProvider';
 
 // Mock the Navigate component to check for redirection
 vi.mock('react-router-dom', () => ({
@@ -29,13 +30,15 @@ describe('PrivateRoute', () => {
     };
 
     render(
-      <AuthContext.Provider value={mockAuthContext}>
-        <Router>
-          <PrivateRoute>
-            <div>Protected Content</div>
+      <AuthProvider>
+        <AuthContext.Provider value={mockAuthContext}>
+          <Router>
+            <PrivateRoute>
+              <div>Protected Content</div>
           </PrivateRoute>
-        </Router>
-      </AuthContext.Provider>
+          </Router>
+        </AuthContext.Provider>
+      </AuthProvider>
     );
 
     expect(screen.getByText('Protected Content')).toBeInTheDocument();
@@ -59,13 +62,15 @@ describe('PrivateRoute', () => {
     };
 
     render(
-      <AuthContext.Provider value={mockAuthContext}>
-        <Router>
-          <PrivateRoute>
-            <div>Protected Content</div>
-          </PrivateRoute>
-        </Router>
-      </AuthContext.Provider>
+      <AuthProvider>
+        <AuthContext.Provider value={mockAuthContext}>
+          <Router>
+            <PrivateRoute>
+              <div>Protected Content</div>
+            </PrivateRoute>
+          </Router>
+        </AuthContext.Provider>
+      </AuthProvider>
     );
 
     expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
@@ -89,13 +94,15 @@ describe('PrivateRoute', () => {
     };
 
     render(
-      <AuthContext.Provider value={mockAuthContext}>
-        <Router>
-          <PrivateRoute requiredRoles={['teacher']}>
-            <div>Teacher Content</div>
-          </PrivateRoute>
-        </Router>
-      </AuthContext.Provider>
+      <AuthProvider>
+        <AuthContext.Provider value={mockAuthContext}>
+          <Router>
+            <PrivateRoute requiredRoles={['teacher']}>
+              <div>Teacher Content</div>
+            </PrivateRoute>
+          </Router>
+        </AuthContext.Provider>
+      </AuthProvider>
     );
 
     expect(screen.getByText('Teacher Content')).toBeInTheDocument();
@@ -119,13 +126,15 @@ describe('PrivateRoute', () => {
     };
 
     render(
-      <AuthContext.Provider value={mockAuthContext}>
-        <Router>
-          <PrivateRoute requiredRoles={['teacher']}>
-            <div>Teacher Content</div>
-          </PrivateRoute>
-        </Router>
-      </AuthContext.Provider>
+      <AuthProvider>
+        <AuthContext.Provider value={mockAuthContext}>
+          <Router>
+            <PrivateRoute requiredRoles={['teacher']}>
+              <div>Teacher Content</div>
+            </PrivateRoute>
+          </Router>
+        </AuthContext.Provider>
+      </AuthProvider>
     );
 
     expect(screen.queryByText('Teacher Content')).not.toBeInTheDocument();
@@ -149,13 +158,15 @@ describe('PrivateRoute', () => {
     };
 
     render(
-      <AuthContext.Provider value={mockAuthContext}>
-        <Router>
-          <PrivateRoute>
-            <div>Protected Content</div>
-          </PrivateRoute>
-        </Router>
-      </AuthContext.Provider>
+      <AuthProvider>
+        <AuthContext.Provider value={mockAuthContext}>
+          <Router>
+            <PrivateRoute>
+              <div>Protected Content</div>
+            </PrivateRoute>
+          </Router>
+        </AuthContext.Provider>
+      </AuthProvider>
     );
 
     // Assuming there's a test id or text for the Loading component
@@ -181,13 +192,15 @@ describe('PrivateRoute', () => {
     };
 
     render(
-      <AuthContext.Provider value={mockAuthContext}>
-        <Router>
-          <PrivateRoute requiredRoles={['admin']}> {/* Required roles specified */}
-            <div>Protected Content</div>
-          </PrivateRoute>
-        </Router>
-      </AuthContext.Provider>
+      <AuthProvider>
+        <AuthContext.Provider value={mockAuthContext}>
+          <Router>
+            <PrivateRoute requiredRoles={['admin']}> {/* Required roles specified */}
+              <div>Protected Content</div>
+            </PrivateRoute>
+          </Router>
+        </AuthContext.Provider>
+      </AuthProvider>
     );
 
     // Assuming there's a test id or text for the Loading component
@@ -213,13 +226,15 @@ describe('PrivateRoute', () => {
     };
 
     render(
-      <AuthContext.Provider value={mockAuthContext}>
-        <Router>
-          <PrivateRoute requiredRoles={[]}> {/* Empty requiredRoles array */}
-            <div>Protected Content</div>
-          </PrivateRoute>
-        </Router>
-      </AuthContext.Provider>
+      <AuthProvider>
+        <AuthContext.Provider value={mockAuthContext}>
+          <Router>
+            <PrivateRoute requiredRoles={[]}> {/* Empty requiredRoles array */}
+              <div>Protected Content</div>
+            </PrivateRoute>
+          </Router>
+        </AuthContext.Provider>
+      </AuthProvider>
     );
 
     expect(screen.getByText('Protected Content')).toBeInTheDocument();

@@ -1,11 +1,12 @@
-// src/types/multimediaTypes.ts
-
-export interface MultimediaItem {
+export interface Multimedia {
   id: string;
   title: string;
-  url: string; // URL del recurso multimedia
-  type: 'video' | 'audio' | 'image'; // Tipos de multimedia conocidos
-  // Agrega otras propiedades relevantes para un item multimedia
+  description: string;
+  type: string; // e.g., 'image', 'video', 'audio'
+  url: string;
+  metadata: MultimediaMetadata;
 }
 
-// Puedes agregar otros tipos relacionados con multimedia aquí
+export interface MultimediaMetadata {
+  [key: string]: unknown;
+}

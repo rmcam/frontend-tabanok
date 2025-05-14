@@ -1,6 +1,4 @@
 import { Button } from '@/components/ui/button';
-import clsx from 'clsx';
-import { motion, useScroll, useTransform } from 'framer-motion';
 import { HashLink } from 'react-router-hash-link'; // Importar HashLink
 import { useNavigate } from 'react-router-dom'; // Importar useNavigate
 
@@ -25,28 +23,19 @@ const HeroSection: React.FC<HeroProps> = ({
   description,
   buttons,
   imageSrc,
-  imageAlt,
   isAuthenticated, // Añadir propiedad isAuthenticated
   onComienzaAhoraClick,
 }) => {
   const navigate = useNavigate(); // Obtener la función de navegación
-  const { scrollYProgress } = useScroll();
-  const y = useTransform(scrollYProgress, [0, 1], [0, 200]);
 
   return (
-    <section className="flex flex-col md:flex-row items-center justify-center py-12 px-4 relative overflow-hidden">
-      <motion.div
-        className="absolute inset-0"
-        style={{
-          backgroundImage: `url(${imageSrc})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed',
-          y,
-        }}
-      />
-      <div className="absolute inset-0 bg-kamentsa-verde-oscuro opacity-80"></div>{' '}
-      {/* Cambiado a superposición con color Kamentsa Verde Oscuro y opacidad aumentada para mejor contraste */}
+    <section className="flex flex-col md:flex-row items-center justify-center py-12 px-4 relative overflow-hidden h-screen bg-center" style={{
+      backgroundImage: `url(${imageSrc})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed',
+    }}>
+      <div className="absolute inset-0 bg-kamentsa-verde-oscuro opacity-80"></div>
       <div className="hero-content text-center md:text-left relative z-10">
         <h2 className="text-4xl font-bold mb-6 text-white">{title}</h2>
         <p className="text-xl mb-8 text-white">{description}</p>
@@ -108,13 +97,6 @@ const HeroSection: React.FC<HeroProps> = ({
             })}
           </div>
         )}
-      </div>
-      <div className="hero-image relative z-10">
-        <img
-          src={imageSrc}
-          alt={imageAlt}
-          className={clsx('rounded-xl shadow-md w-96 border-4 border-kamentsa-amarillo-calido')}
-        />
       </div>
     </section>
   );

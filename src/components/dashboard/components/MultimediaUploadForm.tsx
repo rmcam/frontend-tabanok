@@ -83,7 +83,7 @@ const MultimediaUploadForm: React.FC = () => {
     setUploadProgress(0);
 
     const formData = new FormData();
-    formData.append("multimedia", selectedFile);
+    formData.append("multimedia", selectedFile!);
     formData.append("title", title);
     formData.append("description", description);
 
@@ -133,7 +133,7 @@ const MultimediaUploadForm: React.FC = () => {
         <img
           src={URL.createObjectURL(selectedFile)}
           alt="Preview"
-          className="w-full max-w-xs h-auto" // Usar clases responsive de Tailwind
+          className="w-full max-w-xs h-auto sm:max-w-sm md:max-w-md lg:max-w-lg" // Usar clases responsive de Tailwind
         />
       );
     } else if (selectedFile.type.startsWith("video")) {
@@ -174,10 +174,11 @@ const MultimediaUploadForm: React.FC = () => {
         </Select>
       </div>
       <div>
-        <Label htmlFor="title">Título</Label>
+        <Label htmlFor="title" className="w-full mb-2">Título</Label>
         <Input
           type="text"
           id="title"
+          className="w-full mb-4"
           value={title}
           onChange={(e) => {
             setTitle(e.target.value);
@@ -190,9 +191,10 @@ const MultimediaUploadForm: React.FC = () => {
         {titleError && <p id="multimedia-title-error" className="text-red-500 text-sm">{titleError}</p>} {/* Add id to error message */}
       </div>
       <div>
-        <Label htmlFor="description">Descripción</Label>
+        <Label htmlFor="description" className="w-full mb-2">Descripción</Label>
         <Textarea
           id="description"
+          className="w-full mb-4"
           value={description}
           onChange={(e) => {
             setDescription(e.target.value);
@@ -205,10 +207,11 @@ const MultimediaUploadForm: React.FC = () => {
         {descriptionError && <p id="multimedia-description-error" className="text-red-500 text-sm">{descriptionError}</p>} {/* Add id to error message */}
       </div>
       <div>
-        <Label htmlFor="tags">Etiquetas</Label>
+        <Label htmlFor="tags" className="w-full mb-2">Etiquetas</Label>
         <Input
           type="text"
           id="tags"
+          className="w-full mb-4"
           value={tags}
           onChange={(e) => {
             setTags(e.target.value);

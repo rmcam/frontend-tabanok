@@ -2,7 +2,8 @@ import React from 'react'; // Importar React explícitamente
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import AuthModals from './AuthModals'; // Asegúrate de que la ruta de importación sea correcta
-import { AuthContext, AuthContextType } from '../../auth/context/authContext'; // Importar el contexto de autenticación
+import { AuthContext, AuthContextType } from '../../auth/context/authContext';
+import { AuthProvider } from '../../auth/context/authProvider'; // Importar el contexto de autenticación
 
 // Definir tipos para las props de los componentes mockeados
 type SwitchFormProps = {
@@ -58,9 +59,11 @@ const mockAuthContextValue: AuthContextType = {
 
 const renderWithAuthContext = (contextValue = mockAuthContextValue) => {
   return render(
-    <AuthContext.Provider value={contextValue}>
-      <AuthModals />
-    </AuthContext.Provider>
+      <AuthProvider>
+        <AuthContext.Provider value={contextValue}>
+          <AuthModals />
+        </AuthContext.Provider>
+      </AuthProvider>
   );
 };
 
@@ -100,9 +103,11 @@ describe('AuthModals', () => {
     vi.spyOn(React, 'useState').mockReturnValue(['signin', mockSetOpenModal]);
 
     rerender(
-       <AuthContext.Provider value={mockAuthContextValue}>
-         <AuthModals />
-       </AuthContext.Provider>
+      <AuthProvider>
+        <AuthContext.Provider value={mockAuthContextValue}>
+          <AuthModals />
+        </AuthContext.Provider>
+      </AuthProvider>
     );
 
     expect(screen.getByTestId('signin-form')).toBeInTheDocument();
@@ -119,9 +124,12 @@ describe('AuthModals', () => {
     vi.spyOn(React, 'useState').mockReturnValue(['signup', mockSetOpenModal]);
 
     rerender(
-       <AuthContext.Provider value={mockAuthContextValue}>
-         <AuthModals />
-       </AuthContext.Provider>
+      <AuthProvider>
+        <AuthContext.Provider value={mockAuthContextValue}>
+          <AuthModals />
+          <AuthModals />
+        </AuthContext.Provider>
+      </AuthProvider>
     );
 
     expect(screen.queryByTestId('signin-form')).not.toBeInTheDocument();
@@ -138,9 +146,11 @@ describe('AuthModals', () => {
     vi.spyOn(React, 'useState').mockReturnValue(['forgotPassword', mockSetOpenModal]);
 
     rerender(
-       <AuthContext.Provider value={mockAuthContextValue}>
-         <AuthModals />
-       </AuthContext.Provider>
+      <AuthProvider>
+        <AuthContext.Provider value={mockAuthContextValue}>
+          <AuthModals />
+        </AuthContext.Provider>
+      </AuthProvider>
     );
 
     expect(screen.queryByTestId('signin-form')).not.toBeInTheDocument();
@@ -157,9 +167,11 @@ describe('AuthModals', () => {
     vi.spyOn(React, 'useState').mockReturnValue(['signin', mockSetOpenModal]); // Iniciar con modal abierto
 
     rerender(
-       <AuthContext.Provider value={mockAuthContextValue}>
-         <AuthModals />
-       </AuthContext.Provider>
+      <AuthProvider>
+        <AuthContext.Provider value={mockAuthContextValue}>
+          <AuthModals />
+        </AuthContext.Provider>
+      </AuthProvider>
     );
 
     expect(screen.getByTestId('signin-form')).toBeInTheDocument();
@@ -167,9 +179,11 @@ describe('AuthModals', () => {
     vi.spyOn(React, 'useState').mockReturnValue([null, mockSetOpenModal]); // Simular cierre
 
      rerender(
-       <AuthContext.Provider value={mockAuthContextValue}>
-         <AuthModals />
-       </AuthContext.Provider>
+      <AuthProvider>
+        <AuthContext.Provider value={mockAuthContextValue}>
+          <AuthModals />
+        </AuthContext.Provider>
+      </AuthProvider>
     );
 
     expect(screen.queryByTestId('signin-form')).not.toBeInTheDocument();
@@ -186,9 +200,11 @@ describe('AuthModals', () => {
     vi.spyOn(React, 'useState').mockReturnValue(['signin', mockSetOpenModal]); // Iniciar con signin
 
     rerender(
-       <AuthContext.Provider value={mockAuthContextValue}>
-         <AuthModals />
-       </AuthContext.Provider>
+      <AuthProvider>
+        <AuthContext.Provider value={mockAuthContextValue}>
+          <AuthModals />
+        </AuthContext.Provider>
+      </AuthProvider>
     );
 
     // De signin a signup
@@ -204,9 +220,11 @@ describe('AuthModals', () => {
     // Simular cambio a signup para testear switch a signin
     vi.spyOn(React, 'useState').mockReturnValue(['signup', mockSetOpenModal]);
      rerender(
-       <AuthContext.Provider value={mockAuthContextValue}>
-         <AuthModals />
-       </AuthContext.Provider>
+      <AuthProvider>
+        <AuthContext.Provider value={mockAuthContextValue}>
+          <AuthModals />
+        </AuthContext.Provider>
+      </AuthProvider>
     );
     const switchToSigninButtonFromSignup = screen.getByText('Switch to Signin');
     fireEvent.click(switchToSigninButtonFromSignup);
@@ -215,9 +233,11 @@ describe('AuthModals', () => {
      // Simular cambio a forgot password para testear switch a signin
     vi.spyOn(React, 'useState').mockReturnValue(['forgotPassword', mockSetOpenModal]);
      rerender(
-       <AuthContext.Provider value={mockAuthContextValue}>
-         <AuthModals />
-       </AuthContext.Provider>
+      <AuthProvider>
+        <AuthContext.Provider value={mockAuthContextValue}>
+          <AuthModals />
+        </AuthContext.Provider>
+      </AuthProvider>
     );
     const switchToSigninButtonFromForgot = screen.getByText('Switch to Signin');
     fireEvent.click(switchToSigninButtonFromForgot);

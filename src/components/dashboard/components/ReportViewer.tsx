@@ -18,7 +18,7 @@ interface Report {
 const ReportViewer = () => {
   const { user } = useAuth(); // Obtener el usuario actual
   // TODO: Ajustar el estado para manejar un solo reporte si el endpoint devuelve uno solo
-  const [reportData, setReportData] = useState<Report[]>([]); // Podría cambiar a Report | null o la estructura real
+  const [reportData, setReportData] = useState<Report[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,7 +52,6 @@ const ReportViewer = () => {
 
     fetchData();
   }, [user?.id]); // Dependencia en user.id para recargar si cambia
-
   // TODO: Ajustar el renderizado si el endpoint devuelve un solo reporte en lugar de una lista
   return (
     <div className="flex flex-col">
@@ -64,29 +63,23 @@ const ReportViewer = () => {
         />
         <h2 className="text-xl font-semibold">Acceso a Reportes</h2>
       </div>
-      {/* TODO: Ajustar el renderizado para mostrar el reporte o un enlace si el backend devuelve una estructura diferente */}
-      <ul>
-        {reportData.map((report) => ( // Esto asume que reportData sigue siendo un array
-          <li
-            key={report.id}
-            className="mb-2"
-          >
-            <a
-              href={report.url} // Asumiendo que el objeto report tiene una URL
-              className="text-blue-500 hover:underline"
-              target="_blank" // Abrir en nueva pestaña
-              rel="noopener noreferrer" // Seguridad para target="_blank"
-            >
-              {report.name} {/* Asumiendo que el objeto report tiene un nombre */}
-            </a>
-            <p className="text-gray-700">{report.description}</p> {/* Asumiendo que tiene descripción */}
-          </li>
-        ))}
-      </ul>
       {isLoading && <p>Cargando reportes...</p>}
       {error && <p className="text-red-500">{error}</p>}
-      {/* Si el backend devuelve un solo reporte, se podría renderizar aquí directamente */}
-      {/* Ejemplo: {!isLoading && !error && reportData && <p>Contenido del reporte: {JSON.stringify(reportData)}</p>} */}
+      {reportData.length > 0 ? (
+        reportData.map((report) => ( // Esto asume que reportData sigue siendo un array
+          <div key={report.id} className="mb-4 p-4 border rounded-md">
+            <h3 className="text-lg font-semibold">{report.title}</h3>
+            <p className="text-gray-700">{report.description}</p>
+            <pre className="bg-gray-100 p-2 rounded-md overflow-auto">
+              <code>{JSON.stringify(report.data, null, 2)}</code>
+            </pre>
+          </div>
+        ))
+      ) : (
+        !isLoading && !error && (
+          <p>No hay reportes disponibles.</p>
+        )
+      )}
     </div>
   );
 };

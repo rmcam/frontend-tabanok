@@ -14,5 +14,19 @@ export default defineConfig(() => {
     build: {
       chunkSizeWarningLimit: 1000, // Aumentar el límite a 1000 KB (1 MB)
     },
-  };
+  server: {
+    host: "localhost",
+    hmr: {
+     protocol: "ws",
+   },
+  },
+  cors: {
+    origin: "*", // Permitir solicitudes desde cualquier origen (solo para desarrollo)
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  },
+  test: {
+    environment: 'jsdom',
+  },
+};
 });

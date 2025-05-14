@@ -30,3 +30,19 @@ jobs:
           tags: |
             blackcode13/tabanok-frontend:latest
             blackcode13/tabanok-frontend:${{ github.sha }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            docker pull blackcode13/tabanok-frontend:latest
+            docker stop tabanok-frontend || true
+            docker rm tabanok-frontend || true
+            docker run -d -p 80:80 --name tabanok-frontend blackcode13/tabanok-frontend:latest

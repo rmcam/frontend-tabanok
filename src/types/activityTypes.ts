@@ -8,4 +8,12 @@ export interface Activity {
   // Agrega otras propiedades relevantes para una actividad
 }
 
+export interface Category {
+  id: string;
+  name: string;
+}
+
+
+export type ContentType = 'text' | 'image' | 'video' | 'audio';
+
 // Puedes agregar otros tipos relacionados con actividades aquí

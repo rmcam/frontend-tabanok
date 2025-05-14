@@ -93,9 +93,9 @@ describe('useFetchStudentData', () => {
     expect(result.current.recommendedActivities).toEqual([]);
     expect(result.current.culturalNarratives).toEqual([]);
     expect(result.current.error).not.toBeNull();
-    expect(result.current.error).toContain("Error al obtener los datos del estudiante"); // Ajusta según la implementación del hook
+    expect(result.current.error).toContain("Error al obtener los datos del estudiante");
   });
-
+ 
   it('debería manejar errores específicos al cargar el progreso del estudiante', async () => {
     const mockUser = { id: 'student-1', username: 'testuser', roles: ['student'], email: 'test@example.com', firstName: 'Test', secondName: '', firstLastName: 'User', secondLastName: '' };
     const progressErrorMessage = 'Error al obtener progreso';

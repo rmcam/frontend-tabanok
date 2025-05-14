@@ -28,7 +28,7 @@ interface Category { // Asumiendo que 'Category' en el frontend se mapea a 'Topi
 
 const CategoryManager = () => {
   const [showForm, setShowForm] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]); // Lista de 'Topics'
+  const [categories, setCategories] = useState<Category[]>([]) // Lista de 'Topics'
   const [editCategory, setEditCategory] = useState<Category | null>(null); // 'Topic' a editar
   const [categoryName, setCategoryName] = useState(""); // Nombre del 'Topic'
   const [categoryNameError, setCategoryNameError] = useState(""); // Add state for validation error
@@ -52,7 +52,8 @@ const CategoryManager = () => {
     setIsLoading(true);
     try {
       // TODO: Verificar la estructura exacta de la respuesta del endpoint /topics
-      const data: Category[] = await api.get("/topics"); // Usar endpoint /topics
+      const response = await api.get("/topics"); // Usar endpoint /topics
+      const data: Category[] = response.data; // Asumiendo que la respuesta es un array de Topics con id y name
       setCategories(data); // Asumiendo que la respuesta es un array de Topics con id y name
     } catch (error: unknown) { // Change any to unknown
       const errorMessage = error instanceof Error ? error.message : "Error desconocido al cargar temas.";
@@ -164,9 +165,7 @@ const CategoryManager = () => {
         <h3>Categorías Existentes</h3>
         {isLoading ? (
           <p>Cargando categorías...</p>
-        ) : categories.length === 0 ? (
-          <p>No hay categorías disponibles.</p>
-        ) : (
+        ) : Array.isArray(categories) && categories.length > 0 ? (
           <Table>
             <TableHeader>
               <TableRow>
@@ -190,6 +189,8 @@ const CategoryManager = () => {
               ))}
             </TableBody>
           </Table>
+        ) : (
+          <p>No hay categorías disponibles.</p>
         )}
       </div>
     </div>

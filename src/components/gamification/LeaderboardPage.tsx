@@ -4,12 +4,12 @@ import Loading from '@/components/common/Loading'; // Importar componente de car
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow, // Re-incluir TableRow para el encabezado
 } from "@/components/ui/table"; // Importar componentes Table
 import { useGamificationData } from '@/hooks/useGamificationData';
+import LeaderboardRow from './components/LeaderboardRow'; // Importar el nuevo componente
 
 const LeaderboardPage: React.FC = () => {
   const { leaderboard, loading, error } = useGamificationData();
@@ -40,13 +40,7 @@ const LeaderboardPage: React.FC = () => {
           </TableHeader>
           <TableBody>
             {leaderboard.map((entry, index) => (
-              <TableRow key={entry.userId}>
-                <TableCell>{index + 1}</TableCell>
-                <TableCell>{entry.username}</TableCell>
-                <TableCell>{entry.totalPoints}</TableCell>
-                <TableCell>{entry.level}</TableCell>
-                {/* Agrega otras celdas si es necesario */}
-              </TableRow>
+              <LeaderboardRow key={entry.userId} entry={entry} index={index} />
             ))}
           </TableBody>
         </Table>

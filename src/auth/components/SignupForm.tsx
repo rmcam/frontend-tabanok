@@ -1,9 +1,8 @@
 import Loading from "@/components/common/Loading";
-
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import useFormValidation from "@/hooks/useFormValidation";
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../auth/hooks/useAuth";
 import { cn } from "@/lib/utils";
@@ -62,6 +61,19 @@ const SignUpForm = () => {
 
   const { values, errors, isValid, handleChange, handleSubmit, setErrors } =
     useFormValidation(initialValues);
+
+  // Create refs for the first input in each step
+  const emailRef = useRef<HTMLInputElement>(null);
+  const firstNameRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // Set focus based on the current step
+    if (step === 1 && emailRef.current) {
+      emailRef.current.focus();
+    } else if (step === 2 && firstNameRef.current) {
+      firstNameRef.current.focus();
+    }
+  }, [step]);
 
   const nextStep = () => {
     let currentStepFields: (keyof typeof initialValues)[] = [];
@@ -145,6 +157,8 @@ const SignUpForm = () => {
                 className={cn(
                   errors.email && 'border-destructive'
                 )}
+                ref={emailRef}
+                spellCheck // Enable spellcheck
               />
               {errors.email && (
                 <p
@@ -173,6 +187,7 @@ const SignUpForm = () => {
                 className={cn(
                   errors.password && 'border-destructive'
                 )}
+                spellCheck // Enable spellcheck
               />
               {errors.password && (
                 <p
@@ -201,6 +216,7 @@ const SignUpForm = () => {
                 className={cn(
                   errors.username && 'border-destructive'
                 )}
+                spellCheck // Enable spellcheck
               />
               {errors.username && (
                 <p
@@ -241,6 +257,8 @@ const SignUpForm = () => {
                 className={cn(
                   errors.firstName && 'border-destructive'
                 )}
+                ref={firstNameRef} // Attach the ref to the firstName input
+                spellCheck // Enable spellcheck
               />
               {errors.firstName && (
                 <p
@@ -269,6 +287,7 @@ const SignUpForm = () => {
                 className={cn(
                   errors.secondName && 'border-destructive'
                 )}
+                spellCheck // Enable spellcheck
               />
               {errors.secondName && (
                 <p
@@ -277,137 +296,139 @@ const SignUpForm = () => {
                 >
                   {errors.secondName}
                 </p>
+              )}
+            </div>
+            <div className="grid gap-3">
+              <Label
+                htmlFor="firstLastName"
+              >
+                {t("auth.signup.label.firstLastName")}
+              </Label>
+              <Input
+                id="firstLastName"
+                type="text"
+                placeholder={t("auth.signup.placeholder.firstLastName")}
+                name="firstLastName"
+                value={values.firstLastName}
+                onChange={handleChange}
+                aria-invalid={!!errors.firstLastName}
+                aria-describedby="firstLastName-error"
+                className={cn(
+                  errors.firstLastName && 'border-destructive'
                 )}
-              </div>
-              <div className="grid gap-3">
-                <Label
-                  htmlFor="firstLastName"
+                spellCheck // Enable spellcheck
+              />
+              {errors.firstLastName && (
+                <p
+                  id="firstLastName-error"
+                  className="text-destructive text-sm mt-1"
                 >
-                  {t("auth.signup.label.firstLastName")}
-                </Label>
-                <Input
-                  id="firstLastName"
-                  type="text"
-                  placeholder={t("auth.signup.placeholder.firstLastName")}
-                  name="firstLastName"
-                  value={values.firstLastName}
-                  onChange={handleChange}
-                  aria-invalid={!!errors.firstLastName}
-                  aria-describedby="firstLastName-error"
-                  className={cn(
-                    errors.firstLastName && 'border-destructive'
-                  )}
-                />
-                {errors.firstLastName && (
-                  <p
-                    id="firstLastName-error"
-                    className="text-destructive text-sm mt-1"
-                  >
-                    {errors.firstLastName}
-                  </p>
+                  {errors.firstLastName}
+                </p>
+              )}
+            </div>
+            <div className="grid gap-3">
+              <Label
+                htmlFor="secondLastName"
+              >
+                {t("auth.signup.label.secondLastName")}
+              </Label>
+              <Input
+                id="secondLastName"
+                type="text"
+                placeholder={t("auth.signup.placeholder.secondLastName")}
+                name="secondLastName"
+                value={values.secondLastName}
+                onChange={handleChange}
+                aria-invalid={!!errors.secondLastName}
+                aria-describedby="secondLastName-error"
+                className={cn(
+                  errors.secondLastName && 'border-destructive'
                 )}
-              </div>
-              <div className="grid gap-3">
-                <Label
-                  htmlFor="secondLastName"
+                spellCheck // Enable spellcheck
+              />
+              {errors.secondLastName && (
+                <p
+                  id="secondLastName-error"
+                  className="text-destructive text-sm mt-1"
                 >
-                  {t("auth.signup.label.secondLastName")}
-                </Label>
-                <Input
-                  id="secondLastName"
-                  type="text"
-                  placeholder={t("auth.signup.placeholder.secondLastName")}
-                  name="secondLastName"
-                  value={values.secondLastName}
-                  onChange={handleChange}
-                  aria-invalid={!!errors.secondLastName}
-                  aria-describedby="secondLastName-error"
-                  className={cn(
-                    errors.secondLastName && 'border-destructive'
-                  )}
-                />
-                {errors.secondLastName && (
-                  <p
-                    id="secondLastName-error"
-                    className="text-destructive text-sm mt-1"
-                  >
-                    {errors.secondName}
-                  </p>
-                )}
-              </div>
-              <Button
-                type="button"
-                onClick={prevStep}
-                className="w-full mt-4" // Use default variant
-                variant="secondary" // Use secondary variant for previous button
-              >
-                {t("auth.signup.button.previous")}
-              </Button>
-              <Button
-                type="button"
-                onClick={nextStep}
-                className="w-full" // Use default variant
-              >
-                {t("auth.signup.button.next")}
-              </Button>
-            </>
-          )}
+                  {errors.secondName}
+                </p>
+              )}
+            </div>
+            <Button
+              type="button"
+              onClick={prevStep}
+              className="w-full mt-4" // Use default variant
+              variant="secondary" // Use secondary variant for previous button
+            >
+              {t("auth.signup.button.previous")}
+            </Button>
+            <Button
+              type="button"
+              onClick={nextStep}
+              className="w-full" // Use default variant
+            >
+              {t("auth.signup.button.next")}
+            </Button>
+          </>
+        )}
  
-          {step === 3 && (
-            <>
-              <div className="space-y-2 text-foreground"> {/* Use text-foreground */}
-                <p className="font-semibold">
-                  {t("auth.signup.confirmation.title")}
-                </p>
-                <p>
-                  {t("auth.signup.confirmation.email", { email: values.email })}
-                </p>
-                <p>
-                  {t("auth.signup.confirmation.username", {
-                    username: values.username,
-                  })}
-                </p>
-                <p>
-                  {t("auth.signup.confirmation.firstName", {
-                    firstName: values.firstName,
-                  })}
-                </p>
-                <p>
-                  {t("auth.signup.confirmation.secondName", {
-                    secondName: values.secondName,
-                  })}
-                </p>
-                <p>
-                  {t("auth.signup.confirmation.firstLastName", {
-                    firstLastName: values.firstLastName,
-                  })}
-                </p>
-                <p>
-                  {t("auth.signup.confirmation.secondLastName", {
-                    secondLastName: values.secondLastName,
-                  })}
-                </p>
-              </div>
-              <Button
-                type="button"
-                onClick={prevStep}
-                className="w-full mt-4" // Use default variant
-                variant="secondary" // Use secondary variant for previous button
-              >
-                {t("auth.signup.button.previous")}
-              </Button>
-              <Button
-                type="submit"
-                className="w-full" // Use default variant
-                disabled={!isValid || signingUp}
-              >
-                {signingUp ? <Loading /> : t("auth.signup.button.signUp")}
-              </Button>
-            </>
-          )}
-        </form>
-      </div>
-    );
-  };
+        {step === 3 && (
+          <>
+            <div className="space-y-2 text-foreground"> {/* Use text-foreground */}
+              <p className="font-semibold">
+                {t("auth.signup.confirmation.title")}
+              </p>
+              <p>
+                {t("auth.signup.confirmation.email", { email: values.email })}
+              </p>
+              <p>
+                {t("auth.signup.confirmation.username", {
+                  username: values.username,
+                })}
+              </p>
+              <p>
+                {t("auth.signup.confirmation.firstName", {
+                  firstName: values.firstName,
+                })}
+              </p>
+              <p>
+                {t("auth.signup.confirmation.secondName", {
+                  secondName: values.secondName,
+                })}
+              </p>
+              <p>
+                {t("auth.signup.confirmation.firstLastName", {
+                  firstLastName: values.firstLastName,
+                })}
+              </p>
+              <p>
+                {t("auth.signup.confirmation.secondLastName", {
+                  secondLastName: values.secondLastName,
+                })}
+              </p>
+            </div>
+            <Button
+              type="button"
+              onClick={prevStep}
+              className="w-full mt-4" // Use default variant
+              variant="secondary" // Use secondary variant for previous button
+            >
+              {t("auth.signup.button.previous")}
+            </Button>
+            <Button
+              type="submit"
+              className="w-full" // Use default variant
+              disabled={!isValid || signingUp}
+            >
+              {signingUp ? <Loading /> : t("auth.signup.button.signUp")}
+            </Button>
+          </>
+        )}
+      </form>
+    </div>
+  );
+};
  
-  export default SignUpForm;
+export default SignUpForm;

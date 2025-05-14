@@ -30,8 +30,8 @@ El frontend es una aplicación **React + Vite** con una estructura modular bien 
     *   `MultimediaGallery`: Muestra una galería de archivos multimedia con filtros por tipo, obteniendo datos a través del hook `useMultimedia` que llama a `/multimedia`.
     *   `ContentManager`: Permite crear (`POST /content`), leer (`GET /content`), actualizar (`PUT /content/:id`) y eliminar (`DELETE /content/:id`) contenido en el backend. Se ha implementado la subida de múltiples archivos, la previsualización de archivos subidos, la eliminación de archivos subidos y el editor de texto enriquecido. Además, se ha implementado la funcionalidad de edición de contenido. Se han añadido pruebas unitarias para los componentes `CategoryManager` y `TagManager`.
     *   `CategoryManager`: Modificado para usar el endpoint `/topics` para la gestión de categorías (listar, crear, actualizar, eliminar).
-    *   `TagManager`: Modificado para usar el endpoint `/tags` para la gestión de etiquetas (listar, crear, actualizar, eliminar).
-*   Se agregó el componente `LatestActivities` para mostrar las últimas actividades realizadas por los estudiantes, obteniendo datos del backend (`GET /activities`).
+    *   `TagManager`: Modificado para la gestión de etiquetas (listar, crear, actualizar, eliminar).
+*   Se agregó el componente `LatestActivities` para mostrar las últimas actividades realizadas por los estudiantes, obteniendo datos del backend (`GET /activities`) y filtrando los resultados en el frontend.
 *   Se han añadido indicadores de carga a los componentes del dashboard.
 *   Se movió la verificación de la variable de entorno `VITE_API_URL` al componente `App.tsx` para que se realice solo una vez al inicio de la aplicación.
   - Implementar la funcionalidad de edición de contenido en el componente `ContentManager`. (Completado: Se ha implementado la funcionalidad de edición de contenido).
@@ -70,7 +70,7 @@ El backend es una aplicación **NestJS** conectada a **PostgreSQL**. Reside en s
 *   **Docker Compose:** Unificado para levantar base de datos, backend y frontend (si aplica en el repositorio principal o se gestiona por separado).
 *   **TypeScript:** Configuración base unificada (si aplica a través de archivos de configuración compartidos o convenciones).
 *   **CI/CD:** Implementado para lint, tests y builds automáticos en cada repositorio. La automatización de despliegues a producción está pendiente (falta activar el paso SSH). Ver [`./Flujos.md`](./Flujos.md) para flujos de trabajo.
-*   **Testing:** Todos los tests están pasando. La cobertura general de tests es del 44.79%. Mejorar la cobertura en frontend y backend es un pendiente clave. Se han corregido los errores en las pruebas unitarias de `content.service`. Se han añadido pruebas para el guard `JwtAuthGuard` y ahora prioriza el token del header sobre el de las cookies.
+*   **Testing:** Todos los tests están pasando. La cobertura general de tests es del 44.79%. Mejorar la cobertura en frontend y backend es un pendiente clave. Se han corregido los errores en las pruebas unitarias de `content.service`. Se han añadido pruebas para el guard `JwtAuthGuard` y ahora prioriza el token del header sobre el de las cookies. Se han solucionado los errores en el hook `useFetchContentData`.
 *   **Histórico de funcionalidades eliminadas:** Se eliminó el módulo de chat.
 
 ### Pendientes Clave

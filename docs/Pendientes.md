@@ -7,7 +7,7 @@ Este documento lista las tareas pendientes y los próximos pasos planificados pa
 ## Pendientes Clave
 
 - **Diseño Responsive:**
-  - Realizar una verificación exhaustiva del comportamiento responsive en diferentes dispositivos y tamaños de pantalla, utilizando herramientas de desarrollo del navegador o pruebas de interfaz de usuario automatizadas con control de viewport.
+  - Realizar una verificación exhaustiva del comportamiento responsive en diferentes dispositivos y tamaños de pantalla, utilizando herramientas de desarrollo del navegador o pruebas de interfaz de usuario automatizadas con control de viewport. (En progreso: Se han añadido clases de Tailwind para mejorar el diseño responsive de los componentes `MultimediaUploadForm.tsx` y `DashboardStatistics.tsx`).
 - **Accesibilidad:**
   - Finalizar auditorías manuales de accesibilidad según WCAG 2.1.
   - Validar nuevamente la accesibilidad con herramientas automáticas y manuales después de implementar mejoras.
@@ -45,7 +45,7 @@ Este documento lista las tareas pendientes y los próximos pasos planificados pa
   - Validar calidad lingüística en contenido generado por usuarios.
 - **Refactorización y Limpieza:**
   - Revisar y eliminar redundancias y campos obsoletos restantes en el código y la base de datos. (Se han abordado algunas redundancias en el módulo de autenticación).
-  - Revisar redundancias y eliminar campos obsoletos restantes en el módulo de gamificación.
+  - Revisar redundancias y eliminar campos obsoletos restantes en el módulo de gamificación. (En progreso)
 - Refactorizar los componentes en `src/components` para mejorar la organización y seguir las buenas prácticas (esto ya se ha iniciado según `EstadoProyecto.md`). Se ha corregido el manejo de errores en los componentes de gamificación (`AchievementsPage.tsx`, `GamificationPage.tsx`, `LeaderboardPage.tsx`).
 - ~~Corregir errores de TypeScript en el módulo de recomendaciones~~
 - **Módulo de Recomendaciones:**

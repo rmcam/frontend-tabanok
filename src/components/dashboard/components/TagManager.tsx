@@ -51,8 +51,8 @@ const TagManager = () => {
   const fetchTags = async () => {
     setIsLoading(true);
     try {
-      const data = await api.get("/tags"); // Use api.get
-      setTags(data);
+      //const data = await api.get("/tags"); // Use api.get
+      setTags([]);
     } catch (error: unknown) { // Change any to unknown
       const errorMessage = error instanceof Error ? error.message : "Error desconocido al cargar etiquetas.";
       toast.error(`Error al cargar las etiquetas: ${errorMessage}`);

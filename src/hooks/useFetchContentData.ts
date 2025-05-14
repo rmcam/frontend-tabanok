@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { toast } from 'sonner';
-import { ContentItem, Category } from '@/components/dashboard/components/ContentManager'; // Importar tipos necesarios
+import { ContentItem } from '@/components/dashboard/components/ContentManager'; // Importar tipos necesarios
+import { Category } from '@/types/activityTypes';
 
 interface UseFetchContentDataHook {
   contents: ContentItem[];
-  categories: Category[];
+  categories: Category[]; // Add categories property
   loading: boolean;
   error: string | null;
   refetch: () => void; // Función para recargar los datos
@@ -13,7 +14,6 @@ interface UseFetchContentDataHook {
 
 const useFetchContentData = (): UseFetchContentDataHook => {
   const [contents, setContents] = useState<ContentItem[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,10 +25,9 @@ const useFetchContentData = (): UseFetchContentDataHook => {
       const [contentsData, categoriesData] = await Promise.all([
         api.get("/content"), // Usar endpoint /content (singular)
         api.get("/topics"), // Usar endpoint /topics (plural)
-        api.get("/tags"), // Usar endpoint /tags (plural) // Aunque no se usa directamente aquí, se carga junto con los otros datos
       ]);
       setContents(contentsData); // Asumiendo que contentsData es un array de ContentItem
-      setCategories(categoriesData); // Asumiendo que categoriesData es un array de Category (Topic)
+      setCategories(categoriesData); // Set categories data
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Error desconocido al cargar datos.";
       toast.error(`Error al cargar los datos: ${errorMessage}`);
@@ -38,6 +37,7 @@ const useFetchContentData = (): UseFetchContentDataHook => {
       setLoading(false);
     }
   };
+  const [categories, setCategories] = useState<Category[]>([]); // Initialize categories state
 
   useEffect(() => {
     fetchData();
@@ -49,7 +49,7 @@ const useFetchContentData = (): UseFetchContentDataHook => {
 
   return {
     contents,
-    categories,
+    categories, // Add categories to the return object
     loading,
     error,
     refetch,

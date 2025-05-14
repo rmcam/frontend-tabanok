@@ -1,28 +1,19 @@
 import { useQuery } from '@tanstack/react-query';
 import api from '../lib/api';
-
-interface MultimediaItem {
-  id: string;
-  title: string;
-  description: string;
-  type: "video" | "audio" | "image";
-  url: string;
-  lessonId: string;
-  metadata: object;
-}
+import { Multimedia } from '@/types/multimediaTypes';
 
 function useMultimedia() {
-  const { data, isLoading, isError, error } = useQuery<MultimediaItem[], Error>({
+  const { data, isLoading, isError, error } = useQuery<Multimedia[], Error>({
     queryKey: ['multimedia'],
     queryFn: async () => {
       // TODO: Verificar la estructura exacta de la respuesta de /multimedia
-      const result = await api.get('/multimedia'); // Corregido el endpoint
+      const result = await api.get('/multimedia');
       return result;
     },
   });
 
   return {
-    multimedia: data,
+    multimedia: data as Multimedia[],
     loading: isLoading,
     error: isError ? error : null,
   };

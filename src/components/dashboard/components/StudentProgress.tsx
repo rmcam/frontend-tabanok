@@ -8,6 +8,9 @@ interface Student {
   id: string; // Asumiendo UUIDs en el backend
   name: string; // Nombre del estudiante
   progress: number; // Progreso en porcentaje
+  lessonsCompleted: number;
+  totalLessons: number;
+  score: number;
   // TODO: Añadir otros campos si la respuesta del backend los incluye (ej. lección actual, puntuación, etc.)
 }
 

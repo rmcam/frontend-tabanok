@@ -1,11 +1,10 @@
 import Loading from '@/components/common/Loading';
-
 import useFormValidation from '@/hooks/useFormValidation';
-import React, { FormEvent, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import { useAuth } from '../../auth/hooks/useAuth'; // Import useAuth from hooks
-import { useTranslation } from 'react-i18next'; // Import useTranslation
-import { cn } from "@/lib/utils"; // Import cn utility
+import React, { FormEvent, useCallback, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../auth/hooks/useAuth';
+import { useTranslation } from 'react-i18next';
+import { cn } from "@/lib/utils";
 import { Label } from '@radix-ui/react-label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -16,8 +15,8 @@ interface SigninFormProps {
   [key: string]: string;
 }
 
-const SigninForm: React.FC = () => {
-  const { t } = useTranslation(); // Initialize useTranslation
+const SigninForm = React.forwardRef<HTMLFormElement, SigninFormProps>((props, ref) => {
+  const { t } = useTranslation();
 
   const initialValues: SigninFormProps = {
     identifier: '',
@@ -27,40 +26,51 @@ const SigninForm: React.FC = () => {
   const { values, errors, isValid, handleChange } =
     useFormValidation<SigninFormProps>(initialValues);
 
-  const navigate = useNavigate(); // Get navigate function
-  const { signin, signingIn, user } = useAuth(); // Use useAuth hook from context and get signin, signingIn state, and user
+  const navigate = useNavigate();
+  const { signin, signingIn, user } = useAuth();
+
+  const identifierRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    identifierRef.current?.focus();
+  }, []);
 
   const submitHandler = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       try {
-        // Use signin from the context
         await signin({
           identifier: values.identifier,
           password: values.password,
         });
-        // Después de un inicio de sesión exitoso, verificar el rol del usuario para redirigir
+        console.log('User after signin:', user);
         if (user?.roles.includes('teacher') || user?.roles.includes('admin')) {
-          navigate('/dashboard'); // Redirigir a docentes/admins al dashboard unificado
+          navigate('/dashboard');
         } else if (user?.roles.includes('student')) {
-          navigate('/student-panel'); // Redirigir a estudiantes a su panel
+          navigate('/student-panel');
         } else {
-          // Opcional: redirigir a una página por defecto o mostrar un mensaje si el rol no es reconocido
           navigate('/');
         }
       } catch (error) {
         console.error('Error al iniciar sesión:', error);
-        // El AuthProvider ya maneja la visualización de los toasts de error.
-        // No necesitamos establecer un estado de error local aquí.
       }
     },
-    [values, signin, navigate, user], // Add signin, navigate, and user to dependencies
-  );
+    [values, signin, navigate, user]);
 
-  return (
-    <div className="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow-md"> {/* Added padding, background, rounded corners, and shadow */}
-      <form onSubmit={submitHandler} className="w-full max-w-sm space-y-6"> {/* Increased space-y, Adjusted max-width */}
-        <div className="grid gap-3"> {/* Increased gap */}
+ useEffect(() => {
+   if (user?.roles.includes('teacher') || user?.roles.includes('admin')) {
+     navigate('/dashboard');
+   } else if (user?.roles.includes('student')) {
+     navigate('/student-panel');
+   } else if (user) {
+     navigate('/');
+   }
+ }, [user, navigate]);
+
+ return (
+    <div className="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow-md">
+      <form onSubmit={submitHandler} className="w-full max-w-sm space-y-6" ref={ref}>
+        <div className="grid gap-3">
           <Label htmlFor="identifier">
             {t('auth.signin.label.username')}
           </Label>
@@ -75,7 +85,9 @@ const SigninForm: React.FC = () => {
               errors.identifier && 'border-destructive'
             )}
             aria-label={t('auth.signin.label.username')}
+            aria-invalid={!!errors.identifier}
             aria-describedby="identifier-error"
+            ref={identifierRef}
           />
           {errors.identifier && <p id="identifier-error" className="text-destructive text-sm mt-1">{errors.identifier}</p>}
         </div>
@@ -94,6 +106,7 @@ const SigninForm: React.FC = () => {
               errors.password && 'border-destructive'
             )}
             aria-label={t('auth.signin.label.password')}
+            aria-invalid={!!errors.password}
             aria-describedby="password-error"
           />
           {errors.password && <p id="password-error" className="text-destructive text-sm mt-1">{errors.password}</p>}
@@ -109,6 +122,8 @@ const SigninForm: React.FC = () => {
       </form>
     </div>
   );
-};
+});
+
+SigninForm.displayName = "SigninForm";
 
 export default SigninForm;

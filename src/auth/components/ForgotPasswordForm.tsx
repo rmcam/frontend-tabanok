@@ -1,8 +1,7 @@
-
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import Loading from '@/components/common/Loading'; // Import Loading component
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from 'react-i18next'; // Import useTranslation
 import { cn } from "@/lib/utils"; // Import cn utility
@@ -14,6 +13,12 @@ const ForgotPasswordForm: React.FC = () => {
   // Use useAuth hook from context and get forgotPassword and requestingPasswordReset state
   const { forgotPassword, requestingPasswordReset } = useAuth();
   const [localError, setLocalError] = useState<string | null>(null); // Use localError for basic email validation
+
+  const emailRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    emailRef.current?.focus();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,6 +63,8 @@ const ForgotPasswordForm: React.FC = () => {
             )}
             aria-invalid={!!localError}
             aria-describedby={localError ? 'email-error' : undefined}
+            ref={emailRef}
+            spellCheck // Enable spellcheck
           />
         </div>
         {localError && <p id="email-error" className="text-destructive text-sm mt-1">{localError}</p>} {/* Display local validation error */}

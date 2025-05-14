@@ -38,7 +38,6 @@ const mockSignoutService = vi.fn() as Mock;
 const mockForgotPasswordService = vi.fn() as Mock;
 const mockResetPasswordService = vi.fn() as Mock;
 
-
 describe('AuthProvider', () => {
   beforeEach(() => {
     // Reset mocks before each test
@@ -87,7 +86,7 @@ describe('AuthProvider', () => {
   });
 
   it('should handle initial loading state', async () => {
-    mockVerifySessionService.mockReturnValue(new Promise(() => {})); // Simulate loading
+    mockVerifySessionService.mockResolvedValue(null); // Simulate loading
 
     render(
       <AuthProvider>

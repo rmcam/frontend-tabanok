@@ -29,10 +29,22 @@ const LatestActivities = () => {
     const fetchActivities = async () => {
       try {
         // Llamar al endpoint correcto para las actividades
-        const data: Activity[] = await api.get('/activities');
-        console.log('Datos de actividades recibidos:', data); // Log para inspeccionar la respuesta
+        const activitiesData = await api.get('/activities');
+        console.log('Datos de actividades recibidos:', activitiesData); // Log para inspeccionar la respuesta
+        // Mapear la respuesta a la estructura de la interfaz Activity
+        const activities: Activity[] = activitiesData.map((activity: {
+          id: string;
+          title: string;
+          createdAt: string;
+          user: { firstName: string; lastName: string } | null;
+        }) => ({
+          id: activity.id,
+          studentName: activity.user?.firstName + ' ' + activity.user?.lastName || 'Unknown', // Assuming user info is nested
+          activityName: activity.title,
+          date: activity.createdAt,
+        }));
         // Ordenar las actividades por fecha y obtener las últimas 5
-        const latestActivities = data
+        const latestActivities = activities
           .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
           .slice(0, 5);
         setActivities(latestActivities);
@@ -65,7 +77,7 @@ const LatestActivities = () => {
           <p>No hay actividades disponibles en este momento.</p>
         </div>
       ) : (
-        <Table>
+        <Table className="min-w-full table-auto">
           <TableHeader>
             <TableRow>
               <TableHead>Estudiante</TableHead>
