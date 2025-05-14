@@ -3,8 +3,9 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import PrivateRoute from "./components/common/PrivateRoute";
 import HomePage from "./components/home/HomePage";
 import AuthenticatedLayout from "./components/layout/AuthenticatedLayout";
-import { SidebarProvider } from "./components/ui/sidebar";
+
 import { useParams } from "react-router-dom"; // Import useParams
+import { SidebarProvider } from './components/ui/sidebar';
 
 const UnifiedDashboard = lazy(() => import("./components/dashboard/Dashboard"));
 const MultimediaPage = lazy(() => import("./components/multimedia/MultimediaPage"));

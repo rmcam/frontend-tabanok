@@ -3,14 +3,7 @@ import AuthModals from '@/components/common/AuthModals';
 import FeatureCard from '@/components/common/FeatureCard';
 import Loading from '@/components/common/Loading'; // Importar el componente Loading
 import { Button } from '@/components/ui/button';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-  type CarouselApi, // Importar CarouselApi
-} from '@/components/ui/carousel';
+
 import clsx from 'clsx';
 import Autoplay from 'embla-carousel-autoplay';
 import { motion, useAnimation } from 'framer-motion';
@@ -20,13 +13,15 @@ import { useInView } from 'react-intersection-observer';
 import { HashLink } from 'react-router-hash-link';
 import { useNavigate } from 'react-router-dom'; // Importar useNavigate
 import { useCarousel } from '../../hooks/useCarousel';
-import { Card, CardContent } from '../ui';
+
 import ContactForm from './components/ContactForm';
 import FAQ from './components/FAQ';
 import FeaturedLessonCard from './components/FeaturedLessonCard'; // Importar el nuevo componente
 import HeroSection from './components/HeroSection';
 import HomeNavbar from './components/HomeNavbar'; // Importar HomeNavbar
 import { heroCardsData } from './heroCards';
+import { Carousel, CarouselApi, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '../ui/carousel';
+import { Card, CardContent } from '../ui/card';
 
 // Definir una interfaz para las lecciones destacadas
 interface FeaturedLesson {

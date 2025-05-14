@@ -1,12 +1,7 @@
 import React from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+
+
 
 interface ModalProps {
   id?: string;
@@ -26,7 +21,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onOpenChange, title, description,
           {trigger}
         </DialogTrigger>
       )}
-      <DialogContent className="bg-k-blanco-50 border border-k-negro-100 shadow-lg p-6 max-w-md"> {/* Estilos mejorados */}
+      <DialogContent> {/* Usar estilos por defecto de Shadcn UI */}
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}

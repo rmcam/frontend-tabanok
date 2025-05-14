@@ -1,10 +1,14 @@
 import Loading from '@/components/common/Loading';
-import { Button, Input, Label } from '@/components/ui';
+
 import useFormValidation from '@/hooks/useFormValidation';
 import React, { FormEvent, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { useAuth } from '../../auth/hooks/useAuth'; // Import useAuth from hooks
 import { useTranslation } from 'react-i18next'; // Import useTranslation
+import { cn } from "@/lib/utils"; // Import cn utility
+import { Label } from '@radix-ui/react-label';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 interface SigninFormProps {
   identifier: string;
@@ -54,49 +58,53 @@ const SigninForm: React.FC = () => {
   );
 
   return (
-    <div className="flex flex-col items-center justify-center"> {/* Removed card styles */}
+    <div className="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow-md"> {/* Added padding, background, rounded corners, and shadow */}
       <form onSubmit={submitHandler} className="w-full max-w-sm space-y-6"> {/* Increased space-y, Adjusted max-width */}
         <div className="grid gap-3"> {/* Increased gap */}
-          <Label htmlFor="identifier" className="text-sm">
-            {t('auth.signin.label.username')} 
+          <Label htmlFor="identifier">
+            {t('auth.signin.label.username')}
           </Label>
           <Input
             id="identifier"
             type="text"
-            placeholder={t('auth.signin.placeholder.username')} 
+            placeholder={t('auth.signin.placeholder.username')}
             name="identifier"
             value={values.identifier}
             onChange={handleChange}
-            className={`w-full rounded-lg border ${errors.identifier ? 'border-red-500' : 'border-gray-300'} focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50`}
-            aria-label={t('auth.signin.label.username')} 
+            className={cn(
+              errors.identifier && 'border-destructive'
+            )}
+            aria-label={t('auth.signin.label.username')}
             aria-describedby="identifier-error"
           />
-          {errors.identifier && <p id="identifier-error" className="text-red-500 text-sm mt-1">{errors.identifier}</p>}
+          {errors.identifier && <p id="identifier-error" className="text-destructive text-sm mt-1">{errors.identifier}</p>}
         </div>
         <div className="grid gap-3">
-          <Label htmlFor="password" className="text-sm text-gray-700">
-            {t('auth.signin.label.password')} 
+          <Label htmlFor="password">
+            {t('auth.signin.label.password')}
           </Label>
           <Input
             id="password"
             type="password"
-            placeholder={t('auth.signin.placeholder.password')} 
+            placeholder={t('auth.signin.placeholder.password')}
             name="password"
             value={values.password}
             onChange={handleChange}
-            className={`w-full rounded-lg border ${errors.password ? 'border-red-500' : 'border-gray-300'} focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50`}
-            aria-label={t('auth.signin.label.password')} 
+            className={cn(
+              errors.password && 'border-destructive'
+            )}
+            aria-label={t('auth.signin.label.password')}
             aria-describedby="password-error"
           />
-          {errors.password && <p id="password-error" className="text-red-500 text-sm mt-1">{errors.password}</p>}
+          {errors.password && <p id="password-error" className="text-destructive text-sm mt-1">{errors.password}</p>}
           <div className="text-right text-sm mt-1">
-            <a href="/forgot-password" className="text-blue-600 hover:underline">
-              {t('auth.signin.link.forgotPassword')} 
+            <a href="/forgot-password" className="text-primary hover:underline">
+              {t('auth.signin.link.forgotPassword')}
             </a>
           </div>
         </div>
-        <Button type="submit" className="w-full rounded-lg py-2" disabled={!isValid || signingIn}>
-          {signingIn ? <Loading /> : t('auth.signin.button.signIn')} 
+        <Button type="submit" className="w-full" disabled={!isValid || signingIn}>
+          {signingIn ? <Loading /> : t('auth.signin.button.signIn')}
         </Button>
       </form>
     </div>

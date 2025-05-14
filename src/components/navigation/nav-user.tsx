@@ -19,14 +19,15 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { useSidebar } from '@/hooks/useSidebar';
+// import { useSidebar } from '@/hooks/useSidebar'; // Eliminar importación de useSidebar
 
 export function NavUser({
   user, // Recibir objeto de usuario del contexto
+  isMobile, // Recibir prop isMobile
 }: {
   user: User | null; // Puede ser null si no está autenticado
+  isMobile: boolean; // Agregar prop isMobile
 }) {
-  const { isMobile } = useSidebar();
   const { signout } = useAuth(); // Obtener función de cierre de sesión
 
   // No renderizar si no hay usuario autenticado
@@ -87,7 +88,7 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-<DropdownMenuItem onClick={() => window.location.href = '/upgrade-to-pro'}>
+              <DropdownMenuItem onClick={() => window.location.href = '/upgrade-to-pro'}>
                 <Sparkles />
                 Upgrade to Pro
               </DropdownMenuItem>

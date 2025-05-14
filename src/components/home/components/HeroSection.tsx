@@ -45,8 +45,8 @@ const HeroSection: React.FC<HeroProps> = ({
           y,
         }}
       />
-      <div className="absolute inset-0 bg-blue-900 opacity-80"></div>{' '}
-      {/* Cambiado a superposición azul oscuro con opacidad aumentada para mejor contraste */}
+      <div className="absolute inset-0 bg-kamentsa-verde-oscuro opacity-80"></div>{' '}
+      {/* Cambiado a superposición con color Kamentsa Verde Oscuro y opacidad aumentada para mejor contraste */}
       <div className="hero-content text-center md:text-left relative z-10">
         <h2 className="text-4xl font-bold mb-6 text-white">{title}</h2>
         <p className="text-xl mb-8 text-white">{description}</p>
@@ -113,7 +113,7 @@ const HeroSection: React.FC<HeroProps> = ({
         <img
           src={imageSrc}
           alt={imageAlt}
-          className={clsx('rounded-xl shadow-md w-96 border-4 border-yellow-500')}
+          className={clsx('rounded-xl shadow-md w-96 border-4 border-kamentsa-amarillo-calido')}
         />
       </div>
     </section>

@@ -1,10 +1,12 @@
-import { Input } from '@/components/ui';
+
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import Loading from '@/components/common/Loading'; // Import Loading component
 import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from 'react-i18next'; // Import useTranslation
+import { cn } from "@/lib/utils"; // Import cn utility
+import { Input } from '@/components/ui/input';
 
 const ForgotPasswordForm: React.FC = () => {
   const { t } = useTranslation(); // Initialize useTranslation
@@ -41,7 +43,7 @@ const ForgotPasswordForm: React.FC = () => {
     <div className="flex flex-col items-center justify-center">
       <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-6">
         <div className="grid gap-3">
-          <Label htmlFor="email" className="text-sm text-gray-700">
+          <Label htmlFor="email">
             {t('auth.forgotPassword.label.email')} {/* Use translation */}
           </Label>
           <Input
@@ -51,13 +53,15 @@ const ForgotPasswordForm: React.FC = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className={`w-full rounded-lg border ${localError ? 'border-red-500' : 'border-gray-300'} focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50`}
+            className={cn(
+              localError && 'border-destructive'
+            )}
             aria-invalid={!!localError}
             aria-describedby={localError ? 'email-error' : undefined}
           />
         </div>
-        {localError && <p id="email-error" className="text-red-500 text-sm mt-1">{localError}</p>} {/* Display local validation error */}
-        <Button type="submit" className="w-full rounded-lg py-2" disabled={requestingPasswordReset}>
+        {localError && <p id="email-error" className="text-destructive text-sm mt-1">{localError}</p>} {/* Display local validation error */}
+        <Button type="submit" className="w-full" disabled={requestingPasswordReset}> {/* Use default variant */}
           {requestingPasswordReset ? <Loading /> : t('auth.forgotPassword.button.sendResetLink')} {/* Use context loading state */}
         </Button>
       </form>

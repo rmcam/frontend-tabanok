@@ -38,6 +38,7 @@ const LatestActivities = () => {
           "Error al cargar las últimas actividades: " +
             (err instanceof Error ? err.message : String(err))
         );
+        console.error('Detalle del error:', err); // Log para inspeccionar el error completo
       } finally {
         setLoading(false);
       }

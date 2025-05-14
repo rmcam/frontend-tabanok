@@ -82,6 +82,13 @@ module.exports = {
   				'800': '#003B60',
   				'900': '#002744'
   			},
+  			'kamentsa': {
+  				'verde-oscuro': '#0A4F35',
+  				'azul-celeste': '#87CEEB',
+  				'rojo-intenso': '#C0392B',
+  				'amarillo-calido': '#F4D03F',
+  				'tierra': '#8B4513'
+  			},
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {
@@ -132,7 +139,7 @@ module.exports = {
   				'Merriweather',
   				'serif'
   			],
-        DEFAULT: ['Open Sans', 'sans-serif'],
+  			   DEFAULT: ['Open Sans', 'sans-serif'],
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
@@ -163,5 +170,8 @@ module.exports = {
   		},
   	}
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [
+    require('tailwindcss-animate'),
+    require('@tailwindcss/container-queries'),
+  ],
 };

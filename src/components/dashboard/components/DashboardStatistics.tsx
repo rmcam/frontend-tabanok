@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { FaUsers, FaFileAlt, FaPlusCircle } from "react-icons/fa";
-import api from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Import Card components
 import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton component
+import api from '@/lib/api';
 
 const DashboardStatistics = () => {
   const [statisticsData, setStatisticsData] = useState([
@@ -16,8 +16,9 @@ const DashboardStatistics = () => {
     const fetchStatistics = async () => {
       try {
         // Llamar al endpoint correcto para las estadísticas del dashboard
-        const data = await api.get('/dashboard/statistics');
+
         // TODO: Ajustar el mapeo según la estructura real de la respuesta del backend /dashboard/statistics
+        const data = await api.get('/statistics');
         console.log('Datos de estadísticas recibidos:', data); // Log para inspeccionar la respuesta
         // Mapeo básico asumiendo una estructura de respuesta simple
         setStatisticsData([

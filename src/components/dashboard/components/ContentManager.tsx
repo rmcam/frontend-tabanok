@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
   Textarea,
-} from "@/components/ui/";
+} from "@/components/ui";
 import { useState, useMemo, useCallback, useEffect } from "react"; // Keep useEffect for editContent
 import { toast } from "sonner";
 import api from "@/lib/api";
