@@ -28,11 +28,14 @@ const LatestActivities = () => {
   useEffect(() => {
     const fetchActivities = async () => {
       try {
-        // Llamar al endpoint correcto para las últimas actividades
-        const data: Activity[] = await api.get('/activities/latest');
-        // TODO: Ajustar setActivities(data) según la estructura real de la respuesta del backend /activities/latest
-        console.log('Datos de actividades recientes recibidos:', data); // Log para inspeccionar la respuesta
-        setActivities(data); // Asumiendo que la respuesta es un array de Activity
+        // Llamar al endpoint correcto para las actividades
+        const data: Activity[] = await api.get('/activities');
+        console.log('Datos de actividades recibidos:', data); // Log para inspeccionar la respuesta
+        // Ordenar las actividades por fecha y obtener las últimas 5
+        const latestActivities = data
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+          .slice(0, 5);
+        setActivities(latestActivities);
       } catch (err: unknown) {
         setError(
           "Error al cargar las últimas actividades: " +
