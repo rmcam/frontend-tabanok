@@ -115,6 +115,7 @@ const SignInForm = () => {
           <Input
             id="password"
             type="password"
+            autoComplete="current-password"
             placeholder={t("auth.signin.placeholder.password")}
             name="password"
             value={values.password}

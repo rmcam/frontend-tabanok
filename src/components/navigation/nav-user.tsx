@@ -23,10 +23,8 @@ import {
 
 export function NavUser({
   user, // Recibir objeto de usuario del contexto
-  isMobile, // Recibir prop isMobile
 }: {
   user: User | null; // Puede ser null si no está autenticado
-  isMobile: boolean; // Agregar prop isMobile
 }) {
   const { signout } = useAuth(); // Obtener función de cierre de sesión
 
@@ -65,7 +63,7 @@ export function NavUser({
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            side={isMobile ? 'bottom' : 'right'}
+            side="right"
             align="end"
             sideOffset={4}
           >

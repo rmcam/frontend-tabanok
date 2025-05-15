@@ -123,7 +123,7 @@ const HomePage = () => {
 
   const [defaultAuthModal, setDefaultAuthModal] = useState<
     'signin' | 'signup' | 'forgotPassword' | undefined
-  >(undefined);
+  >('signin'); // Inicializar con 'signin' para abrir el modal automáticamente
 
   // Effect to open signin modal if redirected from PrivateRoute
   useEffect(() => {

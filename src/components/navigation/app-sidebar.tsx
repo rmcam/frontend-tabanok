@@ -3,7 +3,6 @@ import Loading from '@/components/common/Loading';
 import {
   Sidebar,
   SidebarContent,
-  useSidebar, // Importar useSidebar
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
@@ -18,15 +17,18 @@ import { NavUser } from './nav-user';
 import { data } from './sidebar-data';
 import { useFetchUnits } from '@/hooks/useFetchUnits';
 import { Button } from '@/components/ui/button';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const { user, loading: authLoading } = useAuth();
-  const { isMobile } = useSidebar(); // Obtener isMobile del contexto del sidebar
   const { loading: unitsLoading, error: unitsError, refetch } = useFetchUnits();
- 
-   if (authLoading || unitsLoading) {
+
+  if (authLoading || unitsLoading) {
     return (
       <Sidebar collapsible="icon" {...props}>
+        <SidebarHeader>
+          <SidebarTrigger />
+        </SidebarHeader>
         <SidebarContent>
           <Loading />
         </SidebarContent>
@@ -85,7 +87,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       <SidebarRail />
       <SidebarFooter>
         <SidebarSeparator />
-        <NavUser user={user} isMobile={isMobile} /> {/* Pasar isMobile a NavUser */}
+        <NavUser user={user} /> {/* Pasar isMobile a NavUser */}
       </SidebarFooter>
     </Sidebar>
   );
