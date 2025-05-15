@@ -22,8 +22,20 @@ const SignInForm = () => {
     () => ({
       identifier: (value: string) => {
         if (!value) return t("auth.signin.validation.identifier.required");
-        if (value.length < 6)
-          return t("auth.signin.validation.identifier.minlength");
+        // Validación para correo electrónico (regex simple)
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const isEmail = emailRegex.test(value);
+
+        // Validación para nombre de usuario (longitud mínima)
+        const isUsernameValidLength = value.length >= 6;
+        // Permitir el nombre de usuario 'admin' específicamente
+        const isAdminUsername = value === 'admin';
+
+        // Si no es un correo electrónico Y no es 'admin' Y no cumple la longitud mínima del nombre de usuario, es inválido.
+        if (!isEmail && !isAdminUsername && !isUsernameValidLength) {
+          return t("auth.signin.validation.identifier.invalid"); // Mensaje genérico para formato inválido
+        }
+
         return undefined;
       },
       password: (value: string) => {

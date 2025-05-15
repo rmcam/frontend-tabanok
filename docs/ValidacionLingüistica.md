@@ -10,7 +10,7 @@ Fortalecer la calidad del contenido textual mediante validaciones lingüísticas
 
 ## Estado actual
 
-*   **Validaciones básicas:** Implementadas con **Zod** en formularios como los de login y registro para validación estructural de los datos de entrada.
+*   **Validaciones básicas:** Implementadas con **Zod** en formularios como los de login y registro para validación estructural de los datos de entrada. **La validación en el formulario de inicio de sesión (`SigninForm.tsx`) ha sido actualizada para permitir el ingreso con nombre de usuario o correo electrónico, validando el formato de correo electrónico y la longitud mínima para nombres de usuario (incluyendo una excepción para el nombre de usuario 'admin').**
 *   **Mensajes de error:** Se ha iniciado la internacionalización de los mensajes de error y otros textos en los formularios de autenticación (`SigninForm.tsx`, `ForgotPasswordForm.tsx`), pero se han encontrado errores persistentes de parsing/formato que impiden completar esta tarea actualmente.
 *   **Control ortográfico y gramatical avanzado:** No implementado.
 *   **Internacionalización (i18n):** La configuración inicial está presente (`react-i18next`) y se ha iniciado la traducción de la interfaz, pero la traducción completa y la resolución de los errores de formato/parsing están pendientes.

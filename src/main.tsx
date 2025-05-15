@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { I18nextProvider } from 'react-i18next'; // Importa I18nextProvider
 import i18n from './i18n'; // Importa tu configuración de i18n
 import { ThemeProvider } from './context/ThemeContext'; // Importa ThemeProvider
+import { Toaster } from 'sonner'; // Importa el componente Toaster
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ createRoot(document.getElementById("root")!).render(
           <QueryClientProvider client={queryClient}>
             <I18nextProvider i18n={i18n}> {/* Envolver la aplicación con I18nextProvider */}
               <App />
+              <Toaster /> {/* Añade el componente Toaster aquí */}
             </I18nextProvider>
           </QueryClientProvider>
         </AuthProvider>
@@ -29,12 +31,13 @@ createRoot(document.getElementById("root")!).render(
   </StrictMode>
 );
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').then(registration => {
-      console.log('ServiceWorker registration successful with scope: ', registration.scope);
-    }, err => {
-      console.log('ServiceWorker registration failed: ', err);
-    });
-  });
-}
+// Comentar el registro del Service Worker temporalmente para depuración
+// if ('serviceWorker' in navigator) {
+//   window.addEventListener('load', () => {
+//     navigator.serviceWorker.register('/sw.js').then(registration => {
+//       console.log('ServiceWorker registration successful with scope: ', registration.scope);
+//     }, err => {
+//       console.log('ServiceWorker registration failed: ', err);
+//     });
+//   });
+// }

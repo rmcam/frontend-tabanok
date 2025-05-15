@@ -304,15 +304,25 @@ Se implementó una solución en el backend para asegurar que el endpoint `GET /l
 *   `src/auth/hooks/useAuthService.ts`: Hook que encapsula la lógica de `authService.ts`.
 *   `src/auth/utils/authUtils.ts`: Utilidades relacionadas con autenticación. Funciones de manejo de tokens (`saveToken`, `getToken`, `removeToken`) son no-op ya que el frontend no gestiona directamente las cookies HttpOnly.
 *   `src/auth/context/authContext.ts`: Define y exporta el Contexto de Autenticación (`AuthContext`).
-*   `src/auth/context/authProvider.tsx`: Define y exporta el Proveedor de Autenticación (`AuthProvider`). Centraliza el estado del usuario y estados de carga individuales. Realiza verificación de sesión inicial y después de login/signup. Integra notificaciones con `sonner`. Manejo de errores mejorado.
+*   `src/auth/context/authProvider.tsx`: Define y exporta el Proveedor de Autenticación (`AuthProvider`). Centraliza el estado del usuario y estados de carga individuales. Realiza verificación de sesión inicial y después de login/signup. Integra notificaciones con `sonner`. **Manejo de errores mejorado para mostrar mensajes más amigables, incluyendo el parseo de respuestas JSON del backend para extraer el campo `message`.**
 *   `src/auth/hooks/useAuth.ts`: Hook simple para consumir `AuthContext`.
-*   `src/auth/components/`: Componentes de formularios de autenticación (`SigninForm.tsx`, `SignupForm.tsx`, `ForgotPasswordForm.tsx`). Implementan validación y feedback visual de error. Utilizan `useAuth` para operaciones y navegación. `SignupForm` refactorizado para simplificar lógica de validación por pasos.
+*   `src/auth/components/`: Componentes de formularios de autenticación (`SigninForm.tsx`, `SignupForm.tsx`, `ForgotPasswordForm.tsx`). Implementan validación y feedback visual de error. Utilizan `useAuth` para operaciones y navegación. `SignupForm` refactorizado para simplificar lógica de validación por pasos. **La validación en `SigninForm.tsx` para el campo `identifier` ha sido actualizada para permitir correos electrónicos válidos, el nombre de usuario 'admin', y nombres de usuario con 6 o más caracteres.**
 *   `src/components/common/FormWrapper.tsx`: Componente para envolver formularios con estilos visuales.
 *   `src/components/common/Modal.tsx`: Componente genérico de modal.
 *   `src/components/common/AuthModals.tsx`: Agrupa los modales de autenticación.
 *   `src/components/common/PrivateRoute.tsx`: Componente para proteger rutas, verifica autenticación y roles.
 *   `src/components/layout/AuthenticatedLayout.tsx`: Layout para rutas autenticadas.
 *   `src/App.tsx`: Define rutas principales, usa `PrivateRoute` y `AuthenticatedLayout`. Espera carga inicial de autenticación.
+
+---
+
+## Manejo de Mensajes de Éxito y Error
+
+La aplicación utiliza la librería `sonner` para mostrar notificaciones (toasts) de éxito y error al usuario.
+
+*   El componente `<Toaster />` se ha añadido en `src/main.tsx` para permitir la visualización de estos toasts.
+*   La función `showToast` en `src/auth/context/authProvider.tsx` es responsable de mostrar los mensajes. En caso de errores, intenta parsear el mensaje como JSON y mostrar el valor del campo `message` si está presente, o el mensaje completo si no es un JSON válido o no contiene el campo `message`.
+*   Las funciones de autenticación (`signup`, `signin`, `forgotPassword`, `resetPassword`, `signout`) en `src/auth/context/authProvider.tsx` ahora incluyen bloques `try...catch` para capturar errores de las llamadas a la API (propagados desde `useAuthService` y `authService`) y llamar a `showToast` con el mensaje de error correspondiente.
 
 ---
 

@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import useAuthService from "../hooks/useAuthService";
 import { SigninData, SignupData, User } from "../types/authTypes";
 import { AuthContext } from "./authContext";
-import { useLocation } from "react-router-dom"; // Import useLocation
+import { useLocation, useNavigate } from "react-router-dom"; // Import useLocation and useNavigate
 
 const showToast = (
   message: string,
@@ -12,7 +12,18 @@ const showToast = (
   if (type === "success") {
     toast.success(message);
   } else if (type === "error") {
-    toast.error(message);
+    // Intenta parsear el mensaje si es una cadena JSON
+    try {
+      const errorObj = JSON.parse(message);
+      if (errorObj && typeof errorObj === 'object' && errorObj.message) {
+        toast.error(errorObj.message);
+      } else {
+        toast.error(message);
+      }
+    } catch {
+      // Si no es JSON válido, muestra el mensaje tal cual
+      toast.error(message);
+    }
   } else {
     toast.info(message);
   }
@@ -27,6 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [signingUp, setSigningUp] = useState(false);
   const [requestingPasswordReset, setRequestingPasswordReset] = useState(false);
   const [resettingPassword, setResettingPassword] = useState(false); // New state for password reset
+  const [signingOut, setSigningOut] = useState(false); // New state for signout loading
 
   const {
     handleSignup: signupService,
@@ -38,6 +50,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   } = useAuthService();
 
   const location = useLocation(); // Get current location
+  const navigate = useNavigate(); // Get navigate function
 
   useEffect(() => {
     const verifyAuth = async () => {
@@ -66,7 +79,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       await signoutService();
       setUser(null);
+      console.log("User state after signout:", null); // Log user state after signout
       showToast("Sesión cerrada exitosamente.", "success");
+      navigate("/"); // Redirect to homepage after successful signout
+      console.log("Navigated to / after signout"); // Log navigation after signout
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
       const errorMessage =
@@ -75,8 +91,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           : "Error al cerrar sesión. Por favor, inténtalo de nuevo.";
       showToast(errorMessage, "error");
       // No retornar false aquí, ya que el cierre de sesión fallido no debería impedir la limpieza del estado local
+    } finally {
+      setLoading(false); // Set loading to false in finally block
+      setSigningOut(false); // Set signingOut to false in finally block
     }
-  }, [signoutService]);
+  }, [signoutService, navigate]); // Added navigate dependency
 
   const signup = async (data: SignupData) => {
     setSigningUp(true);
@@ -107,10 +126,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       // Después de un inicio de sesión exitoso, verificar la sesión para obtener los datos del usuario
       const authenticatedUser = await verifySessionService();
       setUser(authenticatedUser);
+      console.log("User state after signin:", authenticatedUser); // Log user state after signin
       showToast("Inicio de sesión exitoso.", "success");
-    } catch (error: unknown) {
-      setSigningIn(false);
-      throw error; // Propagar el error
+      navigate("/dashboard"); // Redirect to dashboard after successful login
+      console.log("Navigated to /dashboard after signin"); // Log navigation after signin
+    } catch (error) {
+      console.error("Error al iniciar sesión:", error);
+      const errorMessage =
+        error instanceof Error && error.message
+          ? error.message
+          : "Error al iniciar sesión. Por favor, inténtalo de nuevo.";
+      showToast(errorMessage, "error");
+      // No retornar false aquí, ya que el error ya se maneja con el toast
+    } finally {
+      setSigningIn(false); // Set signingIn to false in finally block
     }
   };
 
@@ -182,6 +211,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         signingUp,
         requestingPasswordReset,
         resettingPassword, // Include new state
+        signingOut, // Include new state
         signin,
         signup,
         signout,

@@ -10,6 +10,7 @@ import { Activity, Book, Gamepad2, Pause, Play } from 'lucide-react'; // Importa
 import { useCallback, useEffect, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { HashLink } from 'react-router-hash-link';
+import { useLocation, useNavigate } from 'react-router-dom'; // Import useLocation and useNavigate
 import { useCarousel } from '../../hooks/useCarousel';
 
 import ContactForm from './components/ContactForm';
@@ -117,9 +118,23 @@ const HomePage = () => {
     };
   }, [testimonialCarouselApi]);
 
+  const location = useLocation(); // Get current location
+  const navigate = useNavigate(); // Get navigate function
+
   const [defaultAuthModal, setDefaultAuthModal] = useState<
     'signin' | 'signup' | 'forgotPassword' | undefined
   >(undefined);
+
+  // Effect to open signin modal if redirected from PrivateRoute
+  useEffect(() => {
+    console.log('Location state:', location.state); // Log location state
+    if (location.state?.showSigninModal) {
+      setDefaultAuthModal('signin');
+      // Clear the state after opening the modal to prevent it from reopening on subsequent visits
+      // Use navigate with replace: true and empty state to clear the location state
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, navigate, location.pathname]); // Depend on location.state, navigate, and location.pathname
 
   const handleOpenSignupModal = () => {
     setDefaultAuthModal('signup');

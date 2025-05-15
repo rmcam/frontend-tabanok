@@ -7,6 +7,7 @@ export interface AuthContextType {
   signingIn: boolean;
   signingUp: boolean;
   requestingPasswordReset: boolean;
+  signingOut: boolean; // Add signingOut state
   signin: (data: SigninData) => Promise<void>;
   signup: (data: SignupData) => Promise<void>;
   signout: () => Promise<void>;
