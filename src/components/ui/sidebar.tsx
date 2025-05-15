@@ -1,3 +1,4 @@
+import { PanelLeftIcon } from "lucide-react";
 import { Slot } from "@radix-ui/react-slot";
 import { VariantProps, cva } from "class-variance-authority";
 import * as React from "react";
@@ -277,7 +278,7 @@ function SidebarTrigger({
       }}
       {...props}
     >
-      {/* <PanelLeftIcon /> */} {/* Removed as it was unused */}
+      <PanelLeftIcon /> {/* Removed as it was unused */}
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   );

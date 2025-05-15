@@ -69,7 +69,9 @@ const StudentProgress = () => {
           {studentData.map((student) => (
             <li key={student.id} className="mb-4">
               <div className="flex justify-between">
-                <span>{student.name}</span>
+                <a href={`/student/${student.id}`} className="hover:underline">
+                  {student.name}
+                </a>
                 <span>{student.progress}%</span>
               </div>
               <Progress value={student.progress} />

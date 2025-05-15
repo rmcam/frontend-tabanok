@@ -47,6 +47,7 @@ El frontend es una aplicación **React + Vite** con una estructura modular bien 
     8.  Vista de Multimedia (`MultimediaPage.tsx`)
     9.  Vista de Actividad - Quiz (`QuizActivity.tsx`)
     10. Vista de Actividad - Matching (`MatchingActivity.tsx`)
+  *   **Diseño de la lista de unidades:** Se ha mejorado el diseño de la lista de unidades (`UnitListPage.tsx`) utilizando componentes de la interfaz de usuario y ajustando la tipografía y el espaciado. Se ha agregado una sombra a las tarjetas y se ha aumentado el tamaño de las imágenes. **Se ha implementado la funcionalidad de apertura, la navegación de regreso y el diseño responsive para las unidades. Cada tarjeta de unidad ahora es un enlace que navega a la página de detalles de la unidad, la cual contiene un botón "Regresar" y migas de pan para facilitar la navegación de regreso a la lista de unidades. Además, se han agregado media queries al archivo src/index.css para adaptar el diseño a diferentes tamaños de pantalla.**
 
 ### Estado del Backend
 

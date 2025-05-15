@@ -68,7 +68,6 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="pb-4">
-        <div className="font-bold text-xl p-2">Tabanok</div>
       </SidebarHeader>
       <SidebarContent>
         <NavMain

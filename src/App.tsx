@@ -1,28 +1,63 @@
-import React, { lazy, Suspense } from 'react';
+import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
+import ForgotPasswordForm from "./auth/components/ForgotPasswordForm";
 import PrivateRoute from "./components/common/PrivateRoute";
 import HomePage from "./components/home/HomePage";
-import ForgotPasswordForm from "./auth/components/ForgotPasswordForm";
 import AuthenticatedLayout from "./components/layout/AuthenticatedLayout";
 
 import { useParams } from "react-router-dom"; // Import useParams
-import { SidebarProvider } from './components/ui/sidebar';
+import { SidebarProvider } from "./components/ui/sidebar";
 
 const UnifiedDashboard = lazy(() => import("./components/dashboard/Dashboard"));
-const MultimediaPage = lazy(() => import("./components/multimedia/MultimediaPage"));
+const MultimediaPage = lazy(
+  () => import("./components/multimedia/MultimediaPage")
+);
 const UnitDetail = lazy(() => import("./components/units/UnitDetail"));
 const QuizActivity = lazy(() => import("./components/activities/QuizActivity"));
-const MatchingActivity = lazy(() => import("./components/activities/MatchingActivity"));
-const FillInTheBlanksActivity = lazy(() => import("./components/activities/FillInTheBlanksActivity"));
+const MatchingActivity = lazy(
+  () => import("./components/activities/MatchingActivity")
+);
+const FillInTheBlanksActivity = lazy(
+  () => import("./components/activities/FillInTheBlanksActivity")
+);
 const ProfilePage = lazy(() => import("./components/settings/ProfilePage")); // Import ProfilePage
-const ActivitiesPage = lazy(() => import("./components/activities/ActivitiesPage")); // Import ActivitiesPage
-const GamificationPage = lazy(() => import("./components/gamification/GamificationPage")); // Import GamificationPage
-const LeaderboardPage = lazy(() => import("./components/gamification/LeaderboardPage")); // Import LeaderboardPage
-const AchievementsPage = lazy(() => import("./components/gamification/AchievementsPage")); // Import AchievementsPage
+const ActivitiesPage = lazy(
+  () => import("./components/activities/ActivitiesPage")
+); // Import ActivitiesPage
+const GamificationPage = lazy(
+  () => import("./components/gamification/GamificationPage")
+); // Import GamificationPage
+const LeaderboardPage = lazy(
+  () => import("./components/gamification/LeaderboardPage")
+); // Import LeaderboardPage
+const AchievementsPage = lazy(
+  () => import("./components/gamification/AchievementsPage")
+); // Import AchievementsPage
 const SettingsPage = lazy(() => import("./components/settings/SettingsPage")); // Import SettingsPage
 const StudentPanel = lazy(() => import("./components/student/StudentPanel")); // Import StudentPanel
+const UnitListPage = lazy(() => import("./components/units/UnitListPage")); // Import UnitListPage
+const StudentDetailsPage = lazy(() => import("./components/student/StudentDetailsPage"));
 
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
+const UnauthorizedPage = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      navigate('/dashboard');
+    }, 2000); // Redirect after 2 seconds
+
+    return () => clearTimeout(timer); // Clear timeout if component unmounts
+  }, [navigate]);
+
+  return (
+    <div>
+      Acceso no autorizado. Redirigiendo al dashboard...
+    </div>
+  );
+};
 function App() {
   return (
     <SidebarProvider>
@@ -35,7 +70,11 @@ function App() {
           <Route
             path="/dashboard"
             element={
-              <PrivateRoute requiredRoles={["user", "student", "teacher", "admin"]}> {/* Added 'admin' role */}
+              <PrivateRoute
+                requiredRoles={["user", "student", "teacher", "admin"]}
+              >
+                {" "}
+                {/* Added 'admin' role */}
                 <AuthenticatedLayout>
                   <UnifiedDashboard />
                 </AuthenticatedLayout>
@@ -45,7 +84,9 @@ function App() {
           <Route
             path="/student-panel" // New route for StudentPanel
             element={
-              <PrivateRoute requiredRoles={["user", "student"]}> {/* Only users and students can access student panel */}
+              <PrivateRoute requiredRoles={["user", "student"]}>
+                {" "}
+                {/* Only users and students can access student panel */}
                 <AuthenticatedLayout>
                   <StudentPanel />
                 </AuthenticatedLayout>
@@ -55,6 +96,14 @@ function App() {
           <Route
             path="/unauthorized"
             element={<div>Acceso no autorizado</div>}
+          />
+          <Route
+            path="/unauthorized"
+            element={<UnauthorizedPage />}
+          />
+          <Route
+            path="/unauthorized"
+            element={<UnauthorizedPage />}
           />
           <Route
             path="/teacher-dashboard"
@@ -84,14 +133,12 @@ function App() {
               </PrivateRoute>
             }
           />
-           <Route
+          <Route
             path="/units"
             element={
-              <PrivateRoute requiredRoles={["user", "student", "teacher"]}>
+              <PrivateRoute requiredRoles={["user", "student", "teacher", "admin"]}>
                 <AuthenticatedLayout>
-                  {/* Render UnitList component */}
-                  {/* TODO: Implement UnitList component */}
-                  <div>Unit List Component</div>
+                  <UnitListPage /> {/* Render UnitListPage component */}
                 </AuthenticatedLayout>
               </PrivateRoute>
             }
@@ -110,7 +157,9 @@ function App() {
           <Route
             path="/activities/quiz/:activityId"
             element={
-              <PrivateRoute requiredRoles={["student"]}> {/* Only students can access quizzes */}
+              <PrivateRoute requiredRoles={["student"]}>
+                {" "}
+                {/* Only students can access quizzes */}
                 <AuthenticatedLayout>
                   {/* Pass activityId from URL params to QuizActivity */}
                   <QuizActivity activityId={useParams().activityId as string} />
@@ -122,10 +171,14 @@ function App() {
           <Route
             path="/activities/matching/:activityId"
             element={
-              <PrivateRoute requiredRoles={["student"]}> {/* Only students can access matching activities */}
+              <PrivateRoute requiredRoles={["student"]}>
+                {" "}
+                {/* Only students can access matching activities */}
                 <AuthenticatedLayout>
                   {/* Pass activityId from URL params to MatchingActivity */}
-                  <MatchingActivity activityId={useParams().activityId as string} />
+                  <MatchingActivity
+                    activityId={useParams().activityId as string}
+                  />
                 </AuthenticatedLayout>
               </PrivateRoute>
             }
@@ -134,10 +187,14 @@ function App() {
           <Route
             path="/activities/fill-in-the-blanks/:activityId"
             element={
-              <PrivateRoute requiredRoles={["student"]}> {/* Only students can access fill-in-the-blanks activities */}
+              <PrivateRoute requiredRoles={["student"]}>
+                {" "}
+                {/* Only students can access fill-in-the-blanks activities */}
                 <AuthenticatedLayout>
                   {/* Pass activityId from URL params to ActivityComponent */}
-                  <FillInTheBlanksActivity activityId={useParams().activityId as string} />
+                  <FillInTheBlanksActivity
+                    activityId={useParams().activityId as string}
+                  />
                 </AuthenticatedLayout>
               </PrivateRoute>
             }
@@ -152,23 +209,27 @@ function App() {
               </PrivateRoute>
             }
           >
-             {/* Nested route for Leaderboard */}
-             <Route
+            {/* Nested route for Leaderboard */}
+            <Route
               path="leaderboard"
               element={
                 <PrivateRoute requiredRoles={["user", "student", "teacher"]}>
-                   <AuthenticatedLayout> {/* Wrap with AuthenticatedLayout */}
+                  <AuthenticatedLayout>
+                    {" "}
+                    {/* Wrap with AuthenticatedLayout */}
                     <LeaderboardPage />
                   </AuthenticatedLayout>
                 </PrivateRoute>
               }
             />
-             {/* Nested route for Achievements */}
-             <Route
+            {/* Nested route for Achievements */}
+            <Route
               path="achievements"
               element={
                 <PrivateRoute requiredRoles={["user", "student", "teacher"]}>
-                   <AuthenticatedLayout> {/* Wrap with AuthenticatedLayout */}
+                  <AuthenticatedLayout>
+                    {" "}
+                    {/* Wrap with AuthenticatedLayout */}
                     <AchievementsPage />
                   </AuthenticatedLayout>
                 </PrivateRoute>
@@ -185,17 +246,29 @@ function App() {
               </PrivateRoute>
             }
           >
-             <Route
+            <Route
               path="profile" // Nested route for profile
               element={
                 <PrivateRoute requiredRoles={["user", "student", "teacher"]}>
-                   <AuthenticatedLayout> {/* Wrap with AuthenticatedLayout */}
+                  <AuthenticatedLayout>
+                    {" "}
+                    {/* Wrap with AuthenticatedLayout */}
                     <ProfilePage />
                   </AuthenticatedLayout>
                 </PrivateRoute>
               }
             />
           </Route>
+          <Route
+            path="/student/:studentId"
+            element={
+              <PrivateRoute requiredRoles={["teacher"]}>
+                <AuthenticatedLayout>
+                  <StudentDetailsPage />
+                </AuthenticatedLayout>
+              </PrivateRoute>
+            }
+          />
           {/* Ruta para acceso no autorizado */}
           <Route
             path="/forgot-password"

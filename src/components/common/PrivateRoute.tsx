@@ -22,7 +22,9 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children, requiredRoles }) 
   }
 
   // Lógica de verificación de roles
-  if (requiredRoles && user && !user.roles.some(role => requiredRoles.includes(role))) {
+  if (user && user.roles.includes('admin')) {
+    // Allow access to admins regardless of requiredRoles
+  } else if (requiredRoles && user && !user.roles.some(role => requiredRoles.includes(role))) {
     return <Navigate to="/unauthorized" />;
   }
 

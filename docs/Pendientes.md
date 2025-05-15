@@ -75,6 +75,8 @@ Este documento lista las tareas pendientes y los próximos pasos planificados pa
 5.  Internacionalizar mensajes e integrar validación lingüística avanzada.
 6.  Mantener la documentación y la hoja de ruta actualizadas tras cada cambio relevante.
 
+- **Diseño de la lista de unidades:** Mejorar el diseño de la lista de unidades (`UnitListPage.tsx`) utilizando componentes de la interfaz de usuario y ajustando la tipografía y el espaciado. Se ha agregado una sombra a las tarjetas y se ha aumentado el tamaño de las imágenes. (Completado)
+
 ---
 
 Última actualización: 12/5/2025, 11:59 p. m. (America/Bogota, UTC-5:00)

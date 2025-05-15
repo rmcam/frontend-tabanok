@@ -38,7 +38,7 @@ Los componentes del frontend se organizan en el directorio `src/components/` con
 *   `navigation/`: Componentes de navegación.
 *   `gamification/`: Componentes específicos del módulo de gamificación (ej. `GamificationPage`, `LeaderboardPage`, `AchievementsPage`). Se ha corregido el manejo de errores en estos componentes para mostrar correctamente los mensajes de error.
 *   `settings/`: Componentes específicos del módulo de configuración (ej. `SettingsPage`, `ProfilePage`).
-*   `units/`: Componentes específicos del módulo de unidades (ej. `UnitDetail`).
+*   `units/`: Componentes específicos del módulo de unidades (ej. `UnitDetail`, `UnitListPage`, `UnitCard`).
 *   `ui/`: Componentes base de Shadcn UI y componentes personalizados basados en ellos (ej. `Button`, `Carousel`).
     *   `sidebar.tsx`: Componente principal de la Sidebar.
     *   `mobile-sidebar.tsx`: Componente específico para la Sidebar en vista móvil.
@@ -76,6 +76,11 @@ Se utilizan validaciones básicas con **Zod** en formularios. La integración av
 Se utilizan hooks personalizados como `useAuth` (`src/auth/hooks/useAuth.ts`) para gestionar el estado de autenticación y `useUnits` (`src/hooks/useFetchUnits.ts`) para obtener datos de unidades, incluyendo almacenamiento en caché con `sessionStorage`.
 
 ### Diseño Responsive
+
+El frontend implementa diseño responsive utilizando **Tailwind CSS** con clases de utilidad para controlar el layout, tamaño y visibilidad de los elementos en diferentes puntos de quiebre (`sm:`, `md:`, `lg:`, etc.). Se utilizan **CSS Grid** y **Flexbox** para crear layouts flexibles y adaptables, como en el Dashboard y los componentes de UI. Componentes de UI genéricos como `Card`, `Dialog`, `Sheet` y `Table` están diseñados con responsive en mente, incluyendo el uso de **container queries** en las tarjetas y `overflow-x-auto` para tablas. La barra lateral tiene una implementación específica para móviles (`MobileSidebar`) que se espera que se muestre como un panel deslizable en pantallas pequeñas, controlada por un trigger.
+
+Se han realizado ajustes específicos para mejorar la responsividad en:
+*   **Lista de Unidades:** Se ha mejorado el diseño de la lista de unidades (`UnitListPage.tsx`) utilizando componentes de la interfaz de usuario y ajustando la tipografía y el espaciado. Se ha agregado una sombra a las tarjetas y se ha aumentado el tamaño de las imágenes. Se han añadido media queries al archivo `src/index.css` para adaptar el diseño a diferentes tamaños de pantalla, apilando las tarjetas en pantallas pequeñas y reduciendo los márgenes y el tamaño de la fuente.
 
 El frontend implementa diseño responsive utilizando **Tailwind CSS** con clases de utilidad para controlar el layout, tamaño y visibilidad de los elementos en diferentes puntos de quiebre (`sm:`, `md:`, `lg:`, etc.). Se utilizan **CSS Grid** y **Flexbox** para crear layouts flexibles y adaptables, como en el Dashboard y los componentes de UI. Componentes de UI genéricos como `Card`, `Dialog`, `Sheet` y `Table` están diseñados con responsive en mente, incluyendo el uso de **container queries** en las tarjetas y `overflow-x-auto` para tablas. La barra lateral tiene una implementación específica para móviles (`MobileSidebar`) que se espera que se muestre como un panel deslizable en pantallas pequeñas, controlada por un trigger.
 

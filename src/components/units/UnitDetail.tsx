@@ -1,27 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Loading from '@/components/common/Loading';
-import * as unitService from '@/services/unitService'; // Importar el servicio de unidades
-import * as recommendationService from '@/services/recommendationService'; // Importar el servicio de recomendaciones
-import { Unit } from '@/types/unitTypes'; // Importar el tipo Unit
-import { Activity } from '@/types/activityTypes'; // Importar el tipo Activity
-import { Recommendation } from '@/types/recommendationTypes'; // Importar el tipo Recommendation
+import { Breadcrumb, BreadcrumbItem } from "@/components/ui/breadcrumb"
+import * as unitService from '@/services/unitService';
+import * as recommendationService from '@/services/recommendationService';
+import { Unit } from '@/types/unitTypes';
+import { Activity } from '@/types/activityTypes';
+import { Recommendation } from '@/types/recommendationTypes';
+import Section from '@/components/common/Section';
+import { CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
-// Mantener interfaces existentes si son más detalladas que el tipo Unit básico
 interface Lesson {
   id: string;
   title: string;
-  activities: Activity[]; // Assuming activities are included in lesson data
-  // Add other lesson properties as needed
+  activities: Activity[];
 }
 
-// Ajustar UnitDetailData para que coincida con el tipo Unit o fusionar si es necesario
-// Por ahora, asumiremos que el servicio devuelve algo compatible con UnitDetailData
-export interface UnitDetailData extends Unit { // Extender de Unit si Unit es un subconjunto
-  lessons: Lesson[]; // Asumiendo lessons son parte del detalle de la unidad
-  // Asegurarse de que las propiedades de Unit (id, title, description) también estén aquí
+export interface UnitDetailData extends Unit {
+  lessons: Lesson[];
 }
-
 
 const UnitDetail: React.FC = () => {
   const { unitId } = useParams<{ unitId: string }>();
@@ -35,11 +33,9 @@ const UnitDetail: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        // Usar el nuevo servicio unitService para obtener los detalles de la unidad
-        const unitDetails: UnitDetailData = await unitService.getUnitById(unitId as string); // Cast unitId to string
+        const unitDetails: UnitDetailData = await unitService.getUnitById(unitId as string);
         setUnitData(unitDetails);
 
-        // Obtener recomendaciones para la unidad
         const unitRecommendations = await recommendationService.getRecommendationsByUnitId(unitId as string);
         setRecommendations(unitRecommendations);
 
@@ -67,7 +63,7 @@ const UnitDetail: React.FC = () => {
       case 'fill-in-the-blanks':
         return `/activities/fill-in-the-blanks/${activity.id}`;
       default:
-        return '#'; // Fallback for unknown activity types
+        return '#';
     }
   };
 
@@ -84,9 +80,22 @@ const UnitDetail: React.FC = () => {
   }
 
   return (
-    <div>
-      <h2>{unitData.title}</h2> {/* Usar unitData.title en lugar de unitData.name */}
-      {unitData.description && <p>{unitData.description}</p>}
+    <Section className="unit-detail" title={unitData.title}>
+      <Breadcrumb>
+        <BreadcrumbItem>
+          <Link to="/">Inicio</Link>
+        </BreadcrumbItem>
+        <BreadcrumbItem>
+          <Link to="/units">Unidades</Link>
+        </BreadcrumbItem>
+        <BreadcrumbItem>
+          {unitData.title}
+        </BreadcrumbItem>
+      </Breadcrumb>
+      <Link to="/units">
+        <Button>Regresar a la lista de unidades</Button>
+      </Link>
+      {unitData.description && <CardDescription>{unitData.description}</CardDescription>}
 
       <h3>Lecciones</h3>
       {unitData.lessons.length === 0 ? (
@@ -100,9 +109,11 @@ const UnitDetail: React.FC = () => {
                 <ul>
                   {lesson.activities.map(activity => (
                     <li key={activity.id}>
-                      <Link to={getActivityRoute(activity)}>
-                        {activity.title} ({activity.type})
-                      </Link>
+                      <Button asChild>
+                        <Link to={getActivityRoute(activity)}>
+                          {activity.title} ({activity.type})
+                        </Link>
+                      </Button>
                     </li>
                   ))}
                 </ul>
@@ -114,7 +125,6 @@ const UnitDetail: React.FC = () => {
         </ul>
       )}
 
-      {/* Display recommendations */}
       {recommendations.length > 0 && (
         <div className="mt-8">
           <h3>Recomendaciones</h3>
@@ -123,18 +133,20 @@ const UnitDetail: React.FC = () => {
               <li key={rec.id}>
                 <h4>{rec.title}</h4>
                 {rec.description && <p>{rec.description}</p>}
-                {rec.link && <a href={rec.link} target="_blank" rel="noopener noreferrer">{rec.link}</a>}
+                {rec.link && <Button asChild><a href={rec.link} target="_blank" rel="noopener noreferrer">{rec.link}</a></Button>}
                 {rec.relatedActivityId && (
-                  <Link to={getActivityRoute({ id: rec.relatedActivityId, type: rec.relatedActivityType || 'unknown', title: 'Actividad Recomendada', description: 'Actividad recomendada relacionada con esta unidad.' } as Activity)}> {/* Assuming a basic Activity structure for routing */}
-                    Ver Actividad Relacionada
-                  </Link>
+                  <Button asChild>
+                    <Link to={getActivityRoute({ id: rec.relatedActivityId, type: rec.relatedActivityType || 'unknown', title: 'Actividad Recomendada', description: 'Actividad recomendada relacionada con esta unidad.' } as Activity)}>
+                      Ver Actividad Relacionada
+                    </Link>
+                  </Button>
                 )}
               </li>
             ))}
           </ul>
         </div>
       )}
-    </div>
+    </Section>
   );
 };
 
