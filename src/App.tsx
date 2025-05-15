@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from "react-router-dom";
 import PrivateRoute from "./components/common/PrivateRoute";
 import HomePage from "./components/home/HomePage";
+import ForgotPasswordForm from "./auth/components/ForgotPasswordForm";
 import AuthenticatedLayout from "./components/layout/AuthenticatedLayout";
 
 import { useParams } from "react-router-dom"; // Import useParams
@@ -79,6 +80,18 @@ function App() {
               <PrivateRoute requiredRoles={["user", "student", "teacher"]}>
                 <AuthenticatedLayout>
                   <UnitDetail /> {/* Render UnitDetail component */}
+                </AuthenticatedLayout>
+              </PrivateRoute>
+            }
+          />
+           <Route
+            path="/units"
+            element={
+              <PrivateRoute requiredRoles={["user", "student", "teacher"]}>
+                <AuthenticatedLayout>
+                  {/* Render UnitList component */}
+                  {/* TODO: Implement UnitList component */}
+                  <div>Unit List Component</div>
                 </AuthenticatedLayout>
               </PrivateRoute>
             }
@@ -184,6 +197,10 @@ function App() {
             />
           </Route>
           {/* Ruta para acceso no autorizado */}
+          <Route
+            path="/forgot-password"
+            element={<ForgotPasswordForm />}
+          />
         </Routes>
       </Suspense>
     </SidebarProvider>

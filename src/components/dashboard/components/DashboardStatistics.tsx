@@ -4,6 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton component
 import api from '@/lib/api';
 
+
+interface Statistics {
+  students: number;
+  activities: number;
+  reports: number;
+}
+
 const DashboardStatistics = () => {
   const [statisticsData, setStatisticsData] = useState([
     { id: '1', label: 'Estudiantes', value: 0, icon: FaUsers },
@@ -21,16 +28,21 @@ const DashboardStatistics = () => {
         //const activities = await api.get('/activities');
         console.log('Datos de estadísticas recibidos:', data); // Log para inspeccionar la respuesta
         // Mapeo basado en la estructura real de la respuesta del backend
-        setStatisticsData([
-          { id: '1', label: 'Estudiantes', value: data.students || 0, icon: FaUsers },
-          { id: '2', label: 'Actividades', value: data.activities || 0, icon: FaPlusCircle },
-          { id: '3', label: 'Reportes', value: data.reports || 0, icon: FaFileAlt },
-        ]);
+        if (typeof data === 'object' && data !== null) {
+          const statistics = data as Statistics;
+          setStatisticsData([
+            { id: '1', label: 'Estudiantes', value: statistics.students || 0, icon: FaUsers },
+            { id: '2', label: 'Actividades', value: statistics.activities || 0, icon: FaPlusCircle },
+            { id: '3', label: 'Reportes', value: statistics.reports || 0, icon: FaFileAlt },
+          ]);
+        } else {
+          console.error('Error: Invalid data format from the backend');
+        }
       } catch (error: unknown) {
         if (error instanceof Error) {
           console.error('Error fetching dashboard statistics:', error.message);
         } else {
-          console.error('An unexpected error occurred:', error);
+          console.error('Error fetching dashboard statistics:', error);
         }
       } finally {
         setLoading(false);

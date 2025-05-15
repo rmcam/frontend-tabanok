@@ -14,6 +14,16 @@
       },
       "button": {
         "signIn": "Sign In"
+      },
+      "validation": {
+        "identifier": {
+          "required": "Username/Email is required",
+          "minlength": "Username/Email must be at least 6 characters"
+        },
+        "password": {
+          "required": "Password is required",
+          "minlength": "Password must be at least 6 characters"
+        }
       }
     },
     "signup": {
@@ -24,7 +34,8 @@
         "passwordMinLength": "Password must be at least 6 characters",
         "usernameRequired": "Username is required",
         "firstNameRequired": "First name is required",
-        "lastNameRequired": "Last name is required"
+        "lastNameRequired": "Last name is required",
+        "identifierRequired": "Username or email is required"
       },
       "step": "Step {{step}} of 3",
       "label": {

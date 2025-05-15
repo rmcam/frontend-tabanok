@@ -109,15 +109,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setUser(authenticatedUser);
       showToast("Inicio de sesión exitoso.", "success");
     } catch (error: unknown) {
-      console.error("Error al iniciar sesión:", error);
-      const errorMessage =
-        error instanceof Error && error.message
-          ? error.message
-          : "Error al iniciar sesión. Por favor, inténtalo de nuevo.";
-      showToast(errorMessage, "error");
-      // No retornar false aquí, ya que el error ya se maneja con el toast
-    } finally {
       setSigningIn(false);
+      throw error; // Propagar el error
     }
   };
 

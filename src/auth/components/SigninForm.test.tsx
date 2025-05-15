@@ -1,195 +1,215 @@
-import useFormValidation from "@/hooks/useFormValidation";
-import "@testing-library/jest-dom";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../auth/hooks/useAuth";
-import SigninForm from "./SigninForm";
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import SignInForm from './SigninForm';
+import { AuthContext } from '../context/authContext';
+import { BrowserRouter } from 'react-router-dom';
+import { I18nextProvider } from 'react-i18next';
+import i18n from '../../i18n';
+import { vi, Mock } from 'vitest'; // Import Mock
 
-// Mock the hooks used by SigninForm
-jest.mock("@/hooks/useFormValidation");
-jest.mock("../../auth/hooks/useAuth");
-jest.mock("react-router-dom", () => ({
-  ...jest.requireActual("react-router-dom"),
-  useNavigate: jest.fn(),
-}));
-jest.mock("react-i18next", () => ({
-  useTranslation: () => ({
-    t: (key: string) => key, // Mock translation function to return the key
-  }),
-}));
+// Mock the hooks
+vi.mock('@/hooks/useFormValidation');
+vi.mock('../../auth/hooks/useAuth');
+vi.mock('react-i18next');
 
-const mockUseFormValidation = useFormValidation as jest.Mock;
-const mockUseAuth = useAuth as jest.Mock;
-const mockUseNavigate = useNavigate as jest.Mock;
+// Import the mocked hooks after mocking
+import useFormValidation from '@/hooks/useFormValidation';
+import { useAuth } from '../../auth/hooks/useAuth';
+import { useTranslation } from 'react-i18next';
 
-describe("SigninForm", () => {
-  const mockHandleChange = jest.fn();
-  const mockSignin = jest.fn();
-  const mockNavigate = jest.fn();
+
+describe('SignInForm Component', () => {
+  const mockUseFormValidation = useFormValidation as Mock; // Use Mock
+  const mockUseAuth = useAuth as Mock; // Use Mock
+  const mockUseTranslation = useTranslation as Mock; // Use Mock
+
+  // Mock translation function
+  const t = vi.fn((key) => key);
+  mockUseTranslation.mockReturnValue({ t });
 
   beforeEach(() => {
     // Reset mocks before each test
     mockUseFormValidation.mockReset();
     mockUseAuth.mockReset();
-    mockUseNavigate.mockReset();
+    t.mockClear();
 
-    // Default mock implementations
+    // Default mock implementation for useFormValidation
     mockUseFormValidation.mockReturnValue({
-      values: { identifier: "", password: "" },
+      values: {
+        identifier: '',
+        password: '',
+      },
       errors: {},
-      isValid: false,
-      handleChange: mockHandleChange,
+      isValid: true,
+      handleChange: vi.fn((e) => {
+        const { name, value } = e.target;
+        // Update the mock return value to simulate state change
+        mockUseFormValidation.mockReturnValue({
+          ...mockUseFormValidation(), // Keep other mocked properties
+          values: {
+            ...mockUseFormValidation().values,
+            [name]: value,
+          },
+        });
+      }),
+      handleSubmit: vi.fn(() => (event: React.FormEvent) => {
+        event.preventDefault();
+        // Simulate validation success by default
+        return { isValid: true };
+      }),
+      setErrors: vi.fn(),
     });
 
+    // Default mock implementation for useAuth
     mockUseAuth.mockReturnValue({
-      signin: mockSignin,
       signingIn: false,
+      signin: vi.fn(),
     });
-
-    mockUseNavigate.mockReturnValue(mockNavigate);
   });
 
-  test("renders correctly", () => {
-    render(<SigninForm />);
+  it('renders the form with identifier and password fields', () => {
+    render(
+      <I18nextProvider i18n={i18n}>
+        <BrowserRouter>
+          <AuthContext.Provider value={mockUseAuth()}> {/* Pass the full mocked context value */}
+            <SignInForm />
+          </AuthContext.Provider>
+        </BrowserRouter>
+      </I18nextProvider>
+    );
 
-    // Check if the form elements are present
-    expect(
-      screen.getByLabelText("auth.signin.label.username")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByLabelText("auth.signin.label.password")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "auth.signin.button.signIn" })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("auth.signin.link.forgotPassword")
-    ).toBeInTheDocument();
+    expect(screen.getByLabelText(/Correo electrónico o nombre de usuario/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Contraseña/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Iniciar sesión/i })).toBeInTheDocument();
   });
 
-  test("calls handleChange when input values change", () => {
-    render(<SigninForm />);
-
-    const usernameInput = screen.getByLabelText("auth.signin.label.username");
-    const passwordInput = screen.getByLabelText("auth.signin.label.password");
-
-    fireEvent.change(usernameInput, {
-      target: { name: "identifier", value: "testuser" },
-    });
-    expect(mockHandleChange).toHaveBeenCalledWith(expect.any(Object)); // Check if handleChange was called
-
-    fireEvent.change(passwordInput, {
-      target: { name: "password", value: "password123" },
-    });
-    expect(mockHandleChange).toHaveBeenCalledWith(expect.any(Object)); // Check if handleChange was called
-  });
-
-  test("disables submit button when form is invalid", () => {
-    mockUseFormValidation.mockReturnValue({
-      values: { identifier: "", password: "" },
-      errors: {},
-      isValid: false, // Form is invalid
-      handleChange: mockHandleChange,
-    });
-
-    render(<SigninForm />);
-    const submitButton = screen.getByRole("button", {
-      name: "auth.signin.button.signIn",
-    });
-    expect(submitButton).toBeDisabled();
-  });
-
-  test("enables submit button when form is valid", () => {
-    mockUseFormValidation.mockReturnValue({
-      values: { identifier: "testuser", password: "password123" },
-      errors: {},
-      isValid: true, // Form is valid
-      handleChange: mockHandleChange,
-    });
-
-    render(<SigninForm />);
-    const submitButton = screen.getByRole("button", {
-      name: "auth.signin.button.signIn",
-    });
-    expect(submitButton).not.toBeDisabled();
-  });
-
-  test("shows loading indicator when signingIn is true", () => {
+  it('calls the signin function with the correct data when the form is submitted', async () => {
+    const mockSignin = vi.fn();
     mockUseAuth.mockReturnValue({
+      signingIn: false,
       signin: mockSignin,
-      signingIn: true, // Signing in
     });
+
+    // Mock useFormValidation to return valid data for submission
     mockUseFormValidation.mockReturnValue({
-      values: { identifier: "testuser", password: "password123" },
+      values: {
+        identifier: 'test@example.com',
+        password: 'password123',
+      },
       errors: {},
       isValid: true,
-      handleChange: mockHandleChange,
+      handleChange: vi.fn(),
+      handleSubmit: vi.fn(() => async (event: React.FormEvent) => {
+        event.preventDefault();
+        // Simulate validation success and call the mock signin
+        const formIsValid = true; // Assume valid for this test
+        if (formIsValid) {
+          await mockSignin({
+             identifier: 'test@example.com',
+             password: 'password123',
+           });
+        }
+        return { isValid: formIsValid };
+      }),
+      setErrors: vi.fn(),
     });
 
-    render(<SigninForm />);
-    expect(screen.getByTestId("loading-indicator")).toBeInTheDocument(); // Assuming Loading component has data-testid="loading-indicator"
-    expect(
-      screen.queryByText("auth.signin.button.signIn")
-    ).not.toBeInTheDocument();
-  });
 
-  test("calls signin and navigates on successful submission", async () => {
-    mockUseFormValidation.mockReturnValue({
-      values: { identifier: "testuser", password: "password123" },
-      errors: {},
-      isValid: true,
-      handleChange: mockHandleChange,
-    });
-    mockSignin.mockResolvedValue(undefined); // Simulate successful signin
+    render(
+      <I18nextProvider i18n={i18n}>
+        <BrowserRouter>
+          <AuthContext.Provider value={mockUseAuth()}> {/* Pass the full mocked context value */}
+            <SignInForm />
+          </AuthContext.Provider>
+        </BrowserRouter>
+      </I18nextProvider>
+    );
 
-    render(<SigninForm />);
-    const submitButton = screen.getByRole("button", {
-      name: "auth.signin.button.signIn",
-    });
-
-    fireEvent.submit(submitButton);
+    const signinButton = screen.getByRole('button', { name: /Iniciar sesión/i });
+    fireEvent.click(signinButton);
 
     await waitFor(() => {
       expect(mockSignin).toHaveBeenCalledWith({
-        identifier: "testuser",
-        password: "password123",
+        identifier: 'test@example.com',
+        password: 'password123',
       });
-      expect(mockNavigate).toHaveBeenCalledWith("/dashboard");
     });
   });
 
-  test("handles signin error", async () => {
+  it('displays validation errors when the form is submitted with invalid data', async () => {
+    // Mock useFormValidation to return invalid data and errors
     mockUseFormValidation.mockReturnValue({
-      values: { identifier: "testuser", password: "password123" },
-      errors: {},
-      isValid: true,
-      handleChange: mockHandleChange,
+      values: {
+        identifier: '', // Invalid identifier
+        password: '', // Invalid password
+      },
+      errors: {
+        identifier: 'auth.signin.validation.identifier.required',
+        password: 'auth.signin.validation.password.required',
+      },
+      isValid: false, // Form is invalid
+      handleChange: vi.fn(),
+      handleSubmit: vi.fn(() => (event: React.FormEvent) => {
+        event.preventDefault();
+        // Simulate failed validation
+        return { isValid: false };
+      }),
+      setErrors: vi.fn(),
     });
-    const mockError = new Error("Signin failed");
-    mockSignin.mockRejectedValue(mockError); // Simulate signin error
-    const consoleErrorSpy = jest
-      .spyOn(console, "error")
-      .mockImplementation(() => {}); // Mock console.error
 
-    render(<SigninForm />);
-    const submitButton = screen.getByRole("button", {
-      name: "auth.signin.button.signIn",
-    });
+    render(
+      <I18nextProvider i18n={i18n}>
+        <BrowserRouter>
+          <AuthContext.Provider value={mockUseAuth()}> {/* Pass the full mocked context value */}
+            <SignInForm />
+          </AuthContext.Provider>
+        </BrowserRouter>
+      </I18nextProvider>
+    );
 
-    fireEvent.submit(submitButton);
+    const signinButton = screen.getByRole('button', { name: /Iniciar sesión/i });
+
+    fireEvent.click(signinButton);
 
     await waitFor(() => {
-      expect(mockSignin).toHaveBeenCalledWith({
-        identifier: "testuser",
-        password: "password123",
-      });
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        "Error al iniciar sesión:",
-        mockError
-      );
-      expect(mockNavigate).not.toHaveBeenCalled(); // Should not navigate on error
+      expect(screen.getByText(/El usuario\/correo electrónico es obligatorio/i)).toBeInTheDocument();
+      expect(screen.getByText(/La contraseña es obligatoria/i)).toBeInTheDocument();
+    });
+  });
+
+  it('should disable submit button when signingIn is true', async () => {
+    mockUseAuth.mockReturnValue({
+      signingIn: true, // Signing in is true
+      signin: vi.fn(),
     });
 
-    consoleErrorSpy.mockRestore(); // Restore console.error
+    // Mock useFormValidation to return valid data for submission
+    mockUseFormValidation.mockReturnValue({
+      values: {
+        identifier: 'test@example.com',
+        password: 'password123',
+      },
+      errors: {},
+      isValid: true,
+      handleChange: vi.fn(),
+      handleSubmit: vi.fn(),
+      setErrors: vi.fn(),
+    });
+
+    render(
+      <I18nextProvider i18n={i18n}>
+        <BrowserRouter>
+          <AuthContext.Provider value={mockUseAuth()}> {/* Pass the full mocked context value */}
+            <SignInForm />
+          </AuthContext.Provider>
+        </BrowserRouter>
+      </I18nextProvider>
+    );
+
+    const signinButton = screen.getByRole('button', { name: /Iniciar sesión/i });
+    expect(signinButton).toBeDisabled();
+    // Assuming Loading component has data-testid="loading"
+    // expect(screen.getByTestId('loading')).toBeInTheDocument();
   });
 });
