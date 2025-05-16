@@ -6,7 +6,7 @@ El frontend de Tabanok es una aplicación web construida con **React (Vite + Typ
 
 El componente `HomePage` (`src/components/home/HomePage.tsx`) es la página principal de la plataforma. Ha sido refactorizado y mejorado para incluir las siguientes secciones y características:
 
-*   **Sección Hero:** Incluye título, descripción, una imagen de fondo con efecto parallax y superposición de color, y botones interactivos. Los datos para esta sección se gestionan centralmente en `src/components/home/heroCards.ts`.
+*   **Sección de "Presentación de la Cultura Kamëntsá":** Incluye un título llamativo, una descripción atractiva, testimonios destacados y enlaces a recursos clave.
 *   **Sección de Características:** Destaca las funcionalidades principales como Lecciones Interactivas, Gamificación y Seguimiento de Progreso, utilizando componentes reutilizables (`FeatureCard`).
 *   **Sección de Lecciones Destacadas:** Muestra lecciones obtenidas dinámicamente desde la API del backend, con manejo de estado de carga y error. Cada lección se presenta utilizando el componente `FeaturedLessonCard`.
 *   **Sección de Testimonios:** Presenta testimonios de usuarios en un carrusel con funcionalidad de autoplay y controles de pausa/reproducción.
@@ -33,7 +33,7 @@ Los componentes del frontend se organizan en el directorio `src/components/` con
 *   Se agregó el componente `LatestActivities` para mostrar las últimas actividades realizadas por los estudiantes, obteniendo datos del backend (`GET /activities`) y filtrando los resultados en el frontend.
 *   Se han añadido indicadores de carga a los componentes del dashboard.
 *   `general/`: Componentes generales no específicos de una sección particular.
-*   `home/`: Componentes utilizados en la página de inicio (`HomePage`) y sus subcomponentes (ej. `HeroSection`, `FeaturedLessonCard`, `ContactForm`, `FAQ`, `HomeNavbar`).
+*   `home/`: Componentes utilizados en la página de inicio (`HomePage`) y sus subcomponentes (ej. `KamentsaCulturePresentation`, `FeaturedLessonCard`, `ContactForm`, `FAQ`, `HomeNavbar`).
 *   `layout/`: Componentes de layout (ej. `AuthenticatedLayout`).
 *   `navigation/`: Componentes de navegación.
 *   `gamification/`: Componentes específicos del módulo de gamificación (ej. `GamificationPage`, `LeaderboardPage`, `AchievementsPage`). Se ha corregido el manejo de errores en estos componentes para mostrar correctamente los mensajes de error.

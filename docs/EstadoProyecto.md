@@ -10,10 +10,9 @@ El frontend es una aplicación **React + Vite** con una estructura modular bien 
 
 *   **Arquitectura:** Organizada en componentes, hooks, servicios y utilidades, siguiendo las mejores prácticas. Ver [`./Frontend-Arquitectura.md`](./Frontend-Arquitectura.md) para más detalles.
 *   **Componente HomePage:** Ha sido refactorizado y mejorado significativamente, incluyendo:
-    *   Sección Hero con imagen de fondo, efecto parallax, superposición de color y botones interactivos.
+    *   Sección de "Presentación de la Cultura Kamëntsá" con un título llamativo, una descripción atractiva, testimonios destacados y enlaces a recursos clave.
     *   Secciones de Características, Lecciones Destacadas (carga dinámica desde API con manejo de estado de carga/error), Testimonios (carrusel con autoplay), FAQ y Contacto (con formulario).
     *   Barra de navegación estática (`HomeNavbar`).
-    *   Uso centralizado de datos para la Hero Section en `src/components/home/heroCards.ts`.
     *   Implementación de `react-router-hash-link` para desplazamiento suave.
     *   Mejoras de diseño y estilo, incluyendo la paleta de colores Kamëntsá en `tailwind.config.js`.
 *   **Autenticación y Protección de Rutas:** Implementada completamente utilizando un Contexto de React (`AuthContext`) y un Proveedor (`AuthProvider`). La gestión de estado del usuario, estados de carga individuales y notificaciones (`sonner`) están centralizados. La interacción con la API de autenticación y el manejo de cookies HttpOnly se realizan en `src/auth/services/authService.ts`. Las rutas sensibles están protegidas con el componente `PrivateRoute`, que verifica autenticación y roles requeridos. Se ha añadido una ruta para la página "unauthorized". Se ha actualizado la ruta `/dashboard` para requerir los roles `user` y `student`. **El formulario de inicio de sesión (`SigninForm.tsx`) ha sido actualizado para permitir a los usuarios ingresar tanto su nombre de usuario como su correo electrónico en el campo 'identifier', con validación ajustada en el frontend.** **Se ha mejorado el manejo de errores en el `AuthProvider` para mostrar mensajes de error más amigables utilizando `sonner`, incluyendo el parseo de respuestas JSON del backend.** Ver [`./Autenticacion.md`](./Autenticacion.md) para más detalles.

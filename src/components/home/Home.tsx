@@ -3,25 +3,23 @@ import FeatureCard from '@/components/common/FeatureCard';
 import Loading from '@/components/common/Loading'; // Importar el componente Loading
 import { Button } from '@/components/ui/button';
 
-import clsx from 'clsx';
 import Autoplay from 'embla-carousel-autoplay';
 import { motion, useAnimation } from 'framer-motion';
 import { Activity, Book, Gamepad2, Pause, Play } from 'lucide-react'; // Importar iconos de pausa/reproducción
 import { useCallback, useEffect, useState } from 'react';
+import { useAuth } from '@/auth/hooks/useAuth';
 import { useInView } from 'react-intersection-observer';
 import { HashLink } from 'react-router-hash-link';
 import { useLocation, useNavigate } from 'react-router-dom'; // Import useLocation and useNavigate
-import { useCarousel } from '../../hooks/useCarousel';
 
 import ContactForm from './components/ContactForm';
 import FAQ from './components/FAQ';
 import FeaturedLessonCard from './components/FeaturedLessonCard'; // Importar el nuevo componente
-import HeroSection from './components/HeroSection';
+import KamentsaCulturePresentation from './components/KamentsaCulturePresentation';
 import HomeNavbar from './components/HomeNavbar'; // Importar HomeNavbar
 import NewsSection from './components/NewsSection';
 import ResourcesSection from './components/ResourcesSection';
 import EventsSection from './components/EventsSection';
-import { heroCardsData } from './heroCards';
 import { Carousel, CarouselApi, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '../ui/carousel';
 import { Card, CardContent } from '../ui/card';
 
@@ -53,7 +51,6 @@ const testimonials = [
 ];
 
 const HomePage = () => {
-  const { slide, setSlide } = useCarousel(0, heroCardsData.length);
   const [featuredLessons, setFeaturedLessons] = useState<FeaturedLesson[]>([]); // Usar la interfaz definida
   const [loadingFeaturedLessons, setLoadingFeaturedLessons] = useState(true); // Estado de carga
   const [errorFeaturedLessons, setErrorFeaturedLessons] = useState<string | null>(null); // Estado de error
@@ -150,8 +147,7 @@ const HomePage = () => {
   };
 
   // Clases comunes para los FeatureCard
-  const featureCardCommonClasses =
-    'hover:scale-105 transition-transform duration-300 hover:bg-gray-100';
+  
 
   const [ref, inView] = useInView({
     triggerOnce: true,
@@ -180,38 +176,14 @@ const HomePage = () => {
     }
   }, [inView, animation]);
 
-  // Efecto para redirigir al usuario si ya está autenticado y la carga inicial ha terminado
-  // useEffect(() => {
-  //   if (user && !loading) {
-  //     navigate('/dashboard');
-  //   }
-  // }, [user, loading, navigate]); // Dependencias: user, loading, navigate
-
-  // Función para manejar el clic en "Empieza ahora"
-  const handleComienzaAhoraClick = () => {
-    // if (user) {
-    //   // Si está autenticado, redirigir al dashboard
-    //   navigate('/dashboard'); // Usar useNavigate
-    // } else {
-    //   // Si no está autenticado, abrir el modal de iniciar sesión
-    //   handleOpenSigninModal();
-    // }
-  };
-
-  // Si el usuario está cargando o ya autenticado, no renderizar el contenido de la página de inicio
-  // Esto evita que la página de inicio parpadee antes de la redirección.
-  // if (loading || user) {
-  //   return <Loading />; // O un spinner, etc.
-  // }
+  const { isAuthenticated } = useAuth();
 
   return (
     <>
-      {' '}
-      {/* Usar fragmento para envolver múltiples elementos */}
       <HomeNavbar
         onOpenSigninModal={handleOpenSigninModal}
         onOpenSignupModal={handleOpenSignupModal}
-        isAuthenticated={false} // Pasar el estado de autenticación
+        isAuthenticated={isAuthenticated}
       />
       <motion.div
         className="container mx-auto px-4 sm:px-6 lg:px-8 py-8" // Añadido padding horizontal y mantenido padding vertical inicial
@@ -225,58 +197,28 @@ const HomePage = () => {
           showDefaultTriggers={false}
           onModalClose={handleModalClose} // Pass the handler
         />
-        <Carousel
-          className="w-full max-w-5xl mx-auto"
-          role="region"
-          aria-roledescription="carousel"
-        >
-          <CarouselContent
-            className="w-full h-auto md:h-[500px]"
-            role="group"
-            aria-label="Elementos del carrusel"
+        <div className="w-full">
+          <Carousel
+            className="w-full"
+            role="region"
+            aria-roledescription="carousel"
           >
-            {' '}
-            {/* Altura automática en móvil, fija en md */}
-            {heroCardsData.map((card, index) => (
-              <CarouselItem key={index} className="w-full md:w-1/2 lg:w-1/3 h-full">
-                {' '}
-                {/* Ancho completo en móvil */}
-                <HeroSection
-                  title={card.title}
-                  description={card.description}
-                  buttons={card.buttons.filter(button => button.action !== 'openSignupModal')}
-                  imageSrc={card.imageSrc}
-                  imageAlt={card.alt}
-                  isAuthenticated={true} // Pasar el estado de autenticación
-                  onComienzaAhoraClick={handleComienzaAhoraClick} // Pasar el nuevo manejador
-                />
+            <CarouselContent
+              className="w-full h-auto md:h-[500px]"
+              role="group"
+              aria-label="Elementos del carrusel"
+            >
+              {' '}
+              {/* Altura automática en móvil, fija en md */}
+              <CarouselItem key="kamentsa-culture" className="w-full h-full">
+                <KamentsaCulturePresentation />
               </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
-          <div className="absolute bottom-4 left-0 w-full">
-            <div className="container mx-auto max-w-5xl flex justify-center">
-              {heroCardsData.map((_, index) => (
-                <button
-                  key={index}
-                  className={`w-3 h-3 rounded-full mx-1 transition-colors duration-300 ${
-                    slide === index
-                      ? 'bg-red-500' // Color para el indicador activo
-                      : 'bg-gray-300 hover:bg-gray-400' // Color simple para indicadores inactivos
-                  }`}
-                  aria-label={`Slide ${index + 1}`}
-                  onClick={() => setSlide(index)}
-                />
-              ))}
-            </div>
-          </div>
-        </Carousel>
+            </CarouselContent>
+          </Carousel>
+        </div>
  
         {/* Features Section */}
         <section className="py-6 sm:py-10">
-         {' '}
-         {/* Ajustado espaciado vertical */}
          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <FeatureCard
               title="Lecciones Interactivas"
@@ -284,10 +226,7 @@ const HomePage = () => {
               icon={Book}
               iconColor="blue"
               ariaLabel="Descubre la riqueza de la cultura Kamëntsá a través de lecciones interactivas y atractivas."
-              className={clsx(
-                featureCardCommonClasses, // Usar constante
-                'md:border md:border-red-500',
-              )} // Usar clsx
+              className="hover:bg-gray-50 transition-colors duration-200 md:border md:border-red-500 p-4 rounded-md"
             />
             <FeatureCard
               title="Gamificación"
@@ -295,10 +234,7 @@ const HomePage = () => {
               icon={Gamepad2}
               iconColor="green"
               ariaLabel="Gana puntos y recompensas mientras avanzas en tu aprendizaje."
-              className={clsx(
-                featureCardCommonClasses, // Usar constante
-                'md:border md:border-yellow-500',
-              )} // Usar clsx
+              className="hover:bg-gray-50 transition-colors duration-200 md:border md:border-yellow-500 p-4 rounded-md"
             />
             <FeatureCard
               title="Seguimiento de Progreso"
@@ -306,18 +242,13 @@ const HomePage = () => {
               icon={Activity}
               iconColor="purple"
               ariaLabel="Visualiza tu progreso y mantente motivado para alcanzar tus metas."
-              className={clsx(
-                featureCardCommonClasses, // Usar constante
-                'md:border md:border-teal-500',
-              )} // Usar clsx
+              className="hover:bg-gray-50 transition-colors duration-200 md:border md:border-teal-500 p-4 rounded-md"
             />
           </div>
         </section>
  
         {/* Featured Lessons Section */}
         <section className="py-6 sm:py-10">
-         {' '}
-         {/* Ajustado espaciado vertical */}
          <h2 className="text-2xl font-bold text-center mb-4">Lecciones Destacadas</h2>
           {loadingFeaturedLessons && (
             <div className="flex justify-center items-center py-8">
@@ -336,7 +267,9 @@ const HomePage = () => {
           {!loadingFeaturedLessons && !errorFeaturedLessons && featuredLessons.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-4">
               {featuredLessons.map((lesson: FeaturedLesson) => (
-                <FeaturedLessonCard key={lesson.id} lesson={lesson} />
+                <Card key={lesson.id}>
+                  <FeaturedLessonCard lesson={lesson} />
+                </Card>
               ))}
             </div>
           )}
@@ -347,7 +280,7 @@ const HomePage = () => {
           )}
           {!loadingFeaturedLessons && !errorFeaturedLessons && (
             <div className="text-center mt-4">
-              <Button variant="link" asChild>
+              <Button asChild>
                 <HashLink to="/lessons#top" smooth={true} duration={500}>
                   Ver todas las lecciones
                 </HashLink>
@@ -366,10 +299,7 @@ const HomePage = () => {
         <EventsSection />
 
         {/* Testimonials Section */}
-        {/* Testimonials Section */}
         <section className="py-6 sm:py-10">
-         {' '}
-         {/* Ajustado espaciado vertical */}
          <h2 className="text-2xl font-bold text-center mb-4">Testimonios</h2>
           <motion.div
             className="w-full max-w-2xl mx-auto relative" // Añadido relative para posicionar el botón
@@ -391,9 +321,7 @@ const HomePage = () => {
                 {/* Añadir rol y etiqueta ARIA */}
                 {testimonials.map((testimonial, index) => (
                   <CarouselItem key={index}>
-                    <Card className="">
-                      {' '}
-                      {/* Eliminado borde amarillo */}
+                    <Card>
                       <CardContent className="p-4 flex flex-col items-center">
                         <p className="text-center">{testimonial.text}</p>
                         <div className="flex items-center mt-2">
@@ -405,7 +333,7 @@ const HomePage = () => {
                             />
                           </div>
                           <div>
-                            <p className="text-sm text-gray-500 text-center">
+                            <p className="text-sm text-muted-foreground text-center">
                               - {testimonial.name}
                             </p>
                           </div>
@@ -423,7 +351,7 @@ const HomePage = () => {
               <Button
                 variant="outline"
                 size="icon"
-                className="absolute bottom-4 right-4 size-8 rounded-full" // Posicionar el botón
+                className="absolute bottom-4 right-4 rounded-full" // Posicionar el botón
                 onClick={toggleTestimonialAutoplay}
                 aria-label={
                   isTestimonialAutoplayPlaying ? 'Pausar autoplay' : 'Reproducir autoplay'
@@ -441,24 +369,18 @@ const HomePage = () => {
  
         {/* FAQ Section */}
         <section className="py-6 sm:py-10">
-         {' '}
-         {/* Ajustado espaciado vertical */}
          <FAQ />
         </section>
  
         {/* Contact Section */}
         <section className="py-6 sm:py-10 bg-white">
-         {' '}
-         {/* Ajustado espaciado vertical */}
          <h2 className="text-2xl font-bold text-center mb-4">¿Tienes preguntas?</h2>
           <ContactForm />
         </section>
 
         {/* Footer */}
         <footer className="text-center py-4 text-gray-500 text-sm">
-          {' '}
-          {/* Increased padding */}
-          <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 mb-2">
+         <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 mb-2">
             <HashLink to="/privacy" smooth={true} duration={500} className="hover:underline mb-4 sm:mb-0">
               Política de Privacidad
             </HashLink>

@@ -3,9 +3,9 @@ import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 
 const DashboardTitle = () => {
   return (
-    <Card>
+    <Card className="bg-tabanok-violeta-claro">
       <CardHeader>
-        <CardTitle className="text-3xl font-bold text-gray-800">¡Bienvenido al Dashboard!</CardTitle>
+        <CardTitle className="text-3xl font-bold text-morado-oscuro">¡Bienvenido al Dashboard!</CardTitle>
       </CardHeader>
     </Card>
   );

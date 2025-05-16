@@ -37,6 +37,7 @@ Las tecnologías clave utilizadas en el proyecto son:
     *   Librería de UI: **React**
     *   Herramienta de build: **Vite**
     *   Framework de CSS: **TailwindCSS**
+    *   Componentes UI: **shadcn/ui**
 *   **Testing:** **Jest**, **Testing Library**
 *   **Linting/Formateo:** **ESLint**, **Prettier**
 *   **Internacionalización:** **react-i18next**

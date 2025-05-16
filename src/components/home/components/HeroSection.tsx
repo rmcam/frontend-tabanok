@@ -29,7 +29,7 @@ const HeroSection: React.FC<HeroProps> = ({
   const navigate = useNavigate(); // Obtener la función de navegación
 
   return (
-    <section className="flex flex-col md:flex-row items-center justify-center py-12 px-4 relative overflow-hidden h-screen bg-center" style={{
+    <section className="flex flex-col md:flex-row items-center justify-center py-12 px-4 relative overflow-hidden h-screen bg-center bg-gradient-to-br from-gray-900 to-black" style={{
       backgroundImage: `url(${imageSrc})`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
@@ -37,7 +37,7 @@ const HeroSection: React.FC<HeroProps> = ({
     }}>
       <div className="absolute inset-0 bg-kamentsa-verde-oscuro opacity-80"></div>
       <div className="hero-content text-center md:text-left relative z-10">
-        <h2 className="text-4xl font-bold mb-6 text-white">{title}</h2>
+        <h2 className="text-5xl font-bold mb-6 text-white text-shadow-md">{title}</h2>
         <p className="text-xl mb-8 text-white">{description}</p>
         {buttons && (
           <div className="space-x-4 mt-8">

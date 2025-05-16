@@ -2,7 +2,7 @@ import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import ForgotPasswordForm from "./auth/components/ForgotPasswordForm";
 import PrivateRoute from "./components/common/PrivateRoute";
-import HomePage from "./components/home/HomePage";
+import HomePage from "./components/home/Home";
 import AuthenticatedLayout from "./components/layout/AuthenticatedLayout";
 
 import { useParams } from "react-router-dom"; // Import useParams

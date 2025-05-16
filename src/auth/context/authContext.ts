@@ -15,6 +15,7 @@ export interface AuthContextType {
   resetPassword: (token: string, newPassword: string) => Promise<void>;
   resettingPassword: boolean;
   refetchUser: () => Promise<void>; // Añadir función para refrescar datos del usuario
+  isAuthenticated: boolean;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);

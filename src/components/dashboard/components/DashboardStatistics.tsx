@@ -69,12 +69,12 @@ const DashboardStatistics = () => {
           </>
         ) : (
           statisticsData.map((item) => (
-            <Card key={item.id} className="w-full">
+            <Card key={item.id} className="w-full bg-tabanok-violeta-claro">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
+                <CardTitle className="text-sm font-medium text-morado-oscuro">
                   {item.label}
                 </CardTitle>
-                {item.icon && <item.icon size={20} className="text-muted-foreground" aria-hidden="true" />}
+                {item.icon && <item.icon size={20} className="text-tabanok-lavanda" aria-hidden="true" />}
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{item.value}</div>

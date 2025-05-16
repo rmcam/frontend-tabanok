@@ -123,9 +123,9 @@ const TagManager = () => {
         {showForm ? "Cancelar" : "Crear Nueva Etiqueta"}
       </Button>
       {(showForm || editTag) && (
-        <Card>
+        <Card className="bg-tabanok-violeta-claro">
           <CardHeader>
-            <CardTitle>
+            <CardTitle className="text-morado-oscuro">
               {editTag ? "Editar Etiqueta" : "Crear Nueva Etiqueta"}
             </CardTitle>
             <CardDescription>

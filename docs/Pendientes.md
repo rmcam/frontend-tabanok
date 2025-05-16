@@ -69,7 +69,7 @@ Este documento lista las tareas pendientes y los próximos pasos planificados pa
 3.  Automatizar despliegues a producción.
 4.  Actualizar a Tailwind CSS v4: Implementar la actualización a Tailwind CSS v4 (versión `next`), incluyendo la revisión de la configuración de PostCSS y la adaptación de Shadcn UI.
 5.  Mejorar el diseño y los colores: Integrar elementos visuales y una paleta de colores inspirada en la cultura Kamëntsá, incluyendo la ampliación de la paleta de colores en `tailwind.config.js`, la definición de variables CSS y la adaptación de componentes clave.
-6.  Mejorar la página de inicio: Añadir secciones de noticias/blog, recursos adicionales y eventos a la página de inicio, y utilizar Playwright para crear pruebas automatizadas.
+6.  Mejorar la página de inicio: Añadir secciones de noticias/blog, recursos adicionales y eventos a la página de inicio, y utilizar Playwright para crear pruebas automatizadas. (En progreso: Se ha reemplazado el Hero con la sección de "Presentación de la Cultura Kamëntsá")
 7.  Refactorizar `ContentManager.tsx`: Refactorizar el componente `ContentManager.tsx` para mejorar su estructura, modularidad, legibilidad y mantenibilidad, incluyendo la refactorización de la lógica de estado y formulario, la extracción de la lógica de fetching inicial, la revisión y mejora de la validación, la división del renderizado complejo y el abordaje de los comentarios TODO.
 4.  Planificar y desarrollar paneles docente/estudiante completos e integración multimedia en frontend.
 5.  Internacionalizar mensajes e integrar validación lingüística avanzada.

@@ -128,9 +128,9 @@ const CategoryManager = () => {
         {showForm ? "Cancelar" : "Crear Nueva Categoría"}
       </Button>
       {(showForm || editCategory) && (
-        <Card>
+        <Card className="bg-tabanok-violeta-claro">
           <CardHeader>
-            <CardTitle>
+            <CardTitle className="text-morado-oscuro">
               {editCategory ? "Editar Categoría" : "Crear Nueva Categoría"}
             </CardTitle>
             <CardDescription>
