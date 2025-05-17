@@ -5,12 +5,12 @@
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0); /* k-blanco.500 */
-  --foreground: oklch(0.145 0 0); /* k-negro.500 */
+  --foreground: oklch(0.2 0.05 280); /* Un tono oscuro de morado */
   --card: oklch(1 0 0); /* k-blanco.500 */
   --card-foreground: oklch(0.145 0 0); /* k-negro.500 */
   --popover: oklch(1 0 0); /* k-blanco.500 */
   --popover-foreground: oklch(0.145 0 0); /* k-negro.500 */
-  --primary: oklch(0.205 0 0); /* kamentsa.verde-oscuro */
+  --primary: oklch(0.5 0.1 280); /* Un tono medio de morado */
   --primary-foreground: oklch(0.985 0 0); /* k-blanco.500 */
   --secondary: oklch(0.97 0 0); /* kamentsa.azul-celeste */
   --secondary-foreground: oklch(0.205 0 0); /* k-negro.500 */
