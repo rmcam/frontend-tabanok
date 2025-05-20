@@ -4,7 +4,7 @@ import { GamificationSummary, Achievement, LeaderboardEntry } from '../types/gam
 export const useGamificationData = () => {
   // Usar useFetchData para cada endpoint
   const { data: summary, loading: loadingSummary, error: errorSummary } = useFetchData<GamificationSummary>('/gamification/summary');
-  const { data: achievements, loading: loadingAchievements, error: errorAchievements } = useFetchData<Achievement[]>('/gamification/achievements');
+  const { data: achievements, loading: loadingAchievements, error: errorAchievements } = useFetchData<Achievement[]>('/cultural-achievements'); // Corregido según Swagger
   const { data: leaderboard, loading: loadingLeaderboard, error: errorLeaderboard } = useFetchData<LeaderboardEntry[]>('/gamification/leaderboard');
 
   // Determinar el estado de carga general y error

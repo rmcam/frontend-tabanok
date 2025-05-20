@@ -7,6 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2 } from "lucide-react";
 
 const allowedTypes = [
   "image/png",
@@ -28,14 +31,15 @@ const MultimediaUploadForm: React.FC = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState("");
-  const [titleError, setTitleError] = useState(""); // Add state for title error
-  const [descriptionError, setDescriptionError] = useState(""); // Add state for description error
-  const [tagsError, setTagsError] = useState(""); // Add state for tags error
-  const [fileError, setFileError] = useState(""); // Add state for file selection error
+  const [titleError, setTitleError] = useState("");
+  const [descriptionError, setDescriptionError] = useState("");
+  const [tagsError, setTagsError] = useState("");
+  const [fileError, setFileError] = useState("");
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
-      setFileError(""); // Clear file error on drop
+      setFileError("");
       const file = acceptedFiles[0];
       if (!selectedTypes.includes(file.type)) {
         setSelectedFile(null);
@@ -52,7 +56,7 @@ const MultimediaUploadForm: React.FC = () => {
 
   const validateForm = () => {
     let isValid = true;
-    setTitleError(""); // Clear previous errors
+    setTitleError("");
     setDescriptionError("");
     setTagsError("");
     setFileError("");
@@ -79,8 +83,9 @@ const MultimediaUploadForm: React.FC = () => {
     }
 
     setUploading(true);
-    setMessage(""); // Clear general message
+    setMessage("");
     setUploadProgress(0);
+    setApiError(null);
 
     const formData = new FormData();
     formData.append("multimedia", selectedFile!);
@@ -120,6 +125,7 @@ const MultimediaUploadForm: React.FC = () => {
           ? error.message
           : "Error desconocido al subir el archivo.";
       setMessage(`Error al subir el archivo: ${errorMessage}`); // Keep error message
+      setApiError(errorMessage);
       setUploadProgress(0);
     } finally {
       setUploading(false);
@@ -152,100 +158,112 @@ const MultimediaUploadForm: React.FC = () => {
   };
 
   return (
-    <div className="multimedia-upload-form">
-      <h3>Subir Archivo Multimedia</h3>
-      <div>
-        <Label htmlFor="fileType" id="fileType">Tipos de archivo permitidos</Label>
-        <Select
-          onValueChange={handleTypeChange}
-          defaultValue={selectedTypes[0]}
-          disabled={uploading}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Seleccione los tipos de archivo" />
-          </SelectTrigger>
-          <SelectContent>
-            {allowedTypes.map((type) => (
-              <SelectItem key={type} value={type}>
-                {type}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div>
-        <Label htmlFor="title" className="w-full mb-2">Título</Label>
-        <Input
-          type="text"
-          id="title"
-          className="w-full mb-4"
-          value={title}
-          onChange={(e) => {
-            setTitle(e.target.value);
-            setTitleError(""); // Clear error on input change
-          }}
-          disabled={uploading}
-          aria-invalid={!!titleError} // Add aria-invalid
-          aria-describedby={titleError ? "multimedia-title-error" : undefined} // Add aria-describedby
-        />
-        {titleError && <p id="multimedia-title-error" className="text-red-500 text-sm">{titleError}</p>} {/* Add id to error message */}
-      </div>
-      <div>
-        <Label htmlFor="description" className="w-full mb-2">Descripción</Label>
-        <Textarea
-          id="description"
-          className="w-full mb-4"
-          value={description}
-          onChange={(e) => {
-            setDescription(e.target.value);
-            setDescriptionError(""); // Clear error on input change
-          }}
-          disabled={uploading}
-          aria-invalid={!!descriptionError} // Add aria-invalid
-          aria-describedby={descriptionError ? "multimedia-description-error" : undefined} // Add aria-describedby
-        />
-        {descriptionError && <p id="multimedia-description-error" className="text-red-500 text-sm">{descriptionError}</p>} {/* Add id to error message */}
-      </div>
-      <div>
-        <Label htmlFor="tags" className="w-full mb-2">Etiquetas</Label>
-        <Input
-          type="text"
-          id="tags"
-          className="w-full mb-4"
-          value={tags}
-          onChange={(e) => {
-            setTags(e.target.value);
-            setTagsError(""); // Clear error on input change
-          }}
-          disabled={uploading}
-          aria-invalid={!!tagsError} // Add aria-invalid
-          aria-describedby={tagsError ? "multimedia-tags-error" : undefined} // Add aria-describedby
-        />
-        {tagsError && <p id="multimedia-tags-error" className="text-red-500 text-sm">{tagsError}</p>} {/* Add id to error message */}
-      </div>
-      <div {...getRootProps()} className={`dropzone ${uploading ? 'disabled' : ''}`}>
-        <input {...getInputProps()} disabled={uploading} />
-        {isDragActive && !uploading ? (
-          <p>Suelta el archivo aquí ...</p>
-        ) : !uploading ? (
-          <p>Arrastra y suelta el archivo aquí, o haz clic para seleccionar un archivo</p>
-        ) : (
-          <p>Subiendo archivo...</p>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Subir Archivo Multimedia</CardTitle>
+        <CardDescription>Seleccione un archivo y complete los detalles.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {apiError && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{apiError}</AlertDescription>
+          </Alert>
         )}
-      </div>
-      {fileError && <p id="multimedia-file-error" className="text-red-500 text-sm">{fileError}</p>} {/* Add id to file error message */}
-      {selectedFile && (
-        <div>
-          <p>Archivo seleccionado: {selectedFile.name}</p>
-          {preview}
+        <div className="mb-4">
+          <Label htmlFor="fileType">Tipos de archivo permitidos</Label>
+          <Select
+            onValueChange={handleTypeChange}
+            defaultValue={selectedTypes[0]}
+            disabled={uploading}
+            >
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccione los tipos de archivo" />
+            </SelectTrigger>
+            <SelectContent>
+              {allowedTypes.map((type) => (
+                <SelectItem key={type} value={type}>
+                  {type}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-      )}
-      {uploadProgress > 0 && <Progress value={uploadProgress} />}
-      <Button onClick={handleUpload} disabled={!selectedFile || uploading}>
-        {uploading ? "Subiendo..." : "Subir"}
-      </Button>
-      {message && <p>{message}</p>} {/* Keep general message for success/error */}
-    </div>
+        <div className="mb-2">
+          <Label htmlFor="title" className="w-full mb-2">Título</Label>
+          <Input
+            type="text"
+            id="title"
+            className="w-full mb-4"
+            value={title}
+            onChange={(e) => {
+              setTitle(e.target.value);
+              setTitleError("");
+            }}
+            disabled={uploading}
+            aria-invalid={!!titleError}
+            aria-describedby={titleError ? "multimedia-title-error" : undefined}
+          />
+          {titleError && <p id="multimedia-title-error" className="text-red-500 text-sm">{titleError}</p>}
+        </div>
+        <div className="mb-4">
+          <Label htmlFor="description" className="w-full mb-2">Descripción</Label>
+          <Textarea
+            id="description"
+            className="w-full mb-4"
+            value={description}
+            onChange={(e) => {
+              setDescription(e.target.value);
+              setDescriptionError("");
+            }}
+            disabled={uploading}
+            aria-invalid={!!descriptionError}
+            aria-describedby={descriptionError ? "multimedia-description-error" : undefined}
+          />
+          {descriptionError && <p id="multimedia-description-error" className="text-red-500 text-sm">{descriptionError}</p>}
+        </div>
+        <div className="mb-4">
+          <Label htmlFor="tags" className="w-full mb-2">Etiquetas</Label>
+          <Input
+            type="text"
+            id="tags"
+            className="w-full mb-4"
+            value={tags}
+            onChange={(e) => {
+              setTags(e.target.value);
+              setTagsError("");
+            }}
+            disabled={uploading}
+            aria-invalid={!!tagsError}
+            aria-describedby={tagsError ? "multimedia-tags-error" : undefined}
+          />
+          {tagsError && <p id="multimedia-tags-error" className="text-red-500 text-sm">{tagsError}</p>}
+        </div>
+        <div {...getRootProps()} className={`dropzone ${uploading ? 'disabled' : ''} border-2 border-dashed rounded-md p-4 text-center`}>
+          <input {...getInputProps()} disabled={uploading} />
+          {isDragActive && !uploading ? (
+            <p>Suelta el archivo aquí ...</p>
+          ) : !uploading ? (
+            <p>Arrastra y suelta el archivo aquí, o haz clic para seleccionar un archivo</p>
+          ) : (
+            <p>Subiendo archivo...</p>
+          )}
+        </div>
+        {fileError && <p id="multimedia-file-error" className="text-red-500 text-sm">{fileError}</p>}
+        {selectedFile && (
+          <div className="mt-4">
+            <p>Archivo seleccionado: {selectedFile.name}</p>
+            {preview}
+          </div>
+        )}
+        {uploadProgress > 0 && <Progress value={uploadProgress} className="mb-4" />}
+        <Button onClick={handleUpload} disabled={!selectedFile || uploading}
+        >
+          {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-label="Subiendo" /> : null}
+          Subir
+        </Button>
+        {message && <p className="mt-4">{message}</p>}
+      </CardContent>
+    </Card>
   );
 };
 

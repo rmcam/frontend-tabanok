@@ -6,6 +6,7 @@ interface StudentProgressData {
   completedLessons: number;
   totalLessons: number;
   overallScore: number;
+  name: string; // Add student name
   // Add other relevant progress fields
 }
 
@@ -41,7 +42,7 @@ interface UseFetchStudentDataResult {
   refreshStudentData: () => Promise<void>;
 }
 
-const useFetchStudentData = (user: User | null): UseFetchStudentDataResult => {
+const useFetchStudentData = (user: User | null, studentId?: string): UseFetchStudentDataResult => {
   const [progressData, setProgressData] = useState<StudentProgressData | null>(null);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [recommendedActivities, setRecommendedActivities] = useState<RecommendedActivity[]>([]);
@@ -59,11 +60,12 @@ const useFetchStudentData = (user: User | null): UseFetchStudentDataResult => {
     setLoading(true);
     setError(null);
     try {
+      // TODO: Verificar la estructura exacta de la respuesta de /content, /topics y /tags
       const [progress, achievementsData, recommendationsData, narrativesData] = await Promise.all([
-        api.get(`/students/${user.id}/progress`),
-        api.get(`/students/${user.id}/achievements`),
-        api.get(`/recommendations/for-student/${user.id}`),
-        api.get(`/cultural-narratives`),
+        api.get(`/statistics/user/${studentId || user.id}`), // Corregido según Swagger
+        api.get(`/cultural-achievements`), // Corregido según Swagger
+        api.get(`/recommendations/users/${studentId || user.id}`), // Corregido según Swagger
+        api.get(`/cultural-content`), // Corregido según Swagger
       ]);
       setProgressData(progress);
       setAchievements(achievementsData);
@@ -78,7 +80,7 @@ const useFetchStudentData = (user: User | null): UseFetchStudentDataResult => {
     } finally {
       setLoading(false);
     }
-  }, [user]); // Refetch when user changes
+  }, [user, studentId]); // Refetch when user or studentId changes
 
   useEffect(() => {
     fetchData();

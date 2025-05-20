@@ -81,7 +81,7 @@ export interface Achievement { // Exportar la interfaz
 // Función para obtener la lista de logros del usuario autenticado
 export const getAchievements = async (): Promise<Achievement[]> => {
   try {
-    const response = await fetch(`${API_URL}/gamification/achievements`, { // Asumiendo endpoint GET /gamification/achievements
+    const response = await fetch(`${API_URL}/cultural-achievements`, { // Endpoint GET /cultural-achievements de Swagger
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

@@ -5,7 +5,7 @@ const API_URL = import.meta.env.VITE_API_URL; // Reemplazar con la URL real de t
 // Función para obtener los detalles de una unidad por su ID
 export const getUnitById = async (unitId: string): Promise<UnitDetailData> => {
   try {
-    const response = await fetch(`${API_URL}/units/${unitId}`, { // Asumiendo endpoint GET /units/:unitId
+    const response = await fetch(`${API_URL}/unity/${unitId}`, { // Endpoint GET /unity/{id} de Swagger
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

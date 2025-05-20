@@ -3,6 +3,10 @@ import { FaChartLine } from "react-icons/fa";
 import { Progress } from "@/components/ui/progress";
 import api from '@/lib/api';
 import { useAuth } from "@/auth/hooks/useAuth"; // Importar useAuth para obtener el usuario
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Import Card components
+import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton component
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"; // Import Alert components
+import { Link } from 'react-router-dom'; // Import Link for navigation
 
 interface Student {
   id: string; // Asumiendo UUIDs en el backend
@@ -59,25 +63,47 @@ const StudentProgress = () => {
         <h2 className="text-xl font-semibold">Progreso de Estudiantes</h2>
       </div>
       {isLoading ? (
-        <p>Cargando datos...</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Skeleton className="h-[120px] w-full" />
+          <Skeleton className="h-[120px] w-full" />
+          <Skeleton className="h-[120px] w-full" />
+        </div>
       ) : error ? (
-        <p className="text-red-500">{error}</p>
+        <Alert variant="destructive">
+          <AlertTitle>Error al cargar progreso</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       ) : studentData.length === 0 ? (
-        <p>No hay datos de progreso de estudiantes disponibles.</p>
+        <div className="flex flex-col items-center justify-center py-10 text-gray-500">
+          <FaChartLine size={30} className="mb-3" />
+          <p>No hay datos de progreso de estudiantes disponibles.</p>
+        </div>
       ) : (
-        <ul>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {studentData.map((student) => (
-            <li key={student.id} className="mb-4">
-              <div className="flex justify-between">
-                <a href={`/student/${student.id}`} className="hover:underline">
-                  {student.name}
-                </a>
-                <span>{student.progress}%</span>
-              </div>
-              <Progress value={student.progress} />
-            </li>
+            <Card key={student.id} className="w-full">
+              <CardHeader>
+                <CardTitle>
+                  <Link to={`/student/${student.id}`} className="hover:underline">
+                    {student.name}
+                  </Link>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex justify-between text-sm mb-1">
+                  <span>Progreso:</span>
+                  <span>{student.progress}%</span>
+                </div>
+                <Progress value={student.progress} />
+                {/* TODO: Mostrar otras métricas si están disponibles */}
+                {/* <div className="text-sm mt-2">
+                  <p>Lecciones completadas: {student.lessonsCompleted} / {student.totalLessons}</p>
+                  <p>Puntuación: {student.score}</p>
+                </div> */}
+              </CardContent>
+            </Card>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );

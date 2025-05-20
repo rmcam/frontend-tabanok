@@ -2,6 +2,9 @@ import api from "@/lib/api";
 import { useEffect, useState } from "react";
 import { FaFileAlt } from "react-icons/fa";
 import { useAuth } from "@/auth/hooks/useAuth"; // Importar useAuth para obtener el usuario
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Import Card components
+import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton component
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"; // Import Alert components
 
 // TODO: Ajustar la interfaz Report según la estructura real de la respuesta del backend
 interface Report {
@@ -63,21 +66,38 @@ const ReportViewer = () => {
         />
         <h2 className="text-xl font-semibold">Acceso a Reportes</h2>
       </div>
-      {isLoading && <p>Cargando reportes...</p>}
-      {error && <p className="text-red-500">{error}</p>}
+      {isLoading && (
+        <div className="flex items-center justify-center py-10">
+          <Skeleton className="h-8 w-[200px]" />
+        </div>
+      )}
+      {error && (
+        <Alert variant="destructive">
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
       {reportData.length > 0 ? (
         reportData.map((report) => ( // Esto asume que reportData sigue siendo un array
-          <div key={report.id} className="mb-4 p-4 border rounded-md">
-            <h3 className="text-lg font-semibold">{report.title}</h3>
-            <p className="text-gray-700">{report.description}</p>
-            <pre className="bg-gray-100 p-2 rounded-md overflow-auto">
-              <code>{JSON.stringify(report.data, null, 2)}</code>
-            </pre>
-          </div>
+          <Card key={report.id} className="mb-4">
+            <CardHeader>
+              <CardTitle>{report.name}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-700">{report.description}</p>
+              {/* TODO: Ajustar la visualización de los datos del reporte según la estructura real */}
+              {/* <pre className="bg-gray-100 p-2 rounded-md overflow-auto">
+                <code>{JSON.stringify(report.data, null, 2)}</code>
+              </pre> */}
+            </CardContent>
+          </Card>
         ))
       ) : (
         !isLoading && !error && (
-          <p>No hay reportes disponibles.</p>
+          <div className="flex flex-col items-center justify-center py-10 text-gray-500">
+            <FaFileAlt size={30} className="mb-3" />
+            <p>No hay reportes disponibles.</p>
+          </div>
         )
       )}
     </div>

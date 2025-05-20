@@ -6,6 +6,9 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge"; // Import Badge component
 import useFetchStudentData from '@/hooks/useFetchStudentData'; // Import the new hook
 import { Activity, Award, ListTodo, BookOpen } from 'lucide-react'; // Importar iconos
+import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton component
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"; // Import Alert components
+import { Progress } from "@/components/ui/progress"; // Import Progress component
 
 const StudentPanel: React.FC = () => {
   const { user } = useAuth(); // Get authenticated user
@@ -19,11 +22,26 @@ const StudentPanel: React.FC = () => {
   } = useFetchStudentData(user); // Use the new hook
 
   if (loading) {
-    return <div>Cargando datos del estudiante...</div>;
+    return (
+      <div className="p-6">
+        <h2 className="text-2xl font-bold mb-6">Panel del Estudiante</h2>
+        <Skeleton className="h-[120px] w-full" />
+        <Skeleton className="h-[120px] w-full" />
+        <Skeleton className="h-[120px] w-full" />
+      </div>
+    );
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return (
+      <div className="p-6">
+        <h2 className="text-2xl font-bold mb-6">Panel del Estudiante</h2>
+        <Alert variant="destructive">
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      </div>
+    );
   }
 
   return (
@@ -39,6 +57,7 @@ const StudentPanel: React.FC = () => {
           <CardContent>
             <p>Lecciones completadas: {progressData.completedLessons} / {progressData.totalLessons}</p>
             <p>Puntuación general: {progressData.overallScore}</p>
+            <Progress value={progressData.overallScore} aria-label="Progreso general del estudiante" />
             {/* Render other progress data */}
           </CardContent>
         </Card>
@@ -48,14 +67,14 @@ const StudentPanel: React.FC = () => {
         <CardHeader className="flex flex-row items-center space-x-2"> {/* Usar flex para alinear icono y título */}
           <Award className="size-6" /> {/* Icono para Logros */}
           <CardTitle>Logros</CardTitle>
-          </CardHeader>
+        </CardHeader>
         <CardContent>
           {achievements.length === 0 ? (
             <p>No hay logros disponibles.</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {achievements.map(achievement => (
-                <Card key={achievement.id}>
+                <Card key={achievement.id} className="shadow-sm" aria-label={`Logro: ${achievement.name}`}>
                   <CardHeader>
                     <CardTitle>{achievement.name}</CardTitle>
                   </CardHeader>
@@ -79,31 +98,36 @@ const StudentPanel: React.FC = () => {
           {recommendedActivities.length === 0 ? (
             <p>No hay actividades recomendadas en este momento.</p>
           ) : (
-            <ul className="space-y-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {recommendedActivities.map(activity => (
-                <li key={activity.id} className="border p-3 rounded-md flex justify-between items-center">
-                  <h4>{activity.title}</h4>
-                  <div>
-                    {/* Render other recommendation details */}
-                    {/* Example link to a quiz activity */}
-                    <Link to={`/activities/quiz/${activity.id}`} className="mr-2">
-                      <Badge>Iniciar Quiz</Badge>
-                    </Link>
-                    {/* Example link to a matching activity */}
-                    <Link to={`/activities/matching/${activity.id}`}>
-                       <Badge>Iniciar Emparejamiento</Badge>
-                    </Link>
-                    {/* Example link to a fill-in-the-blanks activity */}
-                    <Link to={`/activities/fill-in-the-blanks/${activity.id}`}>
-                       <Badge>Iniciar Completar Espacios</Badge>
-                    </Link>
-                  </div>
-                </li>
+                <Card key={activity.id} className="shadow-sm" aria-label={`Actividad recomendada: ${activity.title}`}>
+                  <CardHeader>
+                    <CardTitle>{activity.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {/* TODO: Verificar la interfaz RecommendedActivity y la respuesta del backend para mostrar la descripción */}
+                    {/* <p>{activity.description}</p> */}
+                    <div className="flex justify-around">
+                      {/* Example link to a quiz activity */}
+                      <Link to={`/activities/quiz/${activity.id}`} className="mr-2" aria-label={`Iniciar Quiz: ${activity.title}`}>
+                        <Badge>Quiz</Badge>
+                      </Link>
+                      {/* Example link to a matching activity */}
+                      <Link to={`/activities/matching/${activity.id}`} aria-label={`Iniciar Emparejamiento: ${activity.title}`}>
+                        <Badge>Emparejamiento</Badge>
+                      </Link>
+                      {/* Example link to a fill-in-the-blanks activity */}
+                      <Link to={`/activities/fill-in-the-blanks/${activity.id}`} aria-label={`Iniciar Completar Espacios: ${activity.title}`}>
+                        <Badge>Completar Espacios</Badge>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
-            </ul>
+            </div>
           )}
         </CardContent>
-        </Card>
+      </Card>
 
       <Card className="mb-6">
         <CardHeader className="flex flex-row items-center space-x-2"> {/* Usar flex para alinear icono y título */}

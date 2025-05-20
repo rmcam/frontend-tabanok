@@ -5,7 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea"; // Import Textarea component
 import { Label } from "@/components/ui/label"; // Import Label component
 import { toast } from "sonner";
-import api from "@/lib/api";
+import api from '@/lib/api';
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"; // Import Card components
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"; // Import Alert components
+import { Loader2 } from "lucide-react"; // Import Loader2 icon
 
 const ActivityCreator = () => {
   const [title, setTitle] = useState("");
@@ -13,6 +16,7 @@ const ActivityCreator = () => {
   const [titleError, setTitleError] = useState(""); // Add state for title error
   const [descriptionError, setDescriptionError] = useState(""); // Add state for description error
   const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const validateForm = () => {
     let isValid = true;
@@ -47,6 +51,7 @@ const ActivityCreator = () => {
     }
 
     setIsLoading(true);
+    setApiError(null);
 
     try {
       const newActivity = {
@@ -61,57 +66,68 @@ const ActivityCreator = () => {
       });
       setTitle("");
       setDescription("");
-      setIsLoading(false);
     } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Hubo un error al guardar la actividad.";
+      setApiError(errorMessage);
       toast.error("Error!", {
-        description: "Hubo un error al guardar la actividad.",
+        description: errorMessage,
       });
       console.error("Error al guardar la actividad:", error);
+    } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col">
-      <div className="flex items-center mb-4">
+    <Card className="w-full">
+      <CardHeader className="flex flex-row items-center space-y-0 pb-2">
         <FaPlusCircle size={24} className="mr-2" aria-label="Crear Actividad" />
-        <h2 className="text-xl font-semibold">Creación de Actividades</h2>
-      </div>
-      <div className="mb-2">
-        <Label htmlFor="title">Título</Label> {/* Use Label component */}
-        <Input
-          type="text"
-          id="title"
-          value={title}
-          onChange={(e) => {
-            setTitle(e.target.value);
-            setTitleError(""); // Clear error on input change
-          }}
-          disabled={isLoading} // Disable input while saving
-          aria-invalid={!!titleError} // Add aria-invalid
-          aria-describedby={titleError ? "title-error" : undefined} // Add aria-describedby
-        />
-        {titleError && <p id="title-error" className="text-red-500 text-sm">{titleError}</p>} {/* Add id to error message */}
-      </div>
-      <div className="mb-4">
-        <Label htmlFor="description">Descripción</Label> {/* Use Label component */}
-        <Textarea // Use Textarea component
-          id="description"
-          value={description}
-          onChange={(e) => {
-            setDescription(e.target.value);
-            setDescriptionError(""); // Clear error on input change
-          }}
-          disabled={isLoading} // Disable textarea while saving
-          aria-invalid={!!descriptionError} // Add aria-invalid
-          aria-describedby={descriptionError ? "description-error" : undefined} // Add aria-describedby
-        />
-        {descriptionError && <p id="description-error" className="text-red-500 text-sm">{descriptionError}</p>} {/* Add id to error message */}
-      </div>
-      <Button onClick={handleSave} disabled={isLoading}>
-        {isLoading ? "Guardando..." : "Guardar Actividad"}
-      </Button>
-    </div>
+        <CardTitle className="text-xl font-semibold">Creación de Actividades</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {apiError && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{apiError}</AlertDescription>
+          </Alert>
+        )}
+        <div className="mb-2">
+          <Label htmlFor="title">Título</Label> {/* Use Label component */}
+          <Input
+            type="text"
+            id="title"
+            value={title}
+            onChange={(e) => {
+              setTitle(e.target.value);
+              setTitleError(""); // Clear error on input change
+            }}
+            disabled={isLoading} // Disable input while saving
+            aria-invalid={!!titleError} // Add aria-invalid
+            aria-describedby={titleError ? "title-error" : undefined} // Add aria-describedby
+          />
+          {titleError && <p id="title-error" className="text-red-500 text-sm">{titleError}</p>} {/* Add id to error message */}
+        </div>
+        <div className="mb-4">
+          <Label htmlFor="description">Descripción</Label> {/* Use Label component */}
+          <Textarea // Use Textarea component
+            id="description"
+            value={description}
+            onChange={(e) => {
+              setDescription(e.target.value);
+              setDescriptionError(""); // Clear error on input change
+            }}
+            disabled={isLoading} // Disable textarea while saving
+            aria-invalid={!!descriptionError} // Add aria-invalid
+            aria-describedby={descriptionError ? "description-error" : undefined} // Add aria-describedby
+          />
+          {descriptionError && <p id="description-error" className="text-red-500 text-sm">{descriptionError}</p>} {/* Add id to error message */}
+        </div>
+        <Button onClick={handleSave} disabled={isLoading}>
+          {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+          Guardar Actividad
+        </Button>
+      </CardContent>
+    </Card>
   );
 };
 
