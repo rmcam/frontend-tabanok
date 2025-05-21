@@ -76,8 +76,13 @@ const useAuthService = () => {
     try {
       const user = await verifySession();
       return user;
-    } catch (error) {
+    } catch (error: unknown) { // Especificar tipo unknown para mejor manejo de errores
       console.error('Error verifying session:', error);
+      // Puedes loguear más detalles del error si es necesario
+      if (error instanceof Error) {
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+      }
       throw error;
     }
   }, []);

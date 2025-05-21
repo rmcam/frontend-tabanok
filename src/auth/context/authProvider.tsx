@@ -54,14 +54,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     const verifyAuth = async () => {
+      console.log("Attempting to verify session on mount..."); // Log before calling verifySessionService
       try {
         const authenticatedUser = await verifySessionService();
+        console.log("verifySessionService result on mount:", authenticatedUser); // Log the result
         if (authenticatedUser) {
           setUser(authenticatedUser);
+        } else {
+          setUser(null); // Explicitly set user to null if verification fails
         }
       } catch (error) {
         console.error("Error verifying session on mount:", error);
-        // Manejar el error según sea necesario
+        setUser(null); // Set user to null on error
       } finally {
         setLoading(false);
       }
@@ -124,12 +128,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       await signinService(data);
       // Después de un inicio de sesión exitoso, verificar la sesión para obtener los datos del usuario
+      console.log("Attempting to verify session after signin..."); // Log before calling verifySessionService
       const authenticatedUser = await verifySessionService();
-      setUser(authenticatedUser);
-      console.log("User state after signin:", authenticatedUser); // Log user state after signin
-      showToast("Inicio de sesión exitoso.", "success");
-      navigate("/dashboard"); // Redirect to dashboard after successful login
-      console.log("Navigated to /dashboard after signin"); // Log navigation after signin
+      console.log("verifySessionService result after signin:", authenticatedUser); // Log the result
+      if (authenticatedUser) {
+        setUser(authenticatedUser);
+        console.log("User state after signin:", authenticatedUser); // Log user state after signin
+        showToast("Inicio de sesión exitoso.", "success");
+        navigate("/dashboard"); // Redirect to dashboard after successful login
+        console.log("Navigated to /dashboard after signin"); // Log navigation after signin
+      } else {
+        setUser(null); // Explicitly set user to null if verification fails
+        console.error("Session verification failed after signin."); // Log failure
+        showToast("Inicio de sesión exitoso, pero la verificación de sesión falló.", "error"); // Informar al usuario
+      }
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
       const errorMessage =
@@ -202,6 +214,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [verifySessionService]);
 
 
+  const isAuthenticated = user !== null; // Calculate isAuthenticated
+
   return (
     <AuthContext.Provider
       value={{
@@ -218,6 +232,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         forgotPassword,
         resetPassword, // Include new function
         refetchUser, // Provide refetchUser in the context
+        isAuthenticated, // Include isAuthenticated
       }}
     >
       {children}
