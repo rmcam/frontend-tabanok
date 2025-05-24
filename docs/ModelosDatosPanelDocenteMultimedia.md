@@ -20,7 +20,19 @@ El modelo de datos conceptual para el panel docente (`TeacherDashboard`) agrupa 
       "lastName": "string",
       "email": "string",
       "roles": ["string"],
-      "status": "string"
+    "status": "string",
+      "languages": ["string"],
+      "preferences": {
+        "notifications": "boolean",
+        "language": "string",
+        "theme": "string"
+      },
+      "profile": {
+        "bio": "string",
+        "location": "string",
+        "interests": ["string"],
+        "community": "string"
+      }
       // ... otras propiedades del usuario
     },
     "lessons": [
@@ -82,6 +94,15 @@ El modelo de datos conceptual para el panel docente (`TeacherDashboard`) agrupa 
         "score": "number",
         "feedback": "string"
         // ... otras propiedades de evaluación
+      }
+    ],
+    "users": [ // Añadir lista de usuarios para la gestión de roles
+      {
+        "id": "string",
+        "username": "string",
+        "email": "string",
+        "roles": ["string"]
+        // ... otras propiedades relevantes para la gestión de roles
       }
     ]
   }

@@ -1,91 +1,98 @@
 {
-  "auth": {
-    "signin": {
-      "label": {
-        "username": "Nombre de usuario",
-        "password": "Contraseña"
-      },
-      "placeholder": {
-        "username": "Correo electrónico o nombre de usuario",
-        "password": "Contraseña"
-      },
-      "link": {
-        "forgotPassword": "¿Olvidaste tu contraseña?"
-      },
-      "button": {
-        "signIn": "Iniciar sesión"
-      },
-      "validation": {
-        "identifier": {
-          "required": "El usuario/correo electrónico es obligatorio",
-          "minlength": "El usuario/correo electrónico debe tener al menos 6 caracteres",
-          "invalid": "Introduce un nombre de usuario o correo electrónico válido"
-        },
-        "password": {
-          "required": "La contraseña es obligatoria",
-          "minlength": "La contraseña debe tener al menos 6 caracteres"
-        }
-      }
-    },
-    "signup": {
-      "validation": {
-        "emailRequired": "El correo electrónico es obligatorio",
-        "emailInvalid": "El correo electrónico no es válido",
-        "passwordRequired": "La contraseña es obligatoria",
-        "passwordMinLength": "La contraseña debe tener al menos 6 caracteres",
-        "usernameRequired": "El nombre de usuario es obligatorio",
-        "firstNameRequired": "El nombre es obligatorio",
-        "lastNameRequired": "El apellido es obligatorio",
-        "identifierRequired": "El nombre de usuario o correo electrónico es obligatorio"
-      },
-      "step": "Paso {{step}} de 3",
-      "label": {
-        "email": "Correo electrónico",
-        "password": "Contraseña",
-        "username": "Nombre de usuario",
-        "firstName": "Primer nombre",
-        "secondName": "Segundo nombre",
-        "firstLastName": "Primer apellido",
-        "secondLastName": "Segundo apellido"
-      },
-      "placeholder": {
-        "email": "Correo electrónico",
-        "password": "Contraseña",
-        "username": "Nombre de usuario",
-        "firstName": "Primer nombre",
-        "secondName": "Segundo nombre",
-        "firstLastName": "Primer apellido",
-        "secondLastName": "Segundo apellido"
-      },
-      "button": {
-        "next": "Siguiente",
-        "previous": "Anterior",
-        "signUp": "Registrarse"
-      },
-      "confirmation": {
-        "title": "Confirma tus datos:",
-        "email": "Correo electrónico: {{email}}",
-        "username": "Nombre de usuario: {{username}}",
-        "firstName": "Primer nombre: {{firstName}}",
-        "secondName": "Segundo nombre: {{secondName}}",
-        "firstLastName": "Primer apellido: {{firstLastName}}",
-        "secondLastName": "Segundo apellido: {{secondLastName}}"
-      }
-    },
-    "forgotPassword": {
-      "validation": {
-        "emailRequired": "Por favor, introduce tu dirección de correo electrónico.",
-        "emailInvalid": "Por favor, introduce una dirección de correo electrónico válida."
-      },
-      "label": {
-        "email": "Dirección de correo electrónico"
-      },
-      "placeholder": {
-        "email": "Introduce tu dirección de correo electrónico"
-      },
-      "button": {
-        "sendResetLink": "Enviar enlace de restablecimiento"
-      }
-    }
-  }
+  "welcome": "¡Bienvenido a Tabanok!",
+  "start_now": "Empieza ahora",
+  "already_have_account": "Ya tengo una cuenta",
+  "auth_modal_title": "Tabanok",
+  "auth_modal_description": "Tu plataforma de aprendizaje",
+  "login_tab": "Iniciar sesión",
+  "register_tab": "Registrarse",
+  "login_title": "Iniciar sesión",
+  "login_description": "Ingresa tus credenciales para acceder a tu cuenta.",
+  "email_username_label": "Email/Usuario",
+  "email_invalid": "Email inválido.",
+  "password_label": "Contraseña",
+  "password_required": "La contraseña es requerida.",
+  "password_min_length": "La contraseña debe tener al menos 6 caracteres.",
+  "login_button": "Iniciar sesión",
+  "logging_in": "Iniciando sesión...",
+  "no_account_question": "¿No tienes una cuenta?",
+  "register_link": "Regístrate",
+  "forgot_password_link": "¿Olvidaste tu contraseña?",
+  "or_continue_with": "O continuar con",
+  "register_title": "Registro",
+  "register_step": "Paso {{currentStep}} de {{totalSteps}}",
+  "confirm_password_label": "Confirmar Contraseña",
+  "passwords_do_not_match": "Las contraseñas no coinciden.",
+  "username_label": "Nombre de Usuario",
+  "username_min_length": "El nombre de usuario debe tener al menos 3 caracteres.",
+  "first_name_label": "Nombre",
+  "first_name_required": "El nombre es requerido.",
+  "second_name_label": "Segundo Nombre (Opcional)",
+  "first_last_name_label": "Apellido",
+  "first_last_name_required": "El apellido es requerido.",
+  "second_last_name_label": "Segundo Apellido (Opcional)",
+  "languages_label": "Idiomas",
+  "select_at_least_one_language": "Selecciona al menos un idioma.",
+  "preferred_language_label": "Idioma Preferido",
+  "preferred_language_required": "El idioma de preferencia es requerido.",
+  "select_language_placeholder": "Selecciona un idioma",
+  "spanish": "Español",
+  "english": "Inglés",
+  "preferred_theme_label": "Tema Preferido",
+  "preferred_theme_required": "El tema de preferencia es requerido.",
+  "select_theme_placeholder": "Selecciona un tema",
+  "light_theme": "Claro",
+  "dark_theme": "Oscuro",
+  "system_theme": "Sistema",
+  "notifications_label": "Notificaciones",
+  "role_label": "Rol",
+  "role_required": "El rol es requerido.",
+  "select_role_placeholder": "Selecciona un rol",
+  "student_role": "Estudiante",
+  "teacher_role": "Profesor",
+  "admin_role": "Administrador",
+  "previous_button": "Anterior",
+  "next_button": "Siguiente",
+  "register_button": "Registrarse",
+  "registering": "Registrando...",
+  "already_have_account_question": "¿Ya tienes una cuenta?",
+  "forgot_password_title": "Olvidé mi contraseña",
+  "forgot_password_description": "Ingresa tu email para recibir instrucciones para restablecer tu contraseña.",
+  "send_instructions_button": "Enviar instrucciones",
+  "sending": "Enviando...",
+  "back_to_login": "Volver a Iniciar sesión",
+  "reset_password_title": "Restablecer contraseña",
+  "reset_password_description": "Ingresa tu nueva contraseña.",
+  "new_password_label": "Nueva Contraseña",
+  "confirm_new_password_label": "Confirmar Nueva Contraseña",
+  "reset_password_button": "Restablecer Contraseña",
+  "resetting_password": "Restableciendo...",
+  "login_successful": "Inicio de sesión exitoso",
+  "registration_successful": "Registro exitoso. Por favor, inicia sesión.",
+  "password_reset_request_successful": "Se han enviado instrucciones a tu email.",
+  "password_reset_successful": "Contraseña restablecida exitosamente.",
+  "error_authentication": "Error de autenticación",
+  "error_login_failed": "Error al iniciar sesión",
+  "error_registration_failed": "Error al registrar usuario",
+  "error_password_reset_request_failed": "Error al solicitar restablecimiento de contraseña",
+  "error_password_reset_failed": "Error al restablecer contraseña",
+  "General": "General",
+  "Aprendizaje": "Aprendizaje",
+  "Configuración": "Configuración",
+  "Dashboard": "Dashboard",
+  "Cursos": "Cursos",
+  "Lecciones": "Lecciones",
+  "Progreso": "Progreso",
+  "Perfil": "Perfil",
+  "Seguridad": "Seguridad",
+  "Ajustes": "Ajustes",
+  "Buscar": "Buscar",
+  "Idioma": "Idioma",
+  "Español": "Español",
+  "Inglés": "Inglés",
+  "Buscar en la aplicación...": "Buscar en la aplicación...",
+  "No se encontraron resultados.": "No se encontraron resultados.",
+  "Mi Perfil": "Mi Perfil",
+  "Cerrar Sesión": "Cerrar Sesión",
+  "Usuario Invitado": "Usuario Invitado"
 }

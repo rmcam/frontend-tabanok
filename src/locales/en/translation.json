@@ -1,90 +1,98 @@
 {
-  "auth": {
-    "signin": {
-      "label": {
-        "username": "Username",
-        "password": "Password"
-      },
-      "placeholder": {
-        "username": "Email or Username",
-        "password": "Password"
-      },
-      "link": {
-        "forgotPassword": "Forgot your password?"
-      },
-      "button": {
-        "signIn": "Sign In"
-      },
-      "validation": {
-        "identifier": {
-          "required": "Username/Email is required",
-          "minlength": "Username/Email must be at least 6 characters"
-        },
-        "password": {
-          "required": "Password is required",
-          "minlength": "Password must be at least 6 characters"
-        }
-      }
-    },
-    "signup": {
-      "validation": {
-        "emailRequired": "Email is required",
-        "emailInvalid": "Email is not valid",
-        "passwordRequired": "Password is required",
-        "passwordMinLength": "Password must be at least 6 characters",
-        "usernameRequired": "Username is required",
-        "firstNameRequired": "First name is required",
-        "lastNameRequired": "Last name is required",
-        "identifierRequired": "Username or email is required"
-      },
-      "step": "Step {{step}} of 3",
-      "label": {
-        "email": "Email",
-        "password": "Password",
-        "username": "Username",
-        "firstName": "First Name",
-        "secondName": "Second Name",
-        "firstLastName": "Last Name",
-        "secondLastName": "Second Last Name"
-      },
-      "placeholder": {
-        "email": "Email",
-        "password": "Password",
-        "username": "Username",
-        "firstName": "First Name",
-        "secondName": "Second Name",
-        "firstLastName": "Last Name",
-        "secondLastName": "Second Last Name"
-      },
-      "button": {
-        "next": "Next",
-        "previous": "Previous",
-        "signUp": "Sign Up"
-      },
-      "confirmation": {
-        "title": "Confirm your details:",
-        "email": "Email: {{email}}",
-        "username": "Username: {{username}}",
-        "firstName": "First Name: {{firstName}}",
-        "secondName": "Second Name: {{secondName}}",
-        "firstLastName": "Last Name: {{firstLastName}}",
-        "secondLastName": "Second Last Name: {{secondLastName}}"
-      }
-    },
-    "forgotPassword": {
-      "validation": {
-        "emailRequired": "Please enter your email address.",
-        "emailInvalid": "Please enter a valid email address."
-      },
-      "label": {
-        "email": "Email address"
-      },
-      "placeholder": {
-        "email": "Enter your email address"
-      },
-      "button": {
-        "sendResetLink": "Send Reset Link"
-      }
-    }
-  }
+  "welcome": "Welcome to Tabanok!",
+  "start_now": "Start now",
+  "already_have_account": "I already have an account",
+  "auth_modal_title": "Tabanok",
+  "auth_modal_description": "Your learning platform",
+  "login_tab": "Login",
+  "register_tab": "Register",
+  "login_title": "Login",
+  "login_description": "Enter your credentials to access your account.",
+  "email_username_label": "Email/Username",
+  "email_invalid": "Invalid email.",
+  "password_label": "Password",
+  "password_required": "Password is required.",
+  "password_min_length": "Password must be at least 6 characters.",
+  "login_button": "Login",
+  "logging_in": "Logging in...",
+  "no_account_question": "Don't have an account?",
+  "register_link": "Register",
+  "forgot_password_link": "Forgot your password?",
+  "or_continue_with": "Or continue with",
+  "register_title": "Registration",
+  "register_step": "Step {{currentStep}} of {{totalSteps}}",
+  "confirm_password_label": "Confirm Password",
+  "passwords_do_not_match": "Passwords do not match.",
+  "username_label": "Username",
+  "username_min_length": "Username must be at least 3 characters.",
+  "first_name_label": "First Name",
+  "first_name_required": "First name is required.",
+  "second_name_label": "Middle Name (Optional)",
+  "first_last_name_label": "Last Name",
+  "first_last_name_required": "Last name is required.",
+  "second_last_name_label": "Second Last Name (Optional)",
+  "languages_label": "Languages",
+  "select_at_least_one_language": "Select at least one language.",
+  "preferred_language_label": "Preferred Language",
+  "preferred_language_required": "Preferred language is required.",
+  "select_language_placeholder": "Select a language",
+  "spanish": "Spanish",
+  "english": "English",
+  "preferred_theme_label": "Preferred Theme",
+  "preferred_theme_required": "Preferred theme is required.",
+  "select_theme_placeholder": "Select a theme",
+  "light_theme": "Light",
+  "dark_theme": "Dark",
+  "system_theme": "System",
+  "notifications_label": "Notifications",
+  "role_label": "Role",
+  "role_required": "Role is required.",
+  "select_role_placeholder": "Select a role",
+  "student_role": "Student",
+  "teacher_role": "Teacher",
+  "admin_role": "Admin",
+  "previous_button": "Previous",
+  "next_button": "Next",
+  "register_button": "Register",
+  "registering": "Registering...",
+  "already_have_account_question": "Already have an account?",
+  "forgot_password_title": "Forgot Password",
+  "forgot_password_description": "Enter your email to receive password reset instructions.",
+  "send_instructions_button": "Send Instructions",
+  "sending": "Sending...",
+  "back_to_login": "Back to Login",
+  "reset_password_title": "Reset Password",
+  "reset_password_description": "Enter your new password.",
+  "new_password_label": "New Password",
+  "confirm_new_password_label": "Confirm New Password",
+  "reset_password_button": "Reset Password",
+  "resetting_password": "Resetting...",
+  "login_successful": "Login successful",
+  "registration_successful": "Registration successful. Please log in.",
+  "password_reset_request_successful": "Instructions sent to your email.",
+  "password_reset_successful": "Password reset successfully.",
+  "error_authentication": "Authentication Error",
+  "error_login_failed": "Login failed",
+  "error_registration_failed": "User registration failed",
+  "error_password_reset_request_failed": "Password reset request failed",
+  "error_password_reset_failed": "Password reset failed",
+  "General": "General",
+  "Aprendizaje": "Learning",
+  "Configuración": "Configuration",
+  "Dashboard": "Dashboard",
+  "Cursos": "Courses",
+  "Lecciones": "Lessons",
+  "Progreso": "Progress",
+  "Perfil": "Profile",
+  "Seguridad": "Security",
+  "Ajustes": "Settings",
+  "Buscar": "Search",
+  "Idioma": "Language",
+  "Español": "Spanish",
+  "Inglés": "English",
+  "Buscar en la aplicación...": "Search in application...",
+  "No se encontraron resultados.": "No results found.",
+  "Mi Perfil": "My Profile",
+  "Cerrar Sesión": "Logout",
+  "Usuario Invitado": "Guest User"
 }

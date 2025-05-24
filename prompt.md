@@ -4,7 +4,7 @@
 - Frontend React/TypeScript con Vite
 - Gestión de dependencias: pnpm
 - Testing: Vitest
-- Estilizado: Tailwind CSS
+- Estilizado: Tailwind CSS v4 con Shadcn (integración manual puede ser requerida)
 - CI/CD: GitHub Actions
 - Containerización: Docker
 
@@ -103,7 +103,7 @@ pnpm coverage   # Cobertura de tests
 - Vite 5+
 - TanStack Query: Gestión de estado asíncrono y caching de datos.
 - Zustand: Gestión de estado global simple y escalable.
-- Tailwind CSS
+- Tailwind CSS v4
 - Radix UI: Componentes UI accesibles y personalizables.
 - Vitest/Testing Library
 - Playwright
@@ -173,3 +173,11 @@ pnpm coverage   # Cobertura de tests
 - **Documentación del Código:** Añadir comentarios TSDoc a funciones, componentes, hooks y tipos para mejorar la mantenibilidad y facilitar la comprensión del código.
 - **Convenciones de Nomenclatura:** Seguir convenciones claras y consistentes para archivos, componentes, variables y funciones.
 - **Revisión de Dependencias:** Evaluar periódicamente las dependencias para seguridad, rendimiento y tamaño.
+
+## ⚙️ Configuración de Tailwind CSS v4 y Shadcn
+
+Dado que la integración automática de Shadcn/ui con Tailwind CSS v4 aún no está disponible, se recomienda seguir estos pasos:
+
+1.  **Instalar Tailwind CSS v4:** Siga la guía oficial de Tailwind CSS para instalar la versión 4.
+2.  **Instalación manual de componentes Shadcn/ui:** Copie y pegue los componentes de Shadcn/ui manualmente en su directorio de componentes.
+3.  **Configuración manual:** Configure manualmente los estilos y las dependencias necesarias para los componentes de Shadcn/ui.

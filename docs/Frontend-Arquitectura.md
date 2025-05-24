@@ -21,7 +21,7 @@ El componente `HomePage` (`src/components/home/HomePage.tsx`) es la página prin
 Los componentes del frontend se organizan en el directorio `src/components/` con la siguiente estructura:
 
 *   `common/`: Componentes reutilizables en toda la aplicación (ej. `PrivateRoute`, `AuthModals`, `Loading`).
-*   `dashboard/`: Componentes específicos del dashboard unificado (`UnifiedDashboard`) y sus subcomponentes (ej. `ActivityCreator`, `StudentProgress`, `ReportViewer`, `MultimediaUploadForm`, `MultimediaGallery`, `ContentManager`, `LatestActivities`). Todos estos componentes de sección se cargan de forma lazy. **Todos estos componentes ahora consumen los endpoints del backend correspondientes para obtener y enviar datos.**
+*   `dashboard/`: Componentes específicos del dashboard unificado (`UnifiedDashboard`) y sus subcomponentes (ej. `ActivityCreator`, `StudentProgress`, `ReportViewer`, `MultimediaUploadForm`, `MultimediaGallery`, `ContentManager`, `LatestActivities`, **`RoleManager`**). Todos estos componentes de sección se cargan de forma lazy. **Todos estos componentes ahora consumen los endpoints del backend correspondientes para obtener y enviar datos.**
     *   `ActivityCreator`: Permite crear actividades y guardarlas en el backend (`POST /activities`). Se ha agregado validación para la longitud del título y caracteres especiales.
     *   `StudentProgress`: Muestra el progreso de los estudiantes utilizando una barra de progreso visual, obteniendo datos del backend (`GET /analytics/studentProgress`). Se ha agregado un manejo de errores más robusto y se muestra un mensaje de error en caso de que la API no responda.
     *   `ReportViewer`: Muestra reportes, obteniendo datos del backend (`GET /statistics/reports/quick/:userId`). Se ha agregado un manejo de errores más robusto y se muestra un mensaje de error en caso de que la API no responda.
@@ -30,6 +30,7 @@ Los componentes del frontend se organizan en el directorio `src/components/` con
     *   `ContentManager`: Permite crear (`POST /content`), leer (`GET /content`), actualizar (`PUT /content/:id`) y eliminar (`DELETE /content/:id`) contenido en el backend. Se ha implementado la subida de múltiples archivos, la previsualización de archivos subidos, la eliminación de archivos subidos y el editor de texto enriquecido. Además, se ha implementado la funcionalidad de edición de contenido.
     *   `CategoryManager`: Modificado para usar el endpoint `/topics` para la gestión de categorías (listar, crear, actualizar, eliminar).
     *   `TagManager`: Modificado para la gestión de etiquetas (listar, crear, actualizar, eliminar).
+    *   **`RoleManager`:** Se ha añadido un componente para la gestión de roles de usuario, utilizando un nuevo servicio `userService.ts` para obtener usuarios (`GET /users`) y actualizar sus roles (`PATCH /users/{id}/roles`) con TanStack Query.
 *   Se agregó el componente `LatestActivities` para mostrar las últimas actividades realizadas por los estudiantes, obteniendo datos del backend (`GET /activities`) y filtrando los resultados en el frontend.
 *   Se han añadido indicadores de carga a los componentes del dashboard.
 *   `general/`: Componentes generales no específicos de una sección particular.
@@ -37,7 +38,7 @@ Los componentes del frontend se organizan en el directorio `src/components/` con
 *   `layout/`: Componentes de layout (ej. `AuthenticatedLayout`).
 *   `navigation/`: Componentes de navegación.
 *   `gamification/`: Componentes específicos del módulo de gamificación (ej. `GamificationPage`, `LeaderboardPage`, `AchievementsPage`). Se ha corregido el manejo de errores en estos componentes para mostrar correctamente los mensajes de error.
-*   `settings/`: Componentes específicos del módulo de configuración (ej. `SettingsPage`, `ProfilePage`).
+*   `settings/`: Componentes específicos del módulo de configuración (ej. `SettingsPage`, `ProfilePage` - **mejorada para incluir campos de perfil adicionales y notificaciones**).
 *   `units/`: Componentes específicos del módulo de unidades (ej. `UnitDetail`, `UnitListPage`, `UnitCard`).
 *   `ui/`: Componentes base de Shadcn UI y componentes personalizados basados en ellos (ej. `Button`, `Carousel`).
     *   `sidebar.tsx`: Componente principal de la Sidebar.

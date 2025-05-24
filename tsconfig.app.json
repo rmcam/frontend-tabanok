@@ -1,16 +1,37 @@
 {
-  "extends": "./tsconfig.json",
   "compilerOptions": {
-    "jsx": "react-jsx",
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
     "moduleResolution": "bundler",
-    "outDir": "dist",
-    "composite": true,
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+    "types": ["vitest/globals"],
+
+    /* React */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
-    }
+      "@/*": [
+        "./src/*"
+      ]
+    },
   },
-  "include": ["src/**/*.tsx", "src/lib/api.ts", "src/lib/authService.ts", "src/vite-env.d.ts", "src/**/*.ts", "src/components/ui/button.tsx", "src/**/*.json"],
-  "exclude": ["src/hooks/useAuth.ts", "src/**/*.test.ts", "src/**/*.spec.ts"]
+  "include": ["src", "**/*.test.tsx"],
+  
 }

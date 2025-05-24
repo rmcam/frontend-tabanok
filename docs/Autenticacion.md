@@ -110,6 +110,8 @@ POST /auth/signup
 }
 ```
 
+**Nota:** La estructura del objeto `user` devuelto en la respuesta de registro y verificación de sesión ha sido ampliada para incluir campos de perfil adicionales como `languages`, `preferences` (con `notifications`, `language`, `theme`) y `profile` (con `bio`, `location`, `interests`, `community`). La definición del tipo `User` en `src/auth/types/authTypes.ts` ha sido actualizada para reflejar esta estructura.
+
 Se ha ajustado el seeder de usuarios (`UserSeeder`) para utilizar el enum `UserRole` definido en `src/auth/enums/auth.enum.ts` y se ha corregido la importación de `UserStatus`. El rol 'mentor' en el seeder ahora utiliza `UserRole.TEACHER` para ser compatible con el enum de roles de la base de datos.
 
 ### Restablecer contraseña
