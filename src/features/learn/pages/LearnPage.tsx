@@ -55,20 +55,6 @@ const LearnPage: React.FC = () => {
           ))}
         </div>
       </div>
-
-      {/* Sección Derecha de Invitación */}
-      <div className="w-full md:w-1/4 lg:w-1/5 pt-4 md:pt-0 md:pl-4 flex-shrink-0">
-        <Card className="sticky top-4">
-          <CardHeader>
-            <CardTitle>¡Únete a la Comunidad!</CardTitle>
-            <CardDescription>Crea un perfil para guardar tu progreso, acceder a contenido exclusivo y conectar con otros estudiantes.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col space-y-2">
-            <Button className="w-full">Iniciar Sesión</Button>
-            <Button variant="outline" className="w-full">Crear Perfil</Button>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 };

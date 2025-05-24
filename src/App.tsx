@@ -7,6 +7,15 @@ import AuthModal from './features/auth/components/AuthModal'; // Importar AuthMo
 
 const LandingPage = React.lazy(() => import("./features/landing"));
 const LearnPage = React.lazy(() => import("./features/learn"));
+const DashboardPage = React.lazy(() => import("./pages/dashboard"));
+const InboxPage = React.lazy(() => import("./pages/inbox"));
+const CalendarPage = React.lazy(() => import("./pages/calendar"));
+const CoursesPage = React.lazy(() => import("./pages/courses"));
+const LessonsPage = React.lazy(() => import("./pages/lessons"));
+const ProgressPage = React.lazy(() => import("./pages/progress"));
+const ProfilePage = React.lazy(() => import("./pages/profile"));
+const SecurityPage = React.lazy(() => import("./pages/security"));
+const SettingsPage = React.lazy(() => import("./pages/settings"));
 
 /**
  * Componente principal de la aplicación que configura el enrutamiento
@@ -27,6 +36,15 @@ function App() {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/learn" element={<LearnPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/inbox" element={<InboxPage />} />
+            <Route path="/calendar" element={<CalendarPage />} />
+            <Route path="/courses" element={<CoursesPage />} />
+            <Route path="/lessons" element={<LessonsPage />} />
+            <Route path="/progress" element={<ProgressPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/security" element={<SecurityPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
           </Routes>
         </Suspense>
       </div>

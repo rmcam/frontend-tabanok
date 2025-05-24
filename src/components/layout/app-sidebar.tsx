@@ -1,7 +1,10 @@
-import { Calendar, Home, Inbox, Search, Settings, LayoutDashboard, User, BookOpen, GraduationCap, BarChart, ShieldCheck, Globe, LogOut } from "lucide-react"
-import { useTranslation } from "react-i18next"
+import { Search, Globe, LogOut, User } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
 import { cn } from "@/lib/utils"
+import { navigationItems } from "@/config/navigation"
+import { useLanguage } from "@/hooks/use-language"
+import { useAuth } from "@/hooks/use-auth"
+import { useTranslation } from "react-i18next" // Mantener useTranslation para t()
 
 import {
   Sidebar,
@@ -32,95 +35,17 @@ import {
 import { CommandPalette } from "@/components/common/command-palette"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
-// Menu items.
-const navigationItems = [
-  {
-    group: "General",
-    items: [
-      {
-        title: "Dashboard",
-        url: "/dashboard",
-        icon: LayoutDashboard,
-      },
-      {
-        title: "Home",
-        url: "/",
-        icon: Home,
-      },
-      {
-        title: "Inbox",
-        url: "/inbox",
-        icon: Inbox,
-      },
-      {
-        title: "Calendar",
-        url: "/calendar",
-        icon: Calendar,
-      },
-    ],
-  },
-  {
-    group: "Aprendizaje",
-    items: [
-      {
-        title: "Cursos",
-        url: "/courses",
-        icon: BookOpen,
-      },
-      {
-        title: "Lecciones",
-        url: "/lessons",
-        icon: GraduationCap,
-      },
-      {
-        title: "Progreso",
-        url: "/progress",
-        icon: BarChart,
-      },
-    ],
-  },
-  {
-    group: "Configuración",
-    items: [
-      {
-        title: "Perfil",
-        url: "/profile",
-        icon: User,
-      },
-      {
-        title: "Seguridad",
-        url: "/security",
-        icon: ShieldCheck,
-      },
-      {
-        title: "Ajustes",
-        url: "/settings",
-        icon: Settings,
-      },
-    ],
-  },
-]
-
 export function AppSidebar() {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation() // Solo t() es necesario aquí
   const location = useLocation()
-  const { state: sidebarState } = useSidebar() // Obtener el estado del sidebar
+  const { state: sidebarState } = useSidebar()
+  const { changeLanguage } = useLanguage()
+  const { handleLogout } = useAuth()
 
   // Mock user data for demonstration
   const user = {
     name: "Usuario Invitado",
     avatar: "https://github.com/shadcn.png", // Replace with actual user avatar
-  }
-
-  const changeLanguage = (lng: string) => {
-    i18n.changeLanguage(lng)
-  }
-
-  const handleLogout = () => {
-    // Implement actual logout logic here
-    console.log("Cerrar sesión")
-    // Redirect to login page or home page after logout
-    // navigate("/login");
   }
 
   const isSidebarCollapsed = sidebarState === "collapsed"
