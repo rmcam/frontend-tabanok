@@ -3,6 +3,9 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Instalar pnpm globalmente
+RUN npm install -g pnpm
+
 # Copiar archivos de dependencias y instalar
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
