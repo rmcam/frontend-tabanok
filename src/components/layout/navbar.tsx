@@ -42,26 +42,11 @@ export function Navbar({ hideToggle, isLandingPage }: NavbarProps) {
               <DropdownMenuItem onClick={() => changeLanguage("en")}>
                 English
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => changeLanguage("fr")}>
-                Français
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => changeLanguage("de")}>
-                Deutsch
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => changeLanguage("it")}>
-                Italiano
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => changeLanguage("pt")}>
-                Português
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => changeLanguage("ca")}>
-                Català
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => changeLanguage("ru")}>
-                Русский
-              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => changeLanguage("es")}>
                 Español
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => changeLanguage("kmt")}>
+                Kamentsa
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

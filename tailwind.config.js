@@ -66,15 +66,61 @@ module.exports = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        blob: {
+          "0%": {
+            transform: "translate(0px, 0px) scale(1)",
+          },
+          "33%": {
+            transform: "translate(30px, -50px) scale(1.1)",
+          },
+          "66%": {
+            transform: "translate(-20px, 20px) scale(0.9)",
+          },
+          "100%": {
+            transform: "translate(0px, 0px) scale(1)",
+          },
+        },
+        "blob-reverse": {
+          "0%": {
+            transform: "translate(0px, 0px) scale(1)",
+          },
+          "33%": {
+            transform: "translate(-30px, 50px) scale(0.9)",
+          },
+          "66%": {
+            transform: "translate(20px, -20px) scale(1.1)",
+          },
+          "100%": {
+            transform: "translate(0px, 0px) scale(1)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        blob: "blob 7s infinite",
+        "blob-reverse": "blob-reverse 7s infinite",
+        "bounce-slow": "bounce 3s infinite",
+        "spin-slow": "spin 10s linear infinite",
+        "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite", // Añadir una animación de pulso más lenta
       },
     },
   },
   // Si estás usando las animaciones de Radix o similar,
   // es común usar el plugin 'tailwindcss-animate'.
   // Si 'tw-animate-css' es un archivo CSS que importas, está bien.
-  plugins: [require("tailwindcss-animate")], // Ejemplo, si necesitas este plugin
+  plugins: [
+    require("tailwindcss-animate"),
+    require("tailwindcss/plugin")(function ({ addUtilities }) {
+      const newUtilities = {
+        '.animation-delay-2000': {
+          'animation-delay': '2s',
+        },
+        '.animation-delay-4000': {
+          'animation-delay': '4s',
+        },
+      };
+      addUtilities(newUtilities, ['responsive', 'hover']);
+    }),
+  ],
 };

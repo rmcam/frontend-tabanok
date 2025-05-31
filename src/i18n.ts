@@ -4,6 +4,7 @@ import { initReactI18next } from 'react-i18next';
 // Importa tus archivos de traducción aquí
 import translationEN from './locales/en/translation.json';
 import translationES from './locales/es/translation.json'; // Importar traducción en español
+import translationKMT from './locales/kmt/translation.json'; // Importar traducción en kamentsa
 
 // Los recursos de traducción
 const resources = {
@@ -12,6 +13,9 @@ const resources = {
   },
   es: { // Añadir recursos en español
     translation: translationES,
+  },
+  kmt: { // Añadir recursos en kamentsa
+    translation: translationKMT,
   },
 };
 

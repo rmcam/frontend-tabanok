@@ -35,18 +35,27 @@ El frontend es una aplicación **React + Vite** con una estructura modular bien 
 *   Se han añadido indicadores de carga a los componentes del dashboard.
 *   Se movió la verificación de la variable de entorno `VITE_API_URL` al componente `App.tsx` para que se realice solo una vez al inicio de la aplicación.
   - Implementar la funcionalidad de edición de contenido en el componente `ContentManager`. (Completado: Se ha implementado la funcionalidad de edición de contenido).
-*   **Módulos/Vistas Implementadas (Configuración Inicial o Integración Básica de Datos):** Se ha completado la implementación inicial o la integración básica de datos para 10 módulos/vistas del frontend, incluyendo la configuración de rutas y la obtención básica de datos donde fue aplicable. Los módulos implementados son:
-    1.  Vista de Administración de Perfil (`ProfilePage.tsx`) - **Mejorada para incluir campos de perfil adicionales y notificaciones con Sonner.**
-    2.  Vista de Actividades (`ActivitiesPage.tsx`)
-    3.  Vista principal de Gamificación (`GamificationPage.tsx`)
-    4.  Sub-vista de Gamificación - Leaderboard (`LeaderboardPage.tsx`)
-    5.  Sub-vista de Gamificación - Logros (`AchievementsPage.tsx`)
-    6.  Vista principal de Configuración (`SettingsPage.tsx`)
+*   **Módulos/Vistas Implementadas (Configuración Inicial o Integración Básica de Datos):** Se ha completado la implementación inicial de las páginas del sidebar con componentes de Shadcn y datos simulados, incluyendo la configuración de rutas y la obtención básica de datos donde fue aplicable. Los módulos/vistas implementados son:
+    1.  **DashboardPage (`DashboardPage.tsx`)**: Implementada con un resumen de cursos recientes/en progreso, utilizando tarjetas con iconos y barras de progreso.
+    2.  **InboxPage (`InboxPage.tsx`)**: Implementada con un listado de notificaciones en formato de tarjeta, con iconos y acciones.
+    3.  **CalendarPage (`CalendarPage.tsx`)**: Implementada con un calendario gregoriano que muestra eventos importantes directamente en las celdas y un diálogo para detalles.
+    4.  **CoursesPage (`CoursesPage.tsx`)**: Implementada con una cuadrícula de tarjetas de cursos, incluyendo búsqueda y filtros, y mostrando información detallada como número de lecciones y nivel.
+    5.  **LessonsPage (`LessonsPage.tsx`)**: Implementada con organización por unidades/temas usando componentes colapsables, y tarjetas de lección con tipo de contenido, progreso y estado de bloqueo.
+    6.  **ProgressPage (`ProgressPage.tsx`)**: Implementada con métricas clave, progreso por curso y una galería de logros/insignias.
+    7.  **ProfilePage (`ProfilePage.tsx`)**: Implementada con información de perfil editable, previsualización de avatar y separación de opciones de seguridad.
+    8.  **SecurityPage (`SecurityPage.tsx`)**: Implementada con secciones para cambiar contraseña y configurar autenticación de dos factores (2FA).
+    9.  **SettingsPage (`SettingsPage.tsx`)**: Implementada con ajustes generales (idioma, tema) y preferencias de notificaciones.
+    10. Vista de Administración de Perfil (`ProfilePage.tsx`) - **Mejorada para incluir campos de perfil adicionales y notificaciones con Sonner.**
+    11. Vista de Actividades (`ActivitiesPage.tsx`)
+    12. Vista principal de Gamificación (`GamificationPage.tsx`)
+    13. Sub-vista de Gamificación - Leaderboard (`LeaderboardPage.tsx`)
+    14. Sub-vista de Gamificación - Logros (`AchievementsPage.tsx`)
+    15. Vista principal de Configuración (`SettingsPage.tsx`)
     Se ha corregido el manejo de errores en los componentes de gamificación (`AchievementsPage.tsx`, `GamificationPage.tsx`, `LeaderboardPage.tsx`) para mostrar correctamente los mensajes de error.
-    7.  Vista de Detalle de Unidad (`UnitDetail.tsx`)
-    8.  Vista de Multimedia (`MultimediaPage.tsx`)
-    9.  Vista de Actividad - Quiz (`QuizActivity.tsx`)
-    10. Vista de Actividad - Matching (`MatchingActivity.tsx`)
+    16. Vista de Detalle de Unidad (`UnitDetail.tsx`)
+    17. Vista de Multimedia (`MultimediaPage.tsx`)
+    18. Vista de Actividad - Quiz (`QuizActivity.tsx`)
+    19. Vista de Actividad - Matching (`MatchingActivity.tsx`)
   *   **Diseño de la lista de unidades:** Se ha mejorado el diseño de la lista de unidades (`UnitListPage.tsx`) utilizando componentes de la interfaz de usuario y ajustando la tipografía y el espaciado. Se ha agregado una sombra a las tarjetas y se ha aumentado el tamaño de las imágenes. **Se ha implementado la funcionalidad de apertura, la navegación de regreso y el diseño responsive para las unidades. Cada tarjeta de unidad ahora es un enlace que navega a la página de detalles de la unidad, la cual contiene un botón "Regresar" y migas de pan para facilitar la navegación de regreso a la lista de unidades. Además, se han agregado media queries al archivo src/index.css para adaptar el diseño a diferentes tamaños de pantalla.**
 
 ### Estado del Backend

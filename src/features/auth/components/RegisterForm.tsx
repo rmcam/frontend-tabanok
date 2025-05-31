@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom'; // Importar useNavigate y useLocation
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -6,8 +7,8 @@ import { z } from 'zod';
 import { useForm, Controller } from 'react-hook-form'; // Añadir Controller
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { useSignUp } from '@/hooks/useApi'; // Importar useSignUp
-import type { ApiError } from '@/types/api'; // Importar ApiError como tipo
+import { useSignUp } from '@/hooks/auth/auth.hooks'; // Importar useSignUp
+import type { ApiError, LoginResponse, ApiResponse, UserRole } from '@/types/api'; // Importar ApiError, LoginResponse, ApiResponse y UserRole como tipo
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; // Importar Select
 import { Switch } from '@/components/ui/switch'; // Importar Switch
 import { Checkbox } from '@/components/ui/checkbox'; // Importar Checkbox
@@ -46,10 +47,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ changeView }) => {
     languages: z.array(z.string()).min(1, t('select_at_least_one_language')),
     preferences: z.object({
       notifications: z.boolean(),
-      language: z.enum(['es', 'en'], { message: t('preferred_language_required') }),
+      language: z.enum(['es', 'en', 'kmt'], { message: t('preferred_language_required') }),
       theme: z.enum(['light', 'dark', 'system'], { message: t('preferred_theme_required') }),
     }),
-    role: z.enum(['student', 'teacher', 'admin'], { message: t('role_required') }),
+    role: z.literal('student').optional(), // El rol será 'student' por defecto y opcional
   }).refine((data) => data.password === data.confirmPassword, {
     message: t('passwords_do_not_match'),
     path: ['confirmPassword'],
@@ -77,7 +78,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ changeView }) => {
   const stepFields: Record<number, (keyof RegisterFormData)[]> = {
     1: ['email', 'password', 'confirmPassword'],
     2: ['username', 'firstName', 'secondName', 'firstLastName', 'secondLastName'],
-    3: ['languages', 'preferences', 'role'],
+    3: ['languages', 'preferences'],
   };
 
   const totalSteps = 3; // Número total de pasos
@@ -105,6 +106,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ changeView }) => {
     setCurrentStep(currentStep - 1);
   };
 
+  const navigate = useNavigate(); // Inicializar useNavigate
+  const location = useLocation(); // Inicializar useLocation
+
   const { mutate: signUp, isPending: isRegistering } = useSignUp();
 
   const handleRegister = async (values: RegisterFormData) => {
@@ -121,14 +125,16 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ changeView }) => {
       password: finalData.password,
       languages: finalData.languages,
       preferences: finalData.preferences,
-      role: finalData.role,
+      role: finalData.role as UserRole,
     };
 
     signUp(userData, {
-      onSuccess: (data) => {
+      onSuccess: (data: ApiResponse<LoginResponse>) => {
         console.log('Registration successful:', data);
-        toast.success(t('registration_successful'));
-        changeView('login');
+        toast.success(data.message || t('registration_successful'));
+        // Redirigir al usuario a la página de la que vino o al dashboard
+        const from = (location.state as { from?: string })?.from || '/dashboard';
+        navigate(from, { replace: true });
       },
       onError: (err: ApiError) => {
         console.error('Registration failed:', err);
@@ -166,9 +172,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ changeView }) => {
           {currentStep === 1 && (
             <div className="space-y-4 py-4">
               <div>
-                <Label htmlFor="email">{t('email_username_label')}</Label>
+                <Label htmlFor="register-email">{t('email_username_label')}</Label>
                 <Input
-                  id="email"
+                  id="register-email"
                   type="email"
                   {...register('email')}
                   className="mt-1"
@@ -176,9 +182,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ changeView }) => {
                 {errors.email && <p className="text-destructive text-sm mt-1">{errors.email.message}</p>}
               </div>
               <div>
-                <Label htmlFor="password">{t('password_label')}</Label>
+                <Label htmlFor="register-password">{t('password_label')}</Label>
                 <Input
-                  id="password"
+                  id="register-password"
                   type="password"
                   {...register('password')}
                   className="mt-1"
@@ -186,9 +192,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ changeView }) => {
                 {errors.password && <p className="text-destructive text-sm mt-1">{errors.password.message}</p>}
               </div>
               <div>
-                <Label htmlFor="confirmPassword">{t('confirm_password_label')}</Label>
+                <Label htmlFor="register-confirmPassword">{t('confirm_password_label')}</Label>
                 <Input
-                  id="confirmPassword"
+                  id="register-confirmPassword"
                   type="password"
                   {...register('confirmPassword')}
                   className="mt-1"
@@ -201,9 +207,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ changeView }) => {
           {currentStep === 2 && (
             <div className="space-y-4 py-4">
               <div>
-                <Label htmlFor="username">{t('username_label')}</Label>
+                <Label htmlFor="register-username">{t('username_label')}</Label>
                 <Input
-                  id="username"
+                  id="register-username"
                   type="text"
                   {...register('username')}
                   className="mt-1"
@@ -211,9 +217,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ changeView }) => {
                 {errors.username && <p className="text-destructive text-sm mt-1">{errors.username?.message}</p>}
               </div>
               <div>
-                <Label htmlFor="firstName">{t('first_name_label')}</Label>
+                <Label htmlFor="register-firstName">{t('first_name_label')}</Label>
                 <Input
-                  id="firstName"
+                  id="register-firstName"
                   type="text"
                   {...register('firstName')}
                   className="mt-1"
@@ -221,9 +227,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ changeView }) => {
                 {errors.firstName && <p className="text-destructive text-sm mt-1">{errors.firstName.message}</p>}
               </div>
               <div>
-                <Label htmlFor="secondName">{t('second_name_label')}</Label>
+                <Label htmlFor="register-secondName">{t('second_name_label')}</Label>
                 <Input
-                  id="secondName"
+                  id="register-secondName"
                   type="text"
                   className="mt-1"
                   {...register('secondName')}
@@ -231,9 +237,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ changeView }) => {
                 {errors.secondName && <p className="text-destructive text-sm mt-1">{errors.secondName.message}</p>}
               </div>
               <div>
-                <Label htmlFor="firstLastName">{t('first_last_name_label')}</Label>
+                <Label htmlFor="register-firstLastName">{t('first_last_name_label')}</Label>
                 <Input
-                  id="firstLastName"
+                  id="register-firstLastName"
                   type="text"
                   {...register('firstLastName')}
                   className="mt-1"
@@ -241,9 +247,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ changeView }) => {
                 {errors.firstLastName && <p className="text-destructive text-sm mt-1">{errors.firstLastName.message}</p>}
               </div>
               <div>
-                <Label htmlFor="secondLastName">{t('second_last_name_label')}</Label>
+                <Label htmlFor="register-secondLastName">{t('second_last_name_label')}</Label>
                 <Input
-                  id="secondLastName"
+                  id="register-secondLastName"
                   type="text"
                   className="mt-1"
                   {...register('secondLastName')}
@@ -254,107 +260,94 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ changeView }) => {
           )}
 
           {currentStep === 3 && (
-            <div className="space-y-4 py-4">
-              <div>
-                <Label htmlFor="languages">{t('languages_label')}</Label>
-                <div className="flex flex-wrap gap-2 mt-1">
-                  {['es', 'en', 'fr', 'de'].map((lang) => (
-                    <div key={lang} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`lang-${lang}`}
-                        checked={watchedLanguages.includes(lang)}
-                        onCheckedChange={(checked) => {
-                          const currentLanguages = watchedLanguages;
-                          if (checked) {
-                            setValue('languages', [...currentLanguages, lang], { shouldValidate: true });
-                          } else {
-                            setValue('languages', currentLanguages.filter((l) => l !== lang), { shouldValidate: true });
-                          }
-                        }}
-                      />
-                      <Label htmlFor={`lang-${lang}`}>{lang.toUpperCase()}</Label>
-                    </div>
+            <div className="space-y-6 py-4"> {/* Aumentar el espacio entre secciones */}
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold">{t('languages_section_title')}</h3> {/* Título para idiomas */}
+                <p className="text-sm text-muted-foreground">{t('languages_section_description')}</p>
+                <div className="flex flex-wrap gap-3 mt-2"> {/* Aumentar el espacio entre chips */}
+                  {['es', 'en', 'kmt'].map((lang) => (
+                    <Button
+                      key={lang}
+                      type="button"
+                      variant={watchedLanguages.includes(lang) ? 'default' : 'outline'}
+                      onClick={() => {
+                        const currentLanguages = watchedLanguages;
+                        if (currentLanguages.includes(lang)) {
+                          setValue('languages', currentLanguages.filter((l) => l !== lang), { shouldValidate: true });
+                        } else {
+                          setValue('languages', [...currentLanguages, lang], { shouldValidate: true });
+                        }
+                      }}
+                      className="px-4 py-2 rounded-full transition-colors duration-200"
+                    >
+                      {lang.toUpperCase()}
+                    </Button>
                   ))}
                 </div>
                 {errors.languages && <p className="text-destructive text-sm mt-1">{errors.languages.message}</p>}
               </div>
 
-              <div>
-                <Label htmlFor="preferences.language">{t('preferred_language_label')}</Label>
-                <Controller
-                  name="preferences.language"
-                  control={control}
-                  render={({ field }) => (
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger className="mt-1">
-                        <SelectValue placeholder={t('select_language_placeholder')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="es">{t('spanish')}</SelectItem>
-                        <SelectItem value="en">{t('english')}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                {errors.preferences?.language && <p className="text-destructive text-sm mt-1">{errors.preferences.language.message}</p>}
-              </div>
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">{t('preferences_section_title')}</h3> {/* Título para preferencias */}
+                <p className="text-sm text-muted-foreground">{t('preferences_section_description')}</p>
 
-              <div>
-                <Label htmlFor="preferences.theme">{t('preferred_theme_label')}</Label>
-                <Controller
-                  name="preferences.theme"
-                  control={control}
-                  render={({ field }) => (
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger className="mt-1">
-                        <SelectValue placeholder={t('select_theme_placeholder')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="light">{t('light_theme')}</SelectItem>
-                        <SelectItem value="dark">{t('dark_theme')}</SelectItem>
-                        <SelectItem value="system">{t('system_theme')}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                {errors.preferences?.theme && <p className="text-destructive text-sm mt-1">{errors.preferences.theme.message}</p>}
-              </div>
+                <div className="space-y-2"> {/* Agrupar Label y Select con espacio */}
+                  <Label htmlFor="preferences.language" className="block text-sm font-medium">{t('preferred_language_label')}</Label>
+                  <Controller
+                    name="preferences.language"
+                    control={control}
+                    render={({ field }) => (
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger className="w-full"> {/* Asegurar que ocupe todo el ancho */}
+                          <SelectValue placeholder={t('select_language_placeholder')} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="es">{t('spanish')}</SelectItem>
+                          <SelectItem value="en">{t('english')}</SelectItem>
+                          <SelectItem value="kmt">{t('Kamentsa')}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {errors.preferences?.language && <p className="text-destructive text-sm mt-1">{errors.preferences.language.message}</p>}
+                </div>
 
-              <div className="flex items-center justify-between">
-                <Label htmlFor="preferences.notifications">{t('notifications_label')}</Label>
-                <Controller
-                  name="preferences.notifications"
-                  control={control}
-                  render={({ field }) => (
-                    <Switch
-                      id="preferences.notifications"
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  )}
-                />
+                <div className="space-y-2"> {/* Agrupar Label y Select con espacio */}
+                  <Label htmlFor="preferences.theme" className="block text-sm font-medium">{t('preferred_theme_label')}</Label>
+                  <Controller
+                    name="preferences.theme"
+                    control={control}
+                    render={({ field }) => (
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger className="w-full"> {/* Asegurar que ocupe todo el ancho */}
+                          <SelectValue placeholder={t('select_theme_placeholder')} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="light">{t('light_theme')}</SelectItem>
+                          <SelectItem value="dark">{t('dark_theme')}</SelectItem>
+                          <SelectItem value="system">{t('system_theme')}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {errors.preferences?.theme && <p className="text-destructive text-sm mt-1">{errors.preferences.theme.message}</p>}
+                </div>
+
+                <div className="flex items-center justify-between p-2 border rounded-md"> {/* Contenedor para Switch */}
+                  <Label htmlFor="preferences.notifications" className="text-base">{t('notifications_label')}</Label>
+                  <Controller
+                    name="preferences.notifications"
+                    control={control}
+                    render={({ field }) => (
+                      <Switch
+                        id="preferences.notifications"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    )}
+                  />
+                </div>
                 {errors.preferences?.notifications && <p className="col-span-4 text-destructive text-sm">{errors.preferences.notifications.message}</p>}
-              </div>
-
-              <div>
-                <Label htmlFor="role">{t('role_label')}</Label>
-                <Controller
-                  name="role"
-                  control={control}
-                  render={({ field }) => (
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger className="mt-1">
-                        <SelectValue placeholder={t('select_role_placeholder')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="student">{t('student_role')}</SelectItem>
-                        <SelectItem value="teacher">{t('teacher_role')}</SelectItem>
-                        <SelectItem value="admin">{t('admin_role')}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                {errors.role && <p className="text-destructive text-sm mt-1">{errors.role.message}</p>}
               </div>
             </div>
           )}

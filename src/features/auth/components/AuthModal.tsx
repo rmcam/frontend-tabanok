@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom'; // Importar useNavigate y useLocation
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { useSignIn } from '@/hooks/useApi';
+import { useSignIn } from '@/hooks/auth/auth.hooks';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -31,7 +32,7 @@ const AuthModal: React.FC = () => {
   const [backendError, setBackendError] = useState<string | null>(null);
 
   const loginSchema = z.object({
-    identifier: z.string().min(1, t('email_username_required')),
+    identifier: z.string().min(1, t('email_username_required')), // Cambiado de email a identifier
     password: z.string().min(1, t('password_required')),
   });
 
@@ -44,6 +45,9 @@ const AuthModal: React.FC = () => {
     resolver: zodResolver(loginSchema),
   });
 
+  const navigate = useNavigate(); // Inicializar useNavigate
+  const location = useLocation(); // Inicializar useLocation
+
   const { mutate: signIn } = useSignIn();
 
   const handleLogin = async (values: z.infer<typeof loginSchema>) => {
@@ -53,6 +57,10 @@ const AuthModal: React.FC = () => {
         console.log('Login successful:', data);
         toast.success(t('login_successful'));
         closeModal();
+
+        // Redirigir al usuario a la página de la que vino o al dashboard
+        const from = (location.state as { from?: string })?.from || '/dashboard';
+        navigate(from, { replace: true });
       },
       onError: (err: ApiError) => {
         console.error('Login failed:', err);
@@ -162,24 +170,24 @@ const AuthModal: React.FC = () => {
                 )}
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="identifier">{t('email_username_label')}</Label>
+                    <Label htmlFor="login-identifier">{t('email_username_label')}</Label>
                     <div className="relative flex items-center mt-1">
                       <Mail className="absolute left-2 h-4 w-4 text-muted-foreground" />
                       <Input
-                        id="identifier"
-                        type="text"
-                        {...register('identifier')}
+                        id="auth-login-identifier"
+                        type="text" // Cambiado de email a text
+                        {...register('identifier')} // Cambiado de email a identifier
                         className="pl-8"
                       />
                     </div>
                     {errors.identifier && <p className="text-red-500 text-sm mt-1">{errors.identifier.message}</p>}
                   </div>
                   <div>
-                    <Label htmlFor="password">{t('password_label')}</Label>
+                    <Label htmlFor="login-password">{t('password_label')}</Label>
                     <div className="relative flex items-center mt-1">
                       <Lock className="absolute left-2 h-4 w-4 text-muted-foreground" />
                       <Input
-                        id="password"
+                        id="auth-login-password"
                         type="password"
                         {...register('password')}
                         className="pl-8"
@@ -237,10 +245,10 @@ const AuthModal: React.FC = () => {
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
       <DialogContent className="sm:max-w-[425px] p-6">
-        <div className="text-center mb-4">
-          <h2 className="text-3xl font-bold text-primary">{t('auth_modal_title')}</h2>
-          <p className="text-sm text-muted-foreground">{t('auth_modal_description')}</p>
-        </div>
+        <DialogHeader className="text-center mb-4">
+          <DialogTitle className="text-3xl font-bold text-primary">{t('auth_modal_title')}</DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground">{t('auth_modal_description')}</DialogDescription>
+        </DialogHeader>
         {renderAuthForms()}
       </DialogContent>
     </Dialog>

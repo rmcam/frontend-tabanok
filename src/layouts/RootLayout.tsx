@@ -1,7 +1,11 @@
-import { SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/layout/app-sidebar"
-import { cn } from "@/lib/utils"
- 
+import React, { useEffect } from 'react';
+import { SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/layout/app-sidebar";
+import { cn } from "@/lib/utils";
+import { useProfile } from '@/hooks/auth/auth.hooks';
+import { useUserStore } from '@/stores/userStore';
+// import Header from '@/components/layout/Header'; // Eliminar la importación del Header
+
 export default function RootLayout({ children, isLandingPage = false }: { children: React.ReactNode, isLandingPage?: boolean }) {
   return (
     <SidebarProvider>
@@ -9,11 +13,19 @@ export default function RootLayout({ children, isLandingPage = false }: { childr
         {children}
       </LayoutContent>
     </SidebarProvider>
-  )
+  );
 }
 
 function LayoutContent({ children, isLandingPage }: { children: React.ReactNode, isLandingPage: boolean }) {
   const { state, isMobile } = useSidebar();
+  const { data: userProfile } = useProfile({ enabled: !isLandingPage });
+  const setUser = useUserStore((state) => state.setUser);
+
+  useEffect(() => {
+    if (userProfile) {
+      setUser(userProfile);
+    }
+  }, [userProfile, setUser]);
 
   const sidebarPaddingClass = isMobile
     ? state === "expanded"
@@ -25,8 +37,9 @@ function LayoutContent({ children, isLandingPage }: { children: React.ReactNode,
 
   return (
     <>
+      {/* <Header /> Eliminar el Header de aquí */}
       {!isLandingPage && <AppSidebar />}
-      <main className={cn("flex-1 overflow-auto", !isLandingPage && sidebarPaddingClass)}>
+      <main className={cn("flex-1 overflow-auto", !isLandingPage && sidebarPaddingClass)}> {/* Eliminar padding-top condicional */}
         {children}
       </main>
       {!isLandingPage && (
@@ -44,5 +57,5 @@ function LayoutContent({ children, isLandingPage }: { children: React.ReactNode,
         />
       )}
     </>
-  )
+  );
 }

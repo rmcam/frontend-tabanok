@@ -16,34 +16,50 @@ El componente `HomePage` (`src/components/home/HomePage.tsx`) es la página prin
 *   **Integración de Modales de Autenticación:** Los modales de inicio de sesión, registro y recuperación de contraseña se integran y controlan desde `HomePage`.
 *   **Barra de Navegación Estática:** Una barra de navegación (`HomeNavbar`) visible al cargar y fija al desplazarse, con opciones de autenticación.
 
-### Estructura de Componentes
+### Estructura de Componentes y Páginas
 
-Los componentes del frontend se organizan en el directorio `src/components/` con la siguiente estructura:
+El frontend de Tabanok organiza sus componentes y páginas de la siguiente manera:
 
-*   `common/`: Componentes reutilizables en toda la aplicación (ej. `PrivateRoute`, `AuthModals`, `Loading`).
-*   `dashboard/`: Componentes específicos del dashboard unificado (`UnifiedDashboard`) y sus subcomponentes (ej. `ActivityCreator`, `StudentProgress`, `ReportViewer`, `MultimediaUploadForm`, `MultimediaGallery`, `ContentManager`, `LatestActivities`, **`RoleManager`**). Todos estos componentes de sección se cargan de forma lazy. **Todos estos componentes ahora consumen los endpoints del backend correspondientes para obtener y enviar datos.**
-    *   `ActivityCreator`: Permite crear actividades y guardarlas en el backend (`POST /activities`). Se ha agregado validación para la longitud del título y caracteres especiales.
-    *   `StudentProgress`: Muestra el progreso de los estudiantes utilizando una barra de progreso visual, obteniendo datos del backend (`GET /analytics/studentProgress`). Se ha agregado un manejo de errores más robusto y se muestra un mensaje de error en caso de que la API no responda.
-    *   `ReportViewer`: Muestra reportes, obteniendo datos del backend (`GET /statistics/reports/quick/:userId`). Se ha agregado un manejo de errores más robusto y se muestra un mensaje de error en caso de que la API no responda.
-    *   `MultimediaUploadForm`: Permite subir archivos multimedia al backend (`POST /multimedia/upload`) con validación del tipo de archivo. Se ha implementado la previsualización del archivo seleccionado, la barra de progreso durante la subida y la selección de tipos de archivo permitidos, y la adición de metadatos al archivo.
-    *   `MultimediaGallery`: Muestra una galería de archivos multimedia con filtros por tipo, obteniendo datos a través del hook `useMultimedia` que llama a `/multimedia`.
-    *   `ContentManager`: Permite crear (`POST /content`), leer (`GET /content`), actualizar (`PUT /content/:id`) y eliminar (`DELETE /content/:id`) contenido en el backend. Se ha implementado la subida de múltiples archivos, la previsualización de archivos subidos, la eliminación de archivos subidos y el editor de texto enriquecido. Además, se ha implementado la funcionalidad de edición de contenido.
-    *   `CategoryManager`: Modificado para usar el endpoint `/topics` para la gestión de categorías (listar, crear, actualizar, eliminar).
-    *   `TagManager`: Modificado para la gestión de etiquetas (listar, crear, actualizar, eliminar).
-    *   **`RoleManager`:** Se ha añadido un componente para la gestión de roles de usuario, utilizando un nuevo servicio `userService.ts` para obtener usuarios (`GET /users`) y actualizar sus roles (`PATCH /users/{id}/roles`) con TanStack Query.
-*   Se agregó el componente `LatestActivities` para mostrar las últimas actividades realizadas por los estudiantes, obteniendo datos del backend (`GET /activities`) y filtrando los resultados en el frontend.
-*   Se han añadido indicadores de carga a los componentes del dashboard.
-*   `general/`: Componentes generales no específicos de una sección particular.
-*   `home/`: Componentes utilizados en la página de inicio (`HomePage`) y sus subcomponentes (ej. `KamentsaCulturePresentation`, `FeaturedLessonCard`, `ContactForm`, `FAQ`, `HomeNavbar`).
-*   `layout/`: Componentes de layout (ej. `AuthenticatedLayout`).
-*   `navigation/`: Componentes de navegación.
-*   `gamification/`: Componentes específicos del módulo de gamificación (ej. `GamificationPage`, `LeaderboardPage`, `AchievementsPage`). Se ha corregido el manejo de errores en estos componentes para mostrar correctamente los mensajes de error.
-*   `settings/`: Componentes específicos del módulo de configuración (ej. `SettingsPage`, `ProfilePage` - **mejorada para incluir campos de perfil adicionales y notificaciones**).
-*   `units/`: Componentes específicos del módulo de unidades (ej. `UnitDetail`, `UnitListPage`, `UnitCard`).
-*   `ui/`: Componentes base de Shadcn UI y componentes personalizados basados en ellos (ej. `Button`, `Carousel`).
-    *   `sidebar.tsx`: Componente principal de la Sidebar.
-    *   `mobile-sidebar.tsx`: Componente específico para la Sidebar en vista móvil.
-    *   `sidebar.constants.ts`: Constantes relacionadas con la Sidebar.
+*   **`src/components/`**: Contiene componentes reutilizables y específicos de UI.
+    *   `common/`: Componentes reutilizables en toda la aplicación (ej. `PrivateRoute`, `AuthModals`, `Loading`, `mode-toggle`).
+    *   `layout/`: Componentes de layout (ej. `app-sidebar`, `navbar`, `RootLayout`).
+    *   `ui/`: Componentes base de Shadcn UI y componentes personalizados basados en ellos (ej. `Button`, `Card`, `Input`, `Select`, `Progress`, `Switch`, `Dialog`, `Calendar`, `Accordion`, `Collapsible`, `Table`, `Avatar`, `Badge`, `Separator`, `Tooltip`, `DropdownMenu`, `ScrollArea`).
+        *   `sidebar.tsx`: Componente principal de la Sidebar.
+        *   `mobile-sidebar.tsx`: Componente específico para la Sidebar en vista móvil.
+        *   `sidebar.constants.ts`: Constantes relacionadas con la Sidebar.
+
+*   **`src/features/`**: Contiene las páginas y componentes específicos de cada módulo o característica de la aplicación.
+    *   `auth/`: Componentes y servicios relacionados con la autenticación (ej. `AuthModal`, `ForgotPasswordForm`, `RegisterForm`, `ResetPasswordForm`).
+    *   `landing/`: Componentes y páginas de la página de inicio (ej. `LandingPage`, `HeroSection`, `FeaturesSection`, `AboutSection`, `CallToActionSection`).
+    *   `dashboard/`: Contiene la `DashboardPage` y sus componentes específicos.
+        *   `pages/DashboardPage.tsx`: Implementada con un resumen de cursos recientes/en progreso, utilizando tarjetas con iconos y barras de progreso.
+    *   `inbox/`: Contiene la `InboxPage` y sus componentes específicos.
+        *   `pages/InboxPage.tsx`: Implementada con un listado de notificaciones en formato de tarjeta, con iconos y acciones.
+    *   `calendar/`: Contiene la `CalendarPage` y sus componentes específicos.
+        *   `pages/CalendarPage.tsx`: Implementada con un calendario gregoriano que muestra eventos importantes directamente en las celdas y un diálogo para detalles.
+    *   `learn/`: Contiene las páginas relacionadas con el aprendizaje.
+        *   `pages/LearnPage.tsx`: Página principal del módulo de aprendizaje.
+        *   `pages/CoursesPage.tsx`: Implementada con una cuadrícula de tarjetas de cursos, incluyendo búsqueda y filtros, y mostrando información detallada como número de lecciones y nivel.
+        *   `pages/LessonsPage.tsx`: Implementada con organización por unidades/temas usando componentes colapsables, y tarjetas de lección con tipo de contenido, progreso y estado de bloqueo.
+        *   `pages/ProgressPage.tsx`: Implementada con métricas clave, progreso por curso y una galería de logros/insignias.
+    *   `settings/`: Contiene las páginas de configuración.
+        *   `pages/ProfilePage.tsx`: Implementada con información de perfil editable, previsualización de avatar y separación de opciones de seguridad.
+        *   `pages/SecurityPage.tsx`: Implementada con secciones para cambiar contraseña y configurar autenticación de dos factores (2FA).
+        *   `pages/SettingsPage.tsx`: Implementada con ajustes generales (idioma, tema) y preferencias de notificaciones.
+    *   `dashboard/` (Panel Docente): Componentes específicos del dashboard unificado (`UnifiedDashboard`) y sus subcomponentes (ej. `ActivityCreator`, `StudentProgress`, `ReportViewer`, `MultimediaUploadForm`, `MultimediaGallery`, `ContentManager`, `LatestActivities`, **`RoleManager`**). Todos estos componentes de sección se cargan de forma lazy. **Todos estos componentes ahora consumen los endpoints del backend correspondientes para obtener y enviar datos.**
+        *   `ActivityCreator`: Permite crear actividades y guardarlas en el backend (`POST /activities`). Se ha agregado validación para la longitud del título y caracteres especiales.
+        *   `StudentProgress`: Muestra el progreso de los estudiantes utilizando una barra de progreso visual, obteniendo datos del backend (`GET /analytics/studentProgress`). Se ha agregado un manejo de errores más robusto y se muestra un mensaje de error en caso de que la API no responda.
+        *   `ReportViewer`: Muestra reportes, obteniendo datos del backend (`GET /statistics/reports/quick/:userId`). Se ha agregado un manejo de errores más robusto y se muestra un mensaje de error en caso de que la API no responda.
+        *   `MultimediaUploadForm`: Permite subir archivos multimedia al backend (`POST /multimedia/upload`) con validación del tipo de archivo. Se ha implementado la previsualización del archivo seleccionado, la barra de progreso durante la subida y la selección de tipos de archivo permitidos, y la adición de metadatos al archivo.
+        *   `MultimediaGallery`: Muestra una galería de archivos multimedia con filtros por tipo, obteniendo datos a través del hook `useMultimedia` que llama a `/multimedia`.
+        *   `ContentManager`: Permite crear (`POST /content`), leer (`GET /content`), actualizar (`PUT /content/:id`) y eliminar (`DELETE /content/:id`) contenido en el backend. Se ha implementado la subida de múltiples archivos, la previsualización de archivos subidos, la eliminación de archivos subidos y el editor de texto enriquecido. Además, se ha implementado la funcionalidad de edición de contenido.
+        *   `CategoryManager`: Modificado para usar el endpoint `/topics` para la gestión de categorías (listar, crear, actualizar, eliminar).
+        *   `TagManager`: Modificado para la gestión de etiquetas (listar, crear, actualizar, eliminar).
+        *   **`RoleManager`:** Se ha añadido un componente para la gestión de roles de usuario, utilizando un nuevo servicio `userService.ts` para obtener usuarios (`GET /users`) y actualizar sus roles (`PATCH /users/{id}/roles`) con TanStack Query.
+    *   Se agregó el componente `LatestActivities` para mostrar las últimas actividades realizadas por los estudiantes, obteniendo datos del backend (`GET /activities`) y filtrando los resultados en el frontend.
+    *   Se han añadido indicadores de carga a los componentes del dashboard.
+    *   `gamification/`: Componentes específicos del módulo de gamificación (ej. `GamificationPage`, `LeaderboardPage`, `AchievementsPage`). Se ha corregido el manejo de errores en estos componentes para mostrar correctamente los mensajes de error.
+    *   `units/`: Componentes específicos del módulo de unidades (ej. `UnitDetail`, `UnitListPage`, `UnitCard`).
 
 ### Hooks Personalizados
 
@@ -95,4 +111,4 @@ El frontend consume la API RESTful proporcionada por el backend para obtener dat
 
 ---
 
-Última actualización: 12/5/2025, 11:59 p. m. (America/Bogota, UTC-5:00)
+Última actualización: 27/5/2025, 5:51 p. m. (America/Bogota, UTC-5:00)

@@ -31,7 +31,8 @@ Este documento lista las tareas pendientes y los próximos pasos planificados pa
   - Usar un componente `MultimediaPlayer` reutilizable en el frontend. (Completado: El componente `MultimediaPlayer` ya es reutilizable y se utiliza en `MultimediaGallery`).
   - Desarrollar la galería multimedia accesible en el frontend. (Completado: Se ha añadido una región ARIA live para mensajes de carga y error).
   - Escribir pruebas unitarias y de integración para las nuevas funcionalidades del Panel Docente. (En progreso: Se han añadido pruebas unitarias para `CategoryManager` y `TagManager`).
-  - Implementar la lógica para la gestión de contenidos, progreso de estudiantes, creación de actividades y acceso a reportes en el Panel Docente. (Completado: Se ha implementado las funcionalidades de crear, leer, actualizar y eliminar contenido en el componente `ContentManager`, utilizando la API definida en `src/lib/api.ts`. Se ha implementado la subida de múltiples archivos, la previsualización de archivos subidos y el editor de texto enriquecido).
+- Implementar la lógica para la gestión de contenidos, progreso de estudiantes, creación de actividades y acceso a reportes en el Panel Docente. (Completado: Se ha implementado las funcionalidades de crear, leer, actualizar y eliminar contenido en el componente `ContentManager`, utilizando la API definida en `src/lib/api.ts`. Se ha implementado la subida de múltiples archivos, la previsualización de archivos subidos y el editor de texto enriquecido).
+- Implementar la interfaz de usuario para las páginas del sidebar (DashboardPage, InboxPage, CalendarPage, CoursesPage, LessonsPage, ProgressPage, ProfilePage, SecurityPage, SettingsPage). (Completado)
 - Se agregó el componente `LatestActivities` para mostrar las últimas actividades realizadas por los estudiantes. (Completado: El componente ha sido integrado y modificado para usar el endpoint del backend).
 - Se han añadido indicadores de carga a los componentes `ActivityCreator`, `StudentProgress` y `ReportViewer`. (Completado: Los indicadores de carga han sido añadidos).
 - Se movió la verificación de la variable de entorno `VITE_API_URL` al componente `App.tsx` para que se realice solo una vez al inicio de la aplicación. (Completado: La verificación ha sido movida).
@@ -79,4 +80,4 @@ Este documento lista las tareas pendientes y los próximos pasos planificados pa
 
 ---
 
-Última actualización: 12/5/2025, 11:59 p. m. (America/Bogota, UTC-5:00)
+Última actualización: 27/5/2025, 5:51 p. m. (America/Bogota, UTC-5:00)

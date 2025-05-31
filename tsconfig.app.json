@@ -19,10 +19,10 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "erasableSyntaxOnly": true,
+    // "erasableSyntaxOnly": true, // Deshabilitado temporalmente para pruebas
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "types": ["vitest/globals"],
+    "types": ["vitest/globals", "jest"],
 
     /* React */
     "baseUrl": ".",
@@ -33,5 +33,4 @@
     },
   },
   "include": ["src", "**/*.test.tsx"],
-  
 }

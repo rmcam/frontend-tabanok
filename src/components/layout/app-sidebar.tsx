@@ -1,10 +1,7 @@
-import { Search, Globe, LogOut, User } from "lucide-react"
+import { Calendar, Home, Inbox, Search, Settings, LayoutDashboard, User, BookOpen, GraduationCap, BarChart, ShieldCheck, Globe, LogOut } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { Link, useLocation } from "react-router-dom"
 import { cn } from "@/lib/utils"
-import { navigationItems } from "@/config/navigation"
-import { useLanguage } from "@/hooks/use-language"
-import { useAuth } from "@/hooks/use-auth"
-import { useTranslation } from "react-i18next" // Mantener useTranslation para t()
 
 import {
   Sidebar,
@@ -34,21 +31,107 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { CommandPalette } from "@/components/common/command-palette"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useUserStore } from '@/stores/userStore'; // Importar useUserStore
+
+// Menu items.
+const navigationItems = [
+  {
+    group: "General",
+    items: [
+      {
+        title: "Dashboard",
+        url: "/dashboard", // Asumiendo que el dashboard es una ruta principal
+        icon: LayoutDashboard,
+      },
+      {
+        title: "Home",
+        url: "/", // La página de inicio
+        icon: Home,
+      },
+      {
+        title: "Inbox",
+        url: "/inbox", // Ruta para la bandeja de entrada
+        icon: Inbox,
+      },
+      {
+        title: "Calendar",
+        url: "/calendar", // Ruta para el calendario
+        icon: Calendar,
+      },
+    ],
+  },
+  {
+    group: "Aprendizaje",
+    items: [
+      {
+        title: "Cursos",
+        url: "/learn/courses", // Ruta para la sección de cursos
+        icon: BookOpen,
+      },
+      {
+        title: "Lecciones",
+        url: "/learn/lessons", // Ruta para la sección de lecciones
+        icon: GraduationCap,
+      },
+      {
+        title: "Progreso",
+        url: "/learn/progress", // Ruta para la sección de progreso
+        icon: BarChart,
+      },
+    ],
+  },
+  {
+    group: "Configuración",
+    items: [
+      {
+        title: "Perfil",
+        url: "/settings/profile", // Ruta para la configuración del perfil
+        icon: User,
+      },
+      {
+        title: "Seguridad",
+        url: "/settings/security", // Ruta para la configuración de seguridad
+        icon: ShieldCheck,
+      },
+      {
+        title: "Ajustes",
+        url: "/settings", // Ruta general de ajustes
+        icon: Settings,
+      },
+    ],
+  },
+]
 
 export function AppSidebar() {
-  const { t } = useTranslation() // Solo t() es necesario aquí
+  const { t, i18n } = useTranslation()
   const location = useLocation()
-  const { state: sidebarState } = useSidebar()
-  const { changeLanguage } = useLanguage()
-  const { handleLogout } = useAuth()
+  const { state: sidebarState } = useSidebar() // Obtener el estado del sidebar
+  const user = useUserStore((state) => state.user); // Obtener el usuario del store
 
-  // Mock user data for demonstration
-  const user = {
-    name: "Usuario Invitado",
-    avatar: "https://github.com/shadcn.png", // Replace with actual user avatar
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng)
+  }
+
+  const handleLogout = () => {
+    // Implement actual logout logic here
+    console.log("Cerrar sesión")
+    // Redirect to login page or home page after logout
+    // navigate("/login");
   }
 
   const isSidebarCollapsed = sidebarState === "collapsed"
+
+  // Determinar la URL del avatar
+  const avatarSrc = user?.avatarUrl
+    ? `${import.meta.env.VITE_API_URL}/multimedia/${user.avatarUrl}/file`
+    : (user?.firstName && user?.lastName
+      ? `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=random&color=fff`
+      : undefined);
+
+  // Determinar el texto de fallback para el avatar
+  const avatarFallbackText = user?.firstName && user?.lastName
+    ? `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`
+    : (user?.username ? user.username.charAt(0) : '');
 
   return (
     <Sidebar collapsible="icon">
@@ -112,10 +195,10 @@ export function AppSidebar() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className={cn("w-full h-auto p-2 transition-all duration-300", isSidebarCollapsed ? "justify-center" : "justify-start")}>
               <Avatar className={cn("h-8 w-8", !isSidebarCollapsed && "mr-2")}>
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                <AvatarImage src={avatarSrc} alt={user?.firstName ? `${user.firstName} ${user.lastName || ''}` : 'Usuario'} />
+                <AvatarFallback>{avatarFallbackText}</AvatarFallback>
               </Avatar>
-              <span className={cn("flex-1 text-left", isSidebarCollapsed && "hidden")}>{t(user.name)}</span>
+              <span className={cn("flex-1 text-left", isSidebarCollapsed && "hidden")}>{t(user?.firstName || "Usuario Invitado")}</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent side="right" align="end">
@@ -142,7 +225,10 @@ export function AppSidebar() {
               {t("Español")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => changeLanguage("en")}>
-              {t("Inglés")}
+              {t("English")}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => changeLanguage("kmt")}>
+              {t("Kamentsa")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

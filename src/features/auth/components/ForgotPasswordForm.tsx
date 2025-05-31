@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { useRequestPasswordReset } from '@/hooks/useApi';
+import { useRequestPasswordReset } from '@/hooks/auth/auth.hooks';
 import type { ApiError } from '@/types/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Mail, Loader2 } from 'lucide-react';
@@ -75,11 +75,11 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ changeView }) =
         <form onSubmit={handleSubmit(handleForgotPassword)} className="space-y-6">
           <div className="space-y-4">
             <div>
-              <Label htmlFor="email">{t('email_username_label')}</Label>
+              <Label htmlFor="forgot-password-email">{t('email_username_label')}</Label>
               <div className="relative flex items-center mt-1">
                 <Mail className="absolute left-2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="email"
+                  id="forgot-password-email"
                   type="email"
                   {...register('email')}
                   className="pl-8"
