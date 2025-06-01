@@ -42,8 +42,8 @@ export const useSubmitExerciseAnswers = () => {
     onSuccess: (data: any) => { // Ajustar tipo si se define una respuesta específica
       console.log('Respuestas de ejercicio enviadas con éxito:', data);
       // Invalidar queries relevantes si la sumisión afecta el estado de la actividad o el progreso del usuario
-      // queryClient.invalidateQueries({ queryKey: ['activities', data.id] }); // Si la respuesta incluye el ID de la actividad
-      // queryClient.invalidateQueries({ queryKey: ['userProgress'] }); // Si la sumisión afecta el progreso del usuario
+      queryClient.invalidateQueries({ queryKey: ['activities', data.id] }); // Si la respuesta incluye el ID de la actividad
+      queryClient.invalidateQueries({ queryKey: ['userProgress'] }); // Si la sumisión afecta el progreso del usuario
       toast.success('Respuestas enviadas.'); // Mensaje de éxito
     },
     onError: (error: ApiError) => {
