@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { useResetPassword } from '@/hooks/useApi';
+import { useResetPassword } from '@/hooks/auth/auth.hooks';
 import type { ApiError } from '@/types/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Lock, Loader2 } from 'lucide-react';
@@ -44,8 +44,8 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ changeView }) => 
     const token = 'example-token-from-url'; // TODO: Obtener el token real de la URL o de otro lugar
 
     resetPass({ token, newPassword: values.password }, {
-      onSuccess: (data) => {
-        console.log('Password reset successful:', data);
+      onSuccess: () => {
+        console.log('Password reset successful.');
         toast.success(t('password_reset_successful'));
         changeView('login');
       },

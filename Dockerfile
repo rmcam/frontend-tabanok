@@ -1,28 +1,31 @@
-# Etapa de construcción
-FROM node:20-alpine AS builder
+# Usa una imagen base de Node.js para la construcción
+FROM node:20-alpine AS build
 
+# Establece el directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# Instalar pnpm globalmente
+# Copia los archivos de configuración de pnpm y package.json
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+
+# Instala pnpm globalmente
 RUN npm install -g pnpm
 
-# Copiar archivos de dependencias y instalar
-COPY package.json pnpm-lock.yaml ./
+# Instala las dependencias del proyecto
 RUN pnpm install --frozen-lockfile
 
-# Copiar el resto del código fuente
+# Copia el resto del código fuente de la aplicación
 COPY . .
 
-# Construir la aplicación
+# Construye la aplicación para producción
 RUN pnpm build
 
-# Etapa de servicio
+# Usa una imagen base ligera para servir la aplicación
 FROM nginx:alpine
 
-# Copiar los archivos construidos desde la etapa de construcción
-COPY --from=builder /app/dist /usr/share/nginx/html
+# Copia los archivos de construcción de la etapa anterior al directorio de Nginx
+COPY --from=build /app/dist /usr/share/nginx/html
 
-# Exponer el puerto 80
+# Expone el puerto 80 para el servidor web
 EXPOSE 80
 
 # Comando para iniciar Nginx

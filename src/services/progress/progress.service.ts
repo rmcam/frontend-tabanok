@@ -1,5 +1,5 @@
 import { apiRequest } from '../_shared';
-import type { ProgressDto, CreateProgressDto, UpdateLearningProgressDto } from '../../types/api'; // Asegúrate de que estos tipos existan
+import type { ProgressDto, CreateProgressDto } from '../../types/api'; // Asegúrate de que estos tipos existan
 
 const ProgressService = {
   getProgressByUser: (userId: string) => {

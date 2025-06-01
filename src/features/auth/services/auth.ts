@@ -1,5 +1,5 @@
 
-import { API_URL, handleApiResponse } from '@/services/api';
+import { API_URL, handleApiResponse } from '@/services/_shared';
 import type { AuthResponse, UserProfile } from '../types/auth';
 import type { ApiResponse } from '@/types/api';
 

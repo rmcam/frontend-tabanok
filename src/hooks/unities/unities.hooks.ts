@@ -55,11 +55,9 @@ export const useCreateUnity = () => {
   const queryClient = useQueryClient();
   return useMutation<ApiResponse<Unity>, ApiError, CreateUnityDto>({
     mutationFn: unitiesService.createUnity,
-    onSuccess: (data) => { // Acceder a data.data si la API devuelve ApiResponse
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['unities'] });
-      // Si la API devuelve ApiResponse<Unity>, data.data contendrá la unidad creada
-      // Si solo devuelve Unity, data será la unidad. Ajustar según la implementación real del servicio.
-      // Por ahora, asumimos que el servicio devuelve ApiResponse<Unity> como se tipó en apiRequest.
+      queryClient.invalidateQueries({ queryKey: ['unities', data.data.id] }); // Invalidar por el ID de la unidad creada
       toast.success('Unidad creada exitosamente.');
     },
     onError: (error: ApiError) => {

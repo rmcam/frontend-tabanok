@@ -11,7 +11,7 @@ import { useProfile, useUpdateProfile } from '@/hooks/auth/auth.hooks';
 import { useUserById } from '@/hooks/users/users.hooks';
 import { useUploadFile } from '@/hooks/upload/upload.hooks'; // Importar useUploadFile
 import { toast } from 'sonner';
-import type { UserProfile, UpdateProfileDto, User } from '@/types/api';
+import type { UserProfile, UpdateProfileDto } from '@/types/api';
 import { useUserStore } from '@/stores/userStore'; // Importar useUserStore
 
 const ProfilePage: React.FC = () => {

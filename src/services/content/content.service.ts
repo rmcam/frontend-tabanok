@@ -1,5 +1,4 @@
 import type {
-  ApiResponse,
   Content, // Asumiendo que existe un tipo Content
 } from '../../types/api';
 

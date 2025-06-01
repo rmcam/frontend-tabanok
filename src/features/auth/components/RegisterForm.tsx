@@ -11,7 +11,6 @@ import { useSignUp } from '@/hooks/auth/auth.hooks'; // Importar useSignUp
 import type { ApiError, LoginResponse, ApiResponse, UserRole } from '@/types/api'; // Importar ApiError, LoginResponse, ApiResponse y UserRole como tipo
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; // Importar Select
 import { Switch } from '@/components/ui/switch'; // Importar Switch
-import { Checkbox } from '@/components/ui/checkbox'; // Importar Checkbox
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useTranslation } from 'react-i18next'; // Importar useTranslation

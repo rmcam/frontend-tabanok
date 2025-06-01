@@ -6,7 +6,6 @@ import type {
   MentorshipSession,
   RecordSessionDto,
   UpdateMentorshipStatusDto,
-  AssignStudentDto,
   User,
 } from '../../types/api';
 

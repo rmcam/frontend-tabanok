@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CheckCircle, Lock } from "lucide-react";
 import { Progress } from '@/components/ui/progress'; // Importar Progress
-import type { LearningLesson, UserProgress, LearningLessonCardProps } from '@/types/learning'; // Usar la interfaz global y UserProgress
+import type { LearningLessonCardProps } from '@/types/learning'; // Usar la interfaz global y UserProgress
 
 const LearningLessonCard: React.FC<LearningLessonCardProps> = memo(({ lesson, userProgress, isPreviousLessonCompleted }) => {
   const { t } = useTranslation();

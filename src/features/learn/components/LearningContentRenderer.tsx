@@ -4,11 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ReactPlayer from 'react-player/youtube';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { cn } from '@/lib/utils';
-import type { UserProgress, LearningContentRendererProps } from '@/types/learning'; // Importar LearningContentRendererProps
+import type { LearningContentRendererProps } from '@/types/learning'; // Importar LearningContentRendererProps
 import LearningQuiz from './LearningQuiz'; // Nueva importación
 import { Lock } from 'lucide-react'; // Importar Lock para usarlo como componente
 
-const LearningContentRenderer: React.FC<LearningContentRendererProps> = ({ content, userProgress, isLocked }) => {
+const LearningContentRenderer: React.FC<LearningContentRendererProps> = ({ content, isLocked }) => {
   // Helper para renderizar multimedia
   const renderMultimedia = (multimedia: LearningContent['multimedia']) => {
     if (!multimedia || multimedia.length === 0) {

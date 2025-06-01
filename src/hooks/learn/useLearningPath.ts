@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAllModules } from '@/hooks/modules/modules.hooks';
 import type { Module } from '@/types/api';
-import type { LearningModule, LearningUnit } from '@/types/learning';
+import type { LearningModule } from '@/types/learning';
 
 interface UseLearningPathResult {
   learningPath: LearningModule[];

@@ -14,7 +14,7 @@ import LearningContentRenderer from '@/features/learn/components/LearningContent
 import LearningExerciseItem from '@/features/learn/components/LearningExerciseItem';
 import { useProfile } from '@/hooks/auth/auth.hooks';
 import { useGetProgressByUser } from '@/hooks/progress/progress.hooks';
-import type { LearningContent, LearningLesson } from '@/types/learning'; // Importar LearningLesson
+import type { LearningContent } from '@/types/learning'; // Importar LearningLesson
 
 const LessonDetailPage: React.FC = () => {
   const { t } = useTranslation();

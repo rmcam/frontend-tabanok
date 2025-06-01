@@ -1,5 +1,4 @@
 import type {
-  ApiResponse, // Mantener ApiResponse si se usa en otros lugares, aunque no para los retornos directos de apiRequest
   Exercise, // Cambiar Activity a Exercise
   CreateExerciseDto, // Cambiar CreateActivityDto a CreateExerciseDto
   UpdateExerciseDto, // Cambiar UpdateActivityDto a UpdateExerciseDto

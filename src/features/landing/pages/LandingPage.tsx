@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from 'react';
+import { lazy, Suspense } from 'react';
 import Header from '@/components/layout/Header'; // Importar el componente Header
 
 // Lazy load de los componentes de sección

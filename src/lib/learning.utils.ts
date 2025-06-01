@@ -11,6 +11,7 @@ import type { LearningUnit, LearningLesson, LearningExercise, LearningTopic, Lea
 export function calculateExerciseProgress(
   exercise: Exercise,
   userProgress: UserProgress,
+  lessonId: string, // Añadir lessonId como parámetro
   isPreviousCompleted: boolean = true // Por defecto, no bloqueado si no se especifica
 ): LearningExercise {
   const isCompleted = userProgress.completedExerciseIds?.includes(exercise.id) || false;
@@ -25,6 +26,7 @@ export function calculateExerciseProgress(
     isCompleted,
     isLocked,
     progress,
+    lessonId, // Añadir lessonId aquí
   };
 }
 
@@ -71,7 +73,7 @@ export function calculateLessonProgress(
 ): LearningLesson {
   let previousExerciseCompleted = true;
   const processedExercises = (lesson.exercises || []).map(exercise => {
-    const processed = calculateExerciseProgress(exercise, userProgress, previousExerciseCompleted);
+    const processed = calculateExerciseProgress(exercise, userProgress, lesson.id, previousExerciseCompleted); // Pasar lesson.id
     previousExerciseCompleted = processed.isCompleted; // Actualizar para el siguiente ejercicio
     return processed;
   });
@@ -118,7 +120,10 @@ export function calculateTopicProgress(
 
   let previousExerciseCompleted = true;
   const processedExercises = (topic.exercises || []).map(exercise => {
-    const processed = calculateExerciseProgress(exercise, userProgress, previousExerciseCompleted);
+    // Si los ejercicios en tópicos no tienen un lessonId directo, se podría pasar un valor por defecto o un string vacío.
+    // Sin embargo, la interfaz LearningExercise requiere lessonId. Esto podría indicar una inconsistencia en el modelo de datos.
+    // Por ahora, pasamos un string vacío para que compile.
+    const processed = calculateExerciseProgress(exercise, userProgress, '', previousExerciseCompleted); // Pasar un string vacío para lessonId
     previousExerciseCompleted = processed.isCompleted; // Actualizar para el siguiente ejercicio
     return processed;
   });

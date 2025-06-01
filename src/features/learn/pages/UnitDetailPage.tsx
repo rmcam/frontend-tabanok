@@ -1,17 +1,16 @@
 import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import BreadcrumbNav from '@/components/common/BreadcrumbNav'; // Importar BreadcrumbNav
-import { ArrowLeft, BookOpen, Lightbulb } from 'lucide-react';
+import { BookOpen, Lightbulb } from 'lucide-react';
 import { useDetailedUnit } from '@/hooks/learn/useDetailedUnit';
 import { useModuleById } from '@/hooks/modules/modules.hooks'; // Importar useModuleById
 import LearningLessonCard from '@/features/learn/components/LearningLessonCard';
 import LearningTopicSection from '@/features/learn/components/LearningTopicSection';
 import LearningExerciseItem from '@/features/learn/components/LearningExerciseItem';
-import type { LearningContent, LearningUnit } from '@/types/learning'; // Importar LearningUnit
+import type { LearningUnit } from '@/types/learning'; // Importar LearningUnit
 import type { Module } from '@/types/api'; // Importar Module
 import { useProfile } from '@/hooks/auth/auth.hooks';
 import { useGetProgressByUser } from '@/hooks/progress/progress.hooks';
@@ -34,7 +33,7 @@ const UnitDetailPage: React.FC = () => {
   const module: Module | null | undefined = moduleData;
 
   // Usar el nuevo hook para el cálculo de progreso
-  const { totalExercises, completedExercises, unitProgress } = useUnitProgress(unit as LearningUnit, userProgress); // Forzar tipo a LearningUnit
+  const { unitProgress } = useUnitProgress(unit as LearningUnit, userProgress); // Forzar tipo a LearningUnit
 
   if (isLoading || isLoadingProgress || isLoadingModule) { // Incluir estado de carga del módulo
     return (

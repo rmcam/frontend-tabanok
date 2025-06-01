@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import { useVerifySession } from '../../../hooks/auth/auth.hooks';
-import { useUserStore } from '../../../stores/userStore';
+
 import { useAuthModalStore } from '../../../stores/authModalStore';
 
 /**
@@ -10,7 +10,7 @@ import { useAuthModalStore } from '../../../stores/authModalStore';
  */
 const AuthGuard: React.FC = () => {
   const { data: userProfile, isLoading, isError } = useVerifySession();
-  const user = useUserStore((state) => state.user);
+
   const openAuthModal = useAuthModalStore((state) => state.openModal);
 
   useEffect(() => {

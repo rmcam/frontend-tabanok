@@ -2,7 +2,6 @@ import type {
   Module,
   CreateModuleDto,
   UpdateModuleDto,
-  Unity,
   ApiResponse,
   ModuleWithUnities, // Importar ModuleWithUnities
 } from '../../types/api';

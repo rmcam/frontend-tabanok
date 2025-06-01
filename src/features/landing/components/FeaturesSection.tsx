@@ -1,4 +1,3 @@
-import React from 'react';
 import LightbulbIcon from '@/components/common/LightbulbIcon';
 import BookTextIcon from '@/components/common/BookTextIcon';
 import UsersIcon from '@/components/common/UsersIcon';

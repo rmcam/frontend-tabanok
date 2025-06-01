@@ -1,18 +1,18 @@
 import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+
 import { Progress } from '@/components/ui/progress';
 import BreadcrumbNav from '@/components/common/BreadcrumbNav'; // Importar BreadcrumbNav
-import { ArrowLeft, BookOpen, Lightbulb, CheckCircle2, Lock } from 'lucide-react';
+import { BookOpen } from 'lucide-react';
 import { useUnitiesByModuleId, useModuleById } from '@/hooks/modules/modules.hooks';
 import { useProfile } from '@/hooks/auth/auth.hooks'; // Importar useProfile
 import { useGetProgressByUser } from '@/hooks/progress/progress.hooks'; // Importar useGetProgressByUser
 import LearningUnitCard from '@/features/learn/components/LearningUnitCard';
-import type { LearningUnit, LearningLesson, LearningExercise, LearningTopic } from '@/types/learning'; // Importar tipos de aprendizaje
-import type { Lesson, Exercise, Topic, Module } from '@/types/api'; // Importar tipo Lesson, Exercise, Topic y Module
-import { calculateExerciseProgress, calculateLessonProgress, calculateTopicProgress, calculateUnityProgress } from '@/lib/learning.utils'; // Importar funciones de utilidad
+import type { LearningUnit } from '@/types/learning'; // Importar tipos de aprendizaje
+import type { Module } from '@/types/api'; // Importar Module desde api
+import { calculateUnityProgress } from '@/lib/learning.utils'; // Importar la función
 
 const ModuleDetailPage: React.FC = () => {
   const { t } = useTranslation();

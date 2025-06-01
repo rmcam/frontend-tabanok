@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { ChevronDown, PlayCircle, FileText, HelpCircle, Volume2, Lock, Unlock } from "lucide-react"; // Iconos para tipos de contenido y bloqueo
+import { ChevronDown, PlayCircle, FileText, HelpCircle, Volume2, Lock } from "lucide-react"; // Iconos para tipos de contenido y bloqueo
 import { cn } from "@/lib/utils";
 
 // Definir tipos para Unidad y Lección

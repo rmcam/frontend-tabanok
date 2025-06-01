@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { modulesService } from '@/services/modules/modules.service';
-import type { Module, Unity, ModuleWithUnities } from '@/types/api';
+import type { Module, Unity } from '@/types/api';
 
 /**
  * Hook para obtener todos los módulos de aprendizaje.

@@ -57,9 +57,6 @@ const CalendarPage: React.FC = () => {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const eventsForSelectedDate = mockEvents.filter(event =>
-    selectedDate && format(event.date, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')
-  );
 
   const handleDayClick = (date: Date | undefined) => {
     setSelectedDate(date);

@@ -1,4 +1,3 @@
-import React from 'react';
 import GlobeIcon from '@/components/common/GlobeIcon'; // Importar el nuevo ícono
 
 function AboutSection() {

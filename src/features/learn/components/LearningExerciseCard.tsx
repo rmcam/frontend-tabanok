@@ -9,7 +9,7 @@ interface LearningExerciseCardProps {
   unitIndex: number; // Para determinar la alineación
 }
 
-const LearningExerciseCard: React.FC<LearningExerciseCardProps> = memo(({ exercise, unitIndex }) => {
+const LearningExerciseCard: React.FC<LearningExerciseCardProps> = memo(({ exercise }) => {
   const { t } = useTranslation();
 
   return (

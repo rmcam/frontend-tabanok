@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
 import { useActivityById, useSubmitExerciseAnswers } from '@/hooks/activities/activities.hooks'; // Importar el hook de actividades y el nuevo hook de mutación
-import type { Exercise } from '@/types/api'; // Importar el tipo Exercise
 
 const ExerciseDetailPage: React.FC = () => {
   const { t } = useTranslation();

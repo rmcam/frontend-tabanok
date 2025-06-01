@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { CheckCircle2, XCircle } from 'lucide-react';
 import type { LearningQuizContent } from '@/types/learning';
 import { useProfile } from '@/hooks/auth/auth.hooks'; // Importar useProfile
-import { useMarkProgressAsCompleted, useCreateProgress } from '@/hooks/progress/progress.hooks'; // Importar hooks de progreso
+import { useCreateProgress } from '@/hooks/progress/progress.hooks'; // Importar hooks de progreso
 
 interface LearningQuizProps {
   quiz: LearningQuizContent['content'];
@@ -23,7 +23,6 @@ const LearningQuiz: React.FC<LearningQuizProps> = ({ quiz, onComplete }) => {
   const { data: userProfile } = useProfile();
   const userId = userProfile?.id;
 
-  const { mutate: markCompleted } = useMarkProgressAsCompleted();
   const { mutate: createProgress } = useCreateProgress();
 
   const handleSubmit = () => {

@@ -10,7 +10,7 @@ interface LearningUnitCardProps {
   index: number;
 }
 
-const LearningUnitCard: React.FC<LearningUnitCardProps> = memo(({ unit, index }) => {
+const LearningUnitCard: React.FC<LearningUnitCardProps> = memo(({ unit }) => {
   const { t } = useTranslation();
 
   return (

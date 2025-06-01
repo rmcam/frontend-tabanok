@@ -19,14 +19,6 @@ const SettingsPage: React.FC = () => {
     // Lógica para cambiar el idioma de la aplicación (i18n)
   };
 
-  const handleSaveNotificationSettings = () => {
-    console.log("Guardando preferencias de notificación:", {
-      receiveLessonNotifications,
-      receiveAchievementNotifications,
-      receiveMessageNotifications,
-    });
-    // Lógica para enviar las preferencias al backend (NotificationsModule)
-  };
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">

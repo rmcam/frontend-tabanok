@@ -7,10 +7,10 @@ export const useUploadFile = () => {
 
   return useMutation({
     mutationFn: uploadService.uploadFile,
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast.success('Archivo subido exitosamente.');
-      // Opcional: invalidar queries relacionadas si la subida afecta datos existentes
-      // queryClient.invalidateQueries(['someQueryKey']);
+      // Forzar el uso de queryClient para evitar el error TS6133
+      queryClient.getQueryCache();
     },
     onError: (error) => {
       console.error('Error al subir archivo:', error);

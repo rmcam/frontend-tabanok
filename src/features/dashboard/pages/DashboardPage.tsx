@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { BookOpen, Lightbulb, Award, BarChart2, Trophy } from 'lucide-react'; // Añadido Trophy para logros
+import { BookOpen, Award, BarChart2, Trophy } from 'lucide-react'; // Añadido Trophy para logros
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,7 @@ const DashboardPage: React.FC = () => {
   const { user } = useUserStore(); // Obtener el usuario del store
   const userId = user?.id; // Obtener el ID del usuario
 
-  const { learningPath, isLoading, error, totalModulesCompleted, totalModules, nextModule } = useLearningPath();
+  const { isLoading, error, totalModulesCompleted, totalModules, nextModule } = useLearningPath();
   const { data: userBadges, isLoading: isLoadingBadges, error: errorBadges } = useUserBadges(userId || ''); // Obtener insignias
   const { data: userStats, isLoading: isLoadingStats, error: errorStats } = useUserStatistics(userId || ''); // Obtener estadísticas
 

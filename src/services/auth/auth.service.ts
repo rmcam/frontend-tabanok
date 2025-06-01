@@ -1,6 +1,5 @@
 import type {
   ApiResponse,
-  ApiError as IApiError,
   LoginRequest,
   LoginResponse,
   RegisterRequest,
@@ -11,7 +10,7 @@ import type {
   TokenRefreshResponse,
 } from '../../types/api';
 
-import { apiRequest, ApiError, handleApiResponse, API_URL } from '../_shared';
+import { apiRequest } from '../_shared';
 
 // Funciones específicas para los endpoints de autenticación
 export const authService = {

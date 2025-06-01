@@ -3,14 +3,10 @@ import type {
   Unity,
   CreateUnityDto,
   UpdateUnityDto,
-  Topic, // Importar tipo Topic
-  Content, // Importar tipo Content
   DetailedUnity, // Importar DetailedUnity
 } from '../../types/api';
 
 import { apiRequest } from '../_shared';
-import { topicsService } from '../topics/topics.service'; // Importar topicsService
-import { contentService } from '../content/content.service'; // Importar contentService
 
 /**
  * Funciones específicas para los endpoints de unidades de aprendizaje.

@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { BookOpen, Search } from "lucide-react"; // Importar iconos necesarios
 import { useAllModules } from '@/hooks/modules/modules.hooks'; // Importar el hook para obtener módulos
-import type { Module } from '@/types/api'; // Importar el tipo Module
 
 const CoursesPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");

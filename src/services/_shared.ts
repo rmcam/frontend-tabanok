@@ -1,5 +1,4 @@
 import type {
-  ApiResponse,
   ApiError as IApiError,
 } from '../types/api';
 
