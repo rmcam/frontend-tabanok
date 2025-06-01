@@ -18,7 +18,6 @@ export const useActivityById = (id: string) => {
 };
 
 export const useCreateActivity = () => { // Nuevo hook de mutación
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const queryClient = useQueryClient();
   return useMutation<Exercise, ApiError, CreateExerciseDto>({
     mutationFn: activitiesService.createActivity,
@@ -26,7 +25,6 @@ export const useCreateActivity = () => { // Nuevo hook de mutación
       queryClient.invalidateQueries({ queryKey: ['activities'] });
       queryClient.invalidateQueries({ queryKey: ['activities', data.id] }); // Invalidar también por ID si la actividad tiene uno
       toast.success('Actividad creada exitosamente.');
-      queryClient.getQueryCache(); // Forzar el uso de queryClient
     },
     onError: (error: ApiError) => {
       console.error('Error al crear actividad:', error.message, error.details);
