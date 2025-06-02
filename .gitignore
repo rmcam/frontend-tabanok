@@ -49,3 +49,11 @@ Desktop.ini
 *.tmp
 *.orig
 
+# pnpm
+.pnpm/
+
+# Shadcn
+.shadcn/
+
+# Shadcn components
+components.json
