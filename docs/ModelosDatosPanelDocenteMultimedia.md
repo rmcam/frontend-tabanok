@@ -187,4 +187,4 @@ La implementación de la lógica de backend para la gestión de multimedia, incl
 
 ---
 
-Última actualización: 7/5/2025, 12:35 a. m. (America/Bogota, UTC-5:00)
+Última actualización: 18/9/2025, 3:10 p. m. (America/Bogota, UTC-5:00)

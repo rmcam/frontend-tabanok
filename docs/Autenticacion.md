@@ -342,4 +342,4 @@ La aplicación utiliza la librería `sonner` para mostrar notificaciones (toasts
 
 ---
 
-Última actualización: 7/5/2025, 12:33 a. m. (America/Bogota, UTC-5:00)
+Última actualización: 18/9/2025, 3:08 p. m. (America/Bogota, UTC-5:00)

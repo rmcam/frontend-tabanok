@@ -5,11 +5,20 @@ import { useTheme } from '@/hooks/useTheme'; // Importar el hook de tema
 import SunIcon from '@/components/common/SunIcon'; // Importar ícono de sol
 import MoonIcon from '@/components/common/MoonIcon'; // Importar ícono de luna
 import { useTranslation } from 'react-i18next'; // Importar hook de traducción
+import { useProfile } from '@/hooks/auth/auth.hooks'; // Importar useProfile
+import { useGamificationUserStats } from '@/hooks/gamification/gamification.hooks'; // Importar useGamificationUserStats
+import { useHeartsStore } from '@/stores/heartsStore'; // Importar el store de vidas
+import { Heart } from 'lucide-react'; // Importar el ícono de corazón
 
 const Header: React.FC = () => {
   const { openModal } = useAuthModalStore();
   const { theme, toggleTheme } = useTheme(); // Usar hook de tema
-  const { i18n } = useTranslation(); // Usar hook de traducción
+  const { t, i18n } = useTranslation(); // Usar hook de traducción y desestructurar 't'
+
+  const { data: userProfile } = useProfile();
+  const userId = userProfile?.id;
+  const { data: userStats } = useGamificationUserStats(userId || '');
+  const { hearts } = useHeartsStore(); // Obtener el número de vidas del store
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
@@ -37,6 +46,22 @@ const Header: React.FC = () => {
             {theme === 'dark' ? <SunIcon className="h-6 w-6" /> : <MoonIcon className="h-6 w-6" />}
           </button>
 
+          {/* Mostrar puntos y nivel del usuario si está autenticado */}
+          {userProfile && userStats && (
+            <div className="flex items-center space-x-4 text-sm font-medium text-foreground">
+              <div className="flex items-center space-x-1">
+                <span className="text-primary">{t("Puntos")}: {userStats.points}</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <span className="text-primary">{t("Nivel")}: {userStats.level}</span>
+              </div>
+              <div className="flex items-center space-x-1 text-red-500">
+                <Heart className="h-4 w-4" />
+                <span>{hearts}</span>
+              </div>
+            </div>
+          )}
+
           {/* Selector de idioma */}
           <select
             onChange={(e) => changeLanguage(e.target.value)}
@@ -48,13 +73,15 @@ const Header: React.FC = () => {
             {/* Añadir más idiomas si están disponibles en i18n */}
           </select>
 
-          {/* Botón de Iniciar Sesión */}
-          <button
-            onClick={openModal}
-            className="hidden md:block px-4 py-2 border border-primary rounded-md text-primary hover:bg-primary hover:text-primary-foreground transition-colors duration-300"
-          >
-            Iniciar Sesión
-          </button>
+          {/* Botón de Iniciar Sesión (solo si no está autenticado) */}
+          {!userProfile && (
+            <button
+              onClick={openModal}
+              className="hidden md:block px-4 py-2 border border-primary rounded-md text-primary hover:bg-primary hover:text-primary-foreground transition-colors duration-300"
+            >
+              Iniciar Sesión
+            </button>
+          )}
         </div>
         {/* Mobile menu button - to be implemented */}
         <div className="md:hidden">

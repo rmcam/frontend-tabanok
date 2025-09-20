@@ -1,64 +1,39 @@
-import React, { useState } from 'react'; // Importar useState
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft } from 'lucide-react';
-import { useActivityById, useSubmitExerciseAnswers } from '@/hooks/activities/activities.hooks'; // Importar el hook de actividades y el nuevo hook de mutación
+import { ChevronLeft, CheckCircle2, XCircle } from 'lucide-react'; // Importar CheckCircle2 y XCircle
+import { useExerciseById } from '@/hooks/exercises/exercises.hooks'; // Importar useExerciseById
+import { useProfile } from '@/hooks/auth/auth.hooks'; // Importar useProfile
+import { useSubmitExercise } from '@/hooks/progress/progress.hooks'; // Importar useSubmitExercise desde progress.hooks
+import type { LearningQuizContent, LearningMatchingContent, LearningFillInTheBlankContent, LearningAudioPronunciationContent, LearningTranslationContent, LearningFunFactContent } from '@/types/learning'; // Importar todos los tipos de contenido de aprendizaje
+import LearningQuiz from '../components/LearningQuiz';
+import LearningMatching from '../components/LearningMatching';
+import LearningFillInTheBlank from '../components/LearningFillInTheBlank';
+import LearningAudioPronunciation from '../components/LearningAudioPronunciation';
+import LearningTranslation from '../components/LearningTranslation';
+import LearningFunFact from '../components/LearningFunFact';
 
 const ExerciseDetailPage: React.FC = () => {
   const { t } = useTranslation();
-  const { id: exerciseId } = useParams<{ id: string }>(); // El ID del ejercicio
+  const { id: exerciseId } = useParams<{ id: string }>();
 
-  const { data: exercise, isLoading, error } = useActivityById(exerciseId || '');
-  const { mutate: submitAnswers, isPending: isSubmitting, isSuccess, isError, data: submissionResult } = useSubmitExerciseAnswers(); // Usar el hook de mutación y capturar el resultado
+  const { data: userProfile } = useProfile();
+  const userId = userProfile?.id;
 
-  // Estado para almacenar las respuestas del usuario para el quiz
-  const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({});
-  // Estado para controlar si el quiz ha sido enviado
-  const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const { data: exercise, isLoading, error } = useExerciseById(exerciseId || '');
+  // Eliminamos submitExerciseMutation y isSubmitting ya que la lógica de envío se maneja en los componentes de ejercicio
+  // const { mutate: submitExerciseMutation, isPending: isSubmitting } = useSubmitExercise();
 
-  // Manejar el cambio en las respuestas del quiz
-  const handleQuizAnswerChange = (questionIndex: number, selectedOptionValue: string) => {
-    // Solo permitir cambios si el quiz no ha sido enviado
-    if (!quizSubmitted) {
-      setQuizAnswers(prevAnswers => ({
-        ...prevAnswers,
-        [questionIndex]: selectedOptionValue,
-      }));
-    }
+  const [isExerciseSubmitted, setIsExerciseSubmitted] = useState(false);
+  const [exerciseIsCorrect, setExerciseIsCorrect] = useState<boolean | null>(null);
+  const [awardedPoints, setAwardedPoints] = useState<number>(0);
+
+  const handleExerciseComplete = (isCorrect: boolean, points?: number) => {
+    setIsExerciseSubmitted(true);
+    setExerciseIsCorrect(isCorrect);
+    setAwardedPoints(points || 0);
   };
-
-  // Lógica para enviar las respuestas del quiz
-  const handleSubmitQuiz = () => {
-    if (!exerciseId) {
-      console.error("No exercise ID available for submission.");
-      return;
-    }
-    // Marcar el quiz como enviado
-    setQuizSubmitted(true);
-    // Llama a la función mutate del hook useSubmitExerciseAnswers
-    submitAnswers({ id: exerciseId, answers: quizAnswers });
-  };
-
-  // Determinar si una opción es correcta (basado en el resultado de la sumisión)
-  const isOptionCorrect = (questionIndex: number, optionValue: string): boolean | undefined => {
-    if (!quizSubmitted || !submissionResult || !submissionResult.correctAnswers) {
-      return undefined; // No hay resultado de sumisión o información de respuestas correctas
-    }
-    // Asumiendo que submissionResult.correctAnswers es un objeto { questionIndex: correctAnswerValue }
-    return submissionResult.correctAnswers[questionIndex] === optionValue;
-  };
-
-  // Determinar si la respuesta del usuario para una pregunta es correcta
-  const isUserAnswerCorrect = (questionIndex: number): boolean | undefined => {
-    if (!quizSubmitted || !submissionResult || !submissionResult.correctAnswers) {
-      return undefined;
-    }
-    const userAnswer = quizAnswers[questionIndex];
-    const correctAnswer = submissionResult.correctAnswers[questionIndex];
-    return userAnswer === correctAnswer;
-  };
-
 
   if (isLoading) {
     return (
@@ -94,6 +69,20 @@ const ExerciseDetailPage: React.FC = () => {
     );
   }
 
+  // Asegurarse de que exercise.content no sea nulo antes de pasarlo a los componentes
+  if (!exercise.content) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background text-red-500 p-4">
+        <p className="text-lg">{t("Error: Contenido del ejercicio no disponible.")}</p>
+        <Button asChild className="mt-4">
+          <Link to="/learn">
+            <ChevronLeft className="mr-2 h-4 w-4" /> {t("Volver al Camino de Aprendizaje")}
+          </Link>
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col flex-grow p-4 md:p-8 max-w-4xl mx-auto">
       <div className="mb-8">
@@ -106,111 +95,69 @@ const ExerciseDetailPage: React.FC = () => {
           {exercise.title}
         </h1>
         <div className="prose dark:prose-invert max-w-none">
-          <p>{exercise.description}</p> {/* Mostrar la descripción del ejercicio */}
+          <p>{exercise.description}</p>
+
           {/* Renderizar contenido específico del ejercicio según su tipo */}
           {exercise.type === 'quiz' && (
-            <div className="space-y-6"> {/* Mayor espacio entre preguntas */}
-              {/* Lógica para renderizar un quiz */}
-              {/* Se asume que exercise.content es un objeto con una propiedad 'questions' que es un array */}
-              {/* Cada pregunta tiene 'text' y 'options' (un array de objetos con 'text' y 'value') */}
-              {exercise.content && typeof exercise.content === 'object' && 'questions' in exercise.content && Array.isArray(exercise.content.questions) ? (
-                exercise.content.questions.map((question: any, qIndex: number) => {
-                  const userAnswer = quizAnswers[qIndex];
-                  const isAnswerCorrect = isUserAnswerCorrect(qIndex);
+            <LearningQuiz
+              quiz={exercise.content as LearningQuizContent['content']}
+              onComplete={handleExerciseComplete}
+            />
+          )}
+          {exercise.type === 'matching' && (
+            <LearningMatching
+              matching={exercise.content as LearningMatchingContent['content']}
+              onComplete={handleExerciseComplete}
+            />
+          )}
+          {exercise.type === 'fill-in-the-blank' && (
+            <LearningFillInTheBlank
+              fillInTheBlank={exercise.content as LearningFillInTheBlankContent['content']}
+              onComplete={handleExerciseComplete}
+            />
+          )}
+          {exercise.type === 'audio-pronunciation' && (
+            <LearningAudioPronunciation
+              audioPronunciation={exercise.content as LearningAudioPronunciationContent['content']}
+              onComplete={handleExerciseComplete}
+            />
+          )}
+          {exercise.type === 'translation' && (
+            <LearningTranslation
+              translation={exercise.content as LearningTranslationContent['content']}
+              onComplete={handleExerciseComplete}
+            />
+          )}
+          {exercise.type === 'fun-fact' && (
+            <LearningFunFact
+              funFact={exercise.content as LearningFunFactContent['content']}
+            />
+          )}
 
-                  return (
-                    <div key={qIndex} className={`border rounded-md p-4 shadow-sm ${quizSubmitted ? (isAnswerCorrect ? 'border-green-500' : 'border-red-500') : ''}`}> {/* Añadir sombra y borde de feedback */}
-                      <p className="font-semibold mb-3 text-lg">{`${qIndex + 1}. ${question.text}`}</p> {/* Numerar preguntas */}
-                      {question.options && Array.isArray(question.options) ? (
-                        <div className="space-y-2">
-                          {question.options.map((option: any, oIndex: number) => {
-                            const optionCorrect = isOptionCorrect(qIndex, option.value);
-                            const isSelected = userAnswer === option.value;
-
-                            let optionClass = '';
-                            if (quizSubmitted) {
-                              if (optionCorrect) {
-                                optionClass = 'text-green-600 font-semibold'; // Opción correcta
-                              } else if (isSelected) {
-                                optionClass = 'text-red-600 line-through'; // Opción incorrecta seleccionada
-                              }
-                            }
-
-                            return (
-                              <div key={oIndex} className="flex items-center space-x-2">
-                                <input
-                                  type="radio"
-                                  id={`q${qIndex}-o${oIndex}`}
-                                  name={`question-${qIndex}`}
-                                  value={option.value}
-                                  checked={isSelected}
-                                  onChange={() => handleQuizAnswerChange(qIndex, option.value)}
-                                  className="form-radio text-primary disabled:opacity-50" // Estilo básico para radio button
-                                  disabled={quizSubmitted || isSubmitting} // Deshabilitar después de enviar
-                                />
-                                <label htmlFor={`q${qIndex}-o${oIndex}`} className={`text-base cursor-pointer ${optionClass}`}>
-                                  {option.text}
-                                </label>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      ) : (
-                        <p className="text-red-500">Error: Opciones de pregunta no encontradas o inválidas.</p>
-                      )}
-                      {quizSubmitted && isAnswerCorrect !== undefined && (
-                        <p className={`mt-2 text-sm font-semibold ${isAnswerCorrect ? 'text-green-600' : 'text-red-600'}`}>
-                          {isAnswerCorrect ? t('¡Correcto!') : t('Incorrecto.')}
-                          {/* Opcional: Mostrar la respuesta correcta si es incorrecto */}
-                          {!isAnswerCorrect && submissionResult?.correctAnswers?.[qIndex] && (
-                            <span> {t('La respuesta correcta era')}: {submissionResult.correctAnswers[qIndex]}</span>
-                          )}
-                        </p>
-                      )}
-                    </div>
-                  );
-                })
-              ) : (
-                <p className="text-red-500">Error: Contenido del quiz no encontrado o inválido.</p>
-              )}
-              {/* Botón para enviar respuestas del quiz */}
-              {!quizSubmitted && (
-                <Button onClick={handleSubmitQuiz} className="mt-4" disabled={isSubmitting || Object.keys(quizAnswers).length !== (exercise.content?.questions?.length || 0)}> {/* Deshabilitar si no todas las preguntas tienen respuesta */}
-                  {isSubmitting ? t('Enviando...') : t('Enviar Respuestas')} {/* Cambiar texto durante el envío y traducir */}
-                </Button>
-              )}
-
-              {/* Mostrar estado general de la sumisión */}
-              {quizSubmitted && isSuccess && (
-                <div className="mt-4 p-4 rounded-md bg-green-100 text-green-800">
-                  <p className="font-semibold">{t('Sumisión completada.')}</p>
-                  {/* Opcional: Mostrar puntaje u otro feedback general */}
-                  {submissionResult?.isCorrect && <p>{t('¡Felicidades, has completado el ejercicio correctamente!')}</p>}
-                  {!submissionResult?.isCorrect && <p>{t('Por favor, revisa tus respuestas marcadas en rojo.')}</p>}
-                </div>
-              )}
-              {quizSubmitted && isError && (
-                <div className="mt-4 p-4 rounded-md bg-red-100 text-red-800">
-                  <p className="font-semibold">{t('Error al enviar respuestas.')}</p>
-                  <p>{t('Por favor, inténtalo de nuevo.')}</p>
-                </div>
+          {/* Mensaje de resultado general del ejercicio */}
+          {isExerciseSubmitted && exerciseIsCorrect !== null && (
+            <div
+              className={`mt-6 p-4 rounded-md flex items-center justify-center space-x-2 ${exerciseIsCorrect ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}
+              role="status"
+              aria-live="polite"
+            >
+              {exerciseIsCorrect ? <CheckCircle2 className="h-6 w-6" /> : <XCircle className="h-6 w-6" />}
+              <p className="text-lg font-semibold">
+                {exerciseIsCorrect ? t("¡Ejercicio Completado Correctamente!") : t("Ejercicio Completado Incorrectamente.")}
+              </p>
+              {awardedPoints > 0 && (
+                <p className="text-lg font-semibold ml-4">{t("Puntos Ganados")}: {awardedPoints}</p>
               )}
             </div>
           )}
-          {/* Añadir más tipos de ejercicio según sea necesario */}
-          {exercise.type === 'mission' && (
-            <div>
-              {/* Lógica para renderizar una misión */}
-              <p>{t('Renderizar Misión aquí')}</p> {/* Traducir */}
-              {/* TODO: Implementar renderización para ejercicios de tipo 'mission' */}
-              {/* Se necesitará conocer la estructura de exercise.content para este tipo */}
-            </div>
-          )}
+
           {/* Manejar tipos de ejercicio desconocidos */}
-          {!['quiz', 'mission'].includes(exercise.type) && (
-            <div>
-              <p>{t('Tipo de ejercicio desconocido')}: {exercise.type}</p> {/* Traducir */}
-              <pre>{JSON.stringify(exercise.content, null, 2)}</pre>
+          {!['quiz', 'matching', 'fill-in-the-blank', 'audio-pronunciation', 'translation', 'fun-fact'].includes(exercise.type) && (
+            <div className="mt-8 p-4 rounded-md bg-yellow-100 text-yellow-800">
+              <p className="font-semibold">{t('Tipo de ejercicio desconocido')}: {exercise.type}</p>
+              <pre className="mt-2 text-sm bg-yellow-50 p-3 rounded-md overflow-auto">
+                {JSON.stringify(exercise.content, null, 2)}
+              </pre>
             </div>
           )}
         </div>

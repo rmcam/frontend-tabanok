@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress';
 import BreadcrumbNav from '@/components/common/BreadcrumbNav'; // Importar BreadcrumbNav
 import { BookOpen } from 'lucide-react';
-import { useUnitiesByModuleId, useModuleById } from '@/hooks/modules/modules.hooks';
+import { useModuleById } from '@/hooks/modules/modules.hooks';
 import { useProfile } from '@/hooks/auth/auth.hooks'; // Importar useProfile
 import { useGetProgressByUser } from '@/hooks/progress/progress.hooks'; // Importar useGetProgressByUser
 import LearningUnitCard from '@/features/learn/components/LearningUnitCard';
@@ -24,25 +24,22 @@ const ModuleDetailPage: React.FC = () => {
   const { data: userProgress, isLoading: isLoadingProgress } = useGetProgressByUser(userId);
 
   const { data: moduleData, isLoading: isLoadingModule, error: errorModule } = useModuleById(moduleId || '');
-  const { data: unitiesData, isLoading: isLoadingUnities, error: errorUnities } = useUnitiesByModuleId(moduleId || '');
 
   console.log('ModuleDetailPage - moduleId:', moduleId); // Debugging
   console.log('ModuleDetailPage - moduleData:', moduleData); // Debugging
-  console.log('ModuleDetailPage - unitiesData (from hook):', unitiesData); // Debugging
 
   // Log después de que los datos se han resuelto y antes de mapear
   React.useEffect(() => {
-    if (moduleData && unitiesData) {
+    if (moduleData) {
       console.log('ModuleDetailPage - Final moduleData:', moduleData);
-      console.log('ModuleDetailPage - Final unitiesData:', unitiesData);
     }
-  }, [moduleData, unitiesData]);
+  }, [moduleData]);
 
-  const isLoading = isLoadingModule || isLoadingUnities || isLoadingProgress; // Incluir carga de progreso
-  const error = errorModule || errorUnities;
+  const isLoading = isLoadingModule || isLoadingProgress; // Incluir carga de progreso
+  const error = errorModule;
 
   const module: Module | null | undefined = moduleData; // Permitir que module sea null
-  const unities = unitiesData || [];
+  const unities = moduleData?.unities || []; // Obtener unities directamente de moduleData
 
   // Mapear las unidades de la API a LearningUnit para pasarlas a LearningUnitCard
   const mappedUnities: LearningUnit[] = React.useMemo(() => {
@@ -61,7 +58,7 @@ const ModuleDetailPage: React.FC = () => {
       previousUnityCompleted = processedUnit.isCompleted; // Actualizar para la siguiente unidad
       return processedUnit;
     }).sort((a, b) => a.order - b.order); // Ordenar unidades
-  }, [unities, moduleId, userProgress]); // Añadir userProgress como dependencia
+  }, [unities, userProgress]); // Eliminar moduleId como dependencia, ya que unities ya está filtrado por módulo
 
   if (isLoading) {
     return (
@@ -121,17 +118,22 @@ const ModuleDetailPage: React.FC = () => {
         {t("Unidades del Módulo")}
       </h2>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {mappedUnities.length === 0 && (
-          <div className="col-span-full text-center text-muted-foreground mt-8 p-4 border rounded-lg bg-card shadow-lg">
-            <BookOpen className="h-12 w-12 mx-auto mb-4 text-primary" />
-            <p className="text-xl font-semibold mb-2">{t("¡Aún no hay unidades en este módulo!")}</p>
-            <p>{t("Parece que este módulo está vacío. Por favor, contacta al administrador para que añada contenido.")}</p>
-          </div>
-        )}
-        {mappedUnities.map((unit, i) => (
-          <LearningUnitCard key={unit.id} unit={unit} index={i} />
-        ))}
+      <div className="relative">
+        {/* Línea de tiempo vertical */}
+        <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-primary/20 transform -translate-x-1/2"></div>
+
+        <div className="space-y-12">
+          {mappedUnities.length === 0 && (
+            <div className="col-span-full text-center text-muted-foreground mt-8 p-4 border rounded-lg bg-card shadow-lg">
+              <BookOpen className="h-12 w-12 mx-auto mb-4 text-primary" />
+              <p className="text-xl font-semibold mb-2">{t("¡Aún no hay unidades en este módulo!")}</p>
+              <p>{t("Parece que este módulo está vacío. Por favor, contacta al administrador para que añada contenido.")}</p>
+            </div>
+          )}
+          {mappedUnities.map((unit, i) => (
+            <LearningUnitCard key={unit.id} unit={unit} index={i} />
+          ))}
+        </div>
       </div>
     </div>
   );

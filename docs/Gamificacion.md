@@ -94,4 +94,4 @@ Ver lista completa de pendientes del proyecto en [`docs/Pendientes.md`](./Pendie
 
 ---
 
-Última actualización: 7/5/2025, 12:35 a. m. (America/Bogota, UTC-5:00)
+Última actualización: 18/9/2025, 3:09 p. m. (America/Bogota, UTC-5:00)

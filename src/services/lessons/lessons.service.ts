@@ -1,5 +1,5 @@
-import type { ApiResponse, CreateLessonDto, UpdateLessonDto } from '../../types/api';
-import type { LearningLesson } from '../../types/learning';
+import type { ApiResponse, CreateLessonDto, UpdateLessonDto, Lesson } from '../../types/api';
+import type { LearningLesson } from '../../types/learning'; // Mantener por si se usa en otros lugares
 
 import { apiRequest } from '../_shared';
 
@@ -8,23 +8,25 @@ import { apiRequest } from '../_shared';
  */
 export const lessonsService = {
   createLesson: (lessonData: CreateLessonDto) =>
-    apiRequest<ApiResponse<LearningLesson>>('POST', '/lesson', lessonData),
+    apiRequest<ApiResponse<Lesson>>('POST', '/lesson', lessonData),
   getAllLessons: () =>
-    apiRequest<LearningLesson[]>('GET', '/lesson'),
+    apiRequest<Lesson[]>('GET', '/lesson'),
   getFeaturedLessons: () =>
-    apiRequest<LearningLesson[]>('GET', '/lesson/featured'),
+    apiRequest<Lesson[]>('GET', '/lesson/featured'),
   getLessonById: (id: string) =>
-    apiRequest<LearningLesson>('GET', `/lesson/${id}`),
+    apiRequest<Lesson>('GET', `/lesson/${id}`), // Cambiado a Lesson para incluir ejercicios
   updateLesson: (id: string, lessonData: UpdateLessonDto) =>
-    apiRequest<ApiResponse<LearningLesson>>('PATCH', `/lesson/${id}`, lessonData),
+    apiRequest<ApiResponse<Lesson>>('PATCH', `/lesson/${id}`, lessonData),
   deleteLesson: (id: string) =>
     apiRequest<ApiResponse<void>>('DELETE', `/lesson/${id}`),
   getLessonsByUnityId: (unityId: string) =>
-    apiRequest<LearningLesson[]>('GET', `/lesson/unity/${unityId}`),
+    apiRequest<Lesson[]>('GET', `/lesson/unity/${unityId}`),
   toggleLessonLock: (id: string) =>
-    apiRequest<ApiResponse<LearningLesson>>('PATCH', `/lesson/${id}/toggle-lock`),
+    apiRequest<ApiResponse<Lesson>>('PATCH', `/lesson/${id}/toggle-lock`),
   updateLessonPoints: (id: string, points: number) =>
-    apiRequest<ApiResponse<LearningLesson>>('PATCH', `/lesson/${id}/points`, { points }),
+    apiRequest<ApiResponse<Lesson>>('PATCH', `/lesson/${id}/points`, { points }),
   markLessonAsCompleted: (id: string) =>
-    apiRequest<ApiResponse<LearningLesson>>('PATCH', `/lesson/${id}/complete`),
+    apiRequest<ApiResponse<Lesson>>('PATCH', `/lesson/${id}/complete`),
+  getDailyLesson: (userId: string) =>
+    apiRequest<Lesson>('GET', `/lesson/daily-lesson/${userId}`),
 };

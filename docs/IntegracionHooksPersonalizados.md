@@ -185,4 +185,4 @@ function GamificationDashboard() {
 
 ---
 
-Última actualización: 12/5/2025, 11:59 p. m. (America/Bogota, UTC-5:00)
+Última actualización: 18/9/2025, 3:09 p. m. (America/Bogota, UTC-5:00)

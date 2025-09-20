@@ -147,12 +147,7 @@ export interface User {
   culturalPoints: number;
   level: number;
   points: number;
-  gameStats: {
-    totalPoints: number;
-    level: number;
-    streak: number;
-    lastActivity: string;
-  };
+  gameStats: GamificationUserStatsDto;
   resetPasswordToken?: string | null;
   resetPasswordExpires?: string | null;
   lastLoginAt?: string | null;
@@ -241,15 +236,8 @@ export interface Module {
   isLocked: boolean;
   points: number;
   progress?: number; // Progreso del módulo (0-100)
+  unities: Unity[]; // Añadir unities directamente al tipo Module
   // Añadir otros campos relevantes del modelo Module
-}
-
-/**
- * @interface ModuleWithUnities
- * @description Interfaz para el modelo de módulo de aprendizaje con unidades anidadas.
- */
-export interface ModuleWithUnities extends Module {
-  unities: Unity[];
 }
 
 /**
@@ -346,8 +334,83 @@ export interface Lesson {
   exercises?: Exercise[]; // Cambiado de 'activities' a 'exercises'
   multimedia?: Multimedia[]; // Añadido para incluir multimedia asociada
   isLocked?: boolean; // Añadido para la lógica de bloqueo
+  exercises?: Exercise[]; // Asegurar que los ejercicios estén incluidos
   // Añadir otros campos relevantes del modelo Lesson
 }
+
+/**
+ * @interface SubmitExerciseDto
+ * @description DTO para enviar la respuesta de un ejercicio.
+ */
+export interface SubmitExerciseDto {
+  exerciseId: string; // Añadido para cumplir con la validación del backend
+  userAnswer: string | Record<string, any>; // Puede ser string o un objeto complejo
+}
+
+/**
+ * @interface SubmitExerciseResponse
+ * @description Interfaz para la respuesta del backend al enviar un ejercicio.
+ */
+export interface SubmitExerciseResponse {
+  userId: string; // Añadido para invalidar queries de progreso
+  exerciseId: string; // Añadido para invalidar queries de progreso
+  isCorrect: boolean;
+  score: number;
+  awardedPoints: number;
+  message?: string;
+  newLevel?: number; // Opcional, si el nivel del usuario cambia
+  totalPoints?: number; // Opcional, puntos totales actualizados
+}
+
+/**
+ * @interface GamificationUserStatsDto
+ * @description DTO para las estadísticas de gamificación de un usuario.
+ */
+export interface GamificationUserStatsDto {
+  userId?: string; // Opcional, ya que puede venir del perfil del usuario
+  username?: string; // Opcional
+  level: number;
+  points: number;
+  totalPoints: number;
+  streak: number;
+  lastActivity: string;
+  hearts: number; // Añadido para la lógica de vidas
+  league: string; // Añadido para la lógica de ligas
+  achievements: any[]; // Placeholder, se puede refinar
+  missions: any[]; // Placeholder, se puede refinar
+}
+
+/**
+ * @interface LeaderboardEntryDto
+ * @description DTO para una entrada en la tabla de clasificación.
+ */
+export interface LeaderboardEntryDto {
+  userId: string;
+  username: string;
+  totalPoints: number;
+  rank: number;
+  avatarUrl?: string; // Opcional, para mostrar en el leaderboard
+}
+
+/**
+ * @interface Leaderboard
+ * @description Interfaz para la tabla de clasificación completa.
+ */
+  export interface LeaderboardRanking {
+    userId: string;
+    username: string;
+    avatarUrl?: string;
+    totalPoints: number;
+  }
+
+  export interface Leaderboard {
+    id: string;
+    week: number;
+    year: number;
+    rankings: LeaderboardRanking[];
+    createdAt: Date;
+    updatedAt: Date;
+  }
 
 /**
  * @interface CreateLessonDto
@@ -355,11 +418,11 @@ export interface Lesson {
  */
 export interface CreateLessonDto {
   unityId: string;
-  name: string;
+  title: string;
   description: string;
   content: string;
   order: number;
-  points: number;
+  requiredPoints: number;
 }
 
 /**
@@ -367,12 +430,12 @@ export interface CreateLessonDto {
  * @description DTO para actualizar una lección existente.
  */
 export interface UpdateLessonDto {
-  name?: string;
+  title?: string;
   description?: string;
   content?: string;
   order?: number;
   isLocked?: boolean;
-  points?: number;
+  requiredPoints?: number;
   isCompleted?: boolean;
 }
 
@@ -613,6 +676,7 @@ export interface ProgressDto {
   id: string;
   userId: string;
   exerciseId: string;
+  contentId?: string; // Añadido para el progreso de contenido/lecciones
   score: number | null;
   answers: Record<string, any> | null;
   isCompleted: boolean;
@@ -627,7 +691,8 @@ export interface ProgressDto {
  */
 export interface CreateProgressDto {
   userId: string;
-  exerciseId: string;
+  exerciseId?: string; // Opcional si es progreso de contenido
+  contentId?: string; // Opcional si es progreso de ejercicio
   score?: number;
   answers?: Record<string, any>;
   isCompleted?: boolean;

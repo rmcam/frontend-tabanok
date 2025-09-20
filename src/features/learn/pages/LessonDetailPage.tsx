@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Skeleton } from '@/components/ui/skeleton'; // Importar Skeleton
+import { Skeleton } from '@/components/ui/skeleton';
 import BreadcrumbNav from '@/components/common/BreadcrumbNav';
 import { ArrowLeft, ArrowRight, BookOpen, Lightbulb } from 'lucide-react';
 import { useLessonById } from '@/hooks/lessons/lessons.hooks';
@@ -13,8 +13,9 @@ import { useModuleById } from '@/hooks/modules/modules.hooks';
 import LearningContentRenderer from '@/features/learn/components/LearningContentRenderer';
 import LearningExerciseItem from '@/features/learn/components/LearningExerciseItem';
 import { useProfile } from '@/hooks/auth/auth.hooks';
-import { useGetProgressByUser } from '@/hooks/progress/progress.hooks';
-import type { LearningContent } from '@/types/learning'; // Importar LearningLesson
+import { useGetProgressByUser, useCreateProgress } from '@/hooks/progress/progress.hooks';
+import type { LearningContent, LearningTextContent, LearningLesson, LearningExercise } from '@/types/learning';
+import { calculateLessonProgress } from '@/lib/learning.utils';
 
 const LessonDetailPage: React.FC = () => {
   const { t } = useTranslation();
@@ -25,7 +26,13 @@ const LessonDetailPage: React.FC = () => {
 
   const { data: userProgress, isLoading: isLoadingProgress } = useGetProgressByUser(userId);
 
-  const { data: lesson, isLoading: isLoadingLesson, error: lessonError } = useLessonById(lessonId || '');
+  const { data: lessonData, isLoading: isLoadingLesson, error: lessonError } = useLessonById(lessonId || '');
+  const createProgressMutation = useCreateProgress();
+
+  // Procesar la lección de la API a un tipo de aprendizaje enriquecido
+  const lesson: LearningLesson | undefined = lessonData && userProgress
+    ? calculateLessonProgress(lessonData, userProgress)
+    : undefined;
 
   // Obtener la unidad y el módulo padre para los breadcrumbs
   const { data: unit, isLoading: isLoadingUnit } = useUnityById(lesson?.unityId || '');
@@ -57,12 +64,16 @@ const LessonDetailPage: React.FC = () => {
         </div>
 
         <div className="mb-8">
-          <Skeleton className="h-8 w-1/2 mb-8" /> {/* Skeleton para título Contenido de la Lección */}
+          <h2 className="flex items-center text-3xl font-bold tracking-tight mb-8 text-secondary-foreground">
+            <BookOpen className="mr-3 h-8 w-8 text-primary" /> {t("Contenido de la Lección")}
+          </h2>
           <Skeleton className="h-48 w-full" /> {/* Skeleton para LearningContentRenderer */}
         </div>
 
         <div className="mb-8">
-          <Skeleton className="h-8 w-1/2 mb-8" /> {/* Skeleton para título Ejercicios de la Lección */}
+          <h2 className="flex items-center text-3xl font-bold tracking-tight mb-8 text-secondary-foreground">
+            <Lightbulb className="mr-3 h-8 w-8 text-primary" /> {t("Ejercicios de la Lección")}
+          </h2>
           <div className="grid gap-4">
             <Skeleton className="h-24 w-full" /> {/* Skeleton para LearningExerciseItem */}
             <Skeleton className="h-24 w-full" /> {/* Skeleton para LearningExerciseItem */}
@@ -92,18 +103,30 @@ const LessonDetailPage: React.FC = () => {
     );
   }
 
-  // Procesar el contenido de la lección para el renderizado
-  const lessonContent: LearningContent | null = lesson.content ? {
-    id: lesson.id, // Usar el ID de la lección como ID del contenido principal
+  const isLessonCompleted = lesson.isCompleted;
+
+  const handleCompleteLesson = () => {
+    if (!userId || !lessonId) return;
+
+    createProgressMutation.mutate({
+      userId,
+      contentId: lessonId,
+      isCompleted: true,
+    });
+  };
+
+  // Procesar el contenido principal de la lección como un LearningTextContent de tipo 'html'
+  const lessonContent: LearningTextContent | null = lesson.content ? {
+    id: lesson.id,
     title: lesson.title,
     description: lesson.description,
-    type: 'html', // Asumir que el contenido de la lección es HTML o texto
+    type: 'html',
     content: lesson.content,
     multimedia: lesson.multimedia || [],
-    isCompleted: false, // El estado de completado se maneja a nivel de lección/ejercicio
-    isLocked: false, // El estado de bloqueo se maneja a nivel de lección
-    progress: 0,
-    unityId: lesson.unityId, // Añadir unityId
+    isCompleted: lesson.isCompleted,
+    isLocked: lesson.isLocked,
+    progress: lesson.progress,
+    unityId: lesson.unityId,
   } : null;
 
   return (
@@ -139,7 +162,7 @@ const LessonDetailPage: React.FC = () => {
         <div className="flex justify-between items-center mb-8">
           {/* Botón de Lección Anterior */}
           {(() => {
-            if (!unit?.lessons) return null; // Si no hay unidad o lecciones, no renderizar
+            if (!unit?.lessons) return null;
             const currentLessonIndex = unit.lessons.findIndex(l => l.id === lesson.id);
             const previousLesson = currentLessonIndex > 0 ? unit.lessons[currentLessonIndex - 1] : null;
             return (
@@ -153,7 +176,7 @@ const LessonDetailPage: React.FC = () => {
 
           {/* Botón de Lección Siguiente */}
           {(() => {
-            if (!unit?.lessons) return null; // Si no hay unidad o lecciones, no renderizar
+            if (!unit?.lessons) return null;
             const currentLessonIndex = unit.lessons.findIndex(l => l.id === lesson.id);
             const nextLesson = currentLessonIndex < unit.lessons.length - 1 ? unit.lessons[currentLessonIndex + 1] : null;
             return (
@@ -185,13 +208,12 @@ const LessonDetailPage: React.FC = () => {
           </h2>
           <div className="grid gap-4">
             {lesson.exercises.map(exercise => {
-              const isCompleted = userProgress?.completedExerciseIds?.includes(exercise.id) || false;
               return (
                 <LearningExerciseItem
                   key={exercise.id}
                   exercise={exercise}
-                  isCompleted={isCompleted}
-                  isLocked={lesson.isLocked || exercise.isLocked}
+                  isCompleted={exercise.isCompleted}
+                  isLocked={exercise.isLocked}
                 />
               );
             })}
@@ -213,7 +235,13 @@ const LessonDetailPage: React.FC = () => {
             <ArrowLeft className="mr-2 h-4 w-4" /> {t("Volver a la Unidad")}
           </Link>
         </Button>
-        {/* Aquí se podría añadir un botón para "Siguiente Lección" si se implementa la lógica de navegación secuencial */}
+        {/* Botón para completar la lección */}
+        <Button
+          onClick={handleCompleteLesson}
+          disabled={isLessonCompleted || createProgressMutation.isPending}
+        >
+          {createProgressMutation.isPending ? t("Guardando...") : isLessonCompleted ? t("Lección Completada") : t("Completar Lección")}
+        </Button>
       </div>
     </div>
   );

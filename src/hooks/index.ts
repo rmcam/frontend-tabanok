@@ -5,7 +5,6 @@ export * from './modules/modules.hooks';
 export * from './unities/unities.hooks';
 export * from './lessons/lessons.hooks';
 export * from './topics/topics.hooks';
-// export * from './activities/activities.hooks'; // Comentado porque el archivo no existe
 export * from './exercises/exercises.hooks';
 export * from './multimedia/multimedia.hooks';
 export * from './vocabulary/vocabulary.hooks';

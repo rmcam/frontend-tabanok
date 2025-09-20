@@ -27,4 +27,4 @@ El proyecto Tabanok busca contribuir a la preservación y enseñanza de la lengu
 
 ---
 
-Última actualización: 24/4/2025, 9:00 p. m. (America/Bogota, UTC-5:00)
+Última actualización: 18/9/2025, 3:14 p. m. (America/Bogota, UTC-5:00)

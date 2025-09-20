@@ -1,27 +1,19 @@
-import type {
-  ApiResponse,
-  User,
-  LeaderboardEntryDto,
-  UserAchievementDto,
-  UserMissionDto,
-} from '../../types/api';
-
+import type { ApiResponse, LeaderboardEntryDto, GamificationUserStatsDto, Achievement, MissionTemplate, Leaderboard } from '../../types/api';
 import { apiRequest } from '../_shared';
 
 /**
  * Funciones específicas para los endpoints de gamificación.
  */
 export const gamificationService = {
-  grantPoints: (userId: string, points: number) =>
-    apiRequest<ApiResponse<User>>('POST', `/gamification/grant-points/${userId}`, { points }),
-  assignMission: (userId: string, missionId: string) =>
-    apiRequest<ApiResponse<void>>('POST', `/gamification/${userId}/assign-mission/${missionId}`),
-  getLeaderboard: () =>
-    apiRequest<ApiResponse<LeaderboardEntryDto[]>>('GET', '/gamification/leaderboard'),
+  getCurrentLeaderboard: () =>
+    apiRequest<Leaderboard>('GET', '/gamification/leaderboard/current'), // Cambiado a Leaderboard y endpoint correcto
 
-  getUserAchievements: (userId: string) =>
-    apiRequest<ApiResponse<UserAchievementDto[]>>('GET', `/achievements/user/${userId}`), // Asumiendo UserAchievementDto[] como tipo de respuesta
-
-  getUserMissions: (userId: string) =>
-    apiRequest<ApiResponse<UserMissionDto[]>>('GET', `/missions/user/${userId}`), // Asumiendo UserMissionDto[] como tipo de respuesta
+  getUserStats: (userId: string) =>
+    apiRequest<ApiResponse<GamificationUserStatsDto>>('GET', `/gamification/user-stats/${userId}`),
+  getAchievements: () =>
+    apiRequest<ApiResponse<Achievement[]>>('GET', '/gamification/achievements'),
+  getMissions: () =>
+    apiRequest<ApiResponse<MissionTemplate[]>>('GET', '/gamification/missions'),
+  rechargeHearts: (userId: string) =>
+    apiRequest<ApiResponse<GamificationUserStatsDto>>('POST', `/gamification/recharge-hearts/${userId}`),
 };

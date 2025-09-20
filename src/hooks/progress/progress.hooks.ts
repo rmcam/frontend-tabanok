@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import ProgressService from '../../services/progress/progress.service';
 import { ApiError } from '../../services/_shared';
-import type { ProgressDto, CreateProgressDto, UpdateProgressCompletedDto, UpdateProgressScoreDto } from '../../types/api';
+import type { ProgressDto, CreateProgressDto, UpdateProgressCompletedDto, UpdateProgressScoreDto, SubmitExerciseDto, SubmitExerciseResponse, ApiResponse } from '../../types/api';
 import type { UserProgress } from '../../types/learning'; // Importar el tipo UserProgress
 
 const PROGRESS_QUERY_KEY = 'progress';
@@ -21,9 +21,10 @@ export const useGetProgressByUser = (userId: string | undefined) => {
         .filter(p => p.isCompleted)
         .map(p => p.exerciseId);
 
-      // Asumiendo que ProgressDto solo cubre ejercicios.
-      // Si el progreso del contenido se maneja de forma diferente, se necesitaría otra lógica aquí.
-      const completedContentIds: string[] = []; // Dejar vacío por ahora
+      // Mapear tanto ejercicios como contenido completado
+      const completedContentIds = progressList
+        .filter(p => p.isCompleted && p.contentId)
+        .map(p => p.contentId as string);
 
       return { completedExerciseIds, completedContentIds };
     },
@@ -42,6 +43,23 @@ export const useCreateProgress = () => {
     },
     onError: (error) => {
       console.error('Error al registrar progreso:', error.message, error.details);
+    },
+  });
+};
+
+export const useSubmitExercise = () => {
+  const queryClient = useQueryClient();
+  return useMutation<ApiResponse<SubmitExerciseResponse>, ApiError, { id: string; submission: SubmitExerciseDto }>({
+    mutationFn: ({ id, submission }) => ProgressService.submitExercise(id, submission),
+    onSuccess: (response) => {
+      // Invalidar las queries de progreso para que la UI se actualice
+      queryClient.invalidateQueries({ queryKey: [PROGRESS_QUERY_KEY, response.data.userId] });
+      queryClient.invalidateQueries({ queryKey: [PROGRESS_QUERY_KEY, response.data.userId, response.data.exerciseId] });
+      // No mostrar toast aquí, el componente que usa el hook lo manejará
+    },
+    onError: (error) => {
+      console.error('Error al enviar ejercicio:', error.message, error.details);
+      // No mostrar toast aquí, el componente que usa el hook lo manejará
     },
   });
 };

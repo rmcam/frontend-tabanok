@@ -99,4 +99,4 @@ Ver próximos pasos y pendientes detallados en [`./Pendientes.md`](./Pendientes.
 
 ---
 
-Última actualización: 7/5/2025, 12:35 a. m. (America/Bogota, UTC-5:00)
+Última actualización: 18/9/2025, 3:13 p. m. (America/Bogota, UTC-5:00)

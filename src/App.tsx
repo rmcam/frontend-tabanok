@@ -24,7 +24,9 @@ const CoursesPage = React.lazy(() => import("./features/learn/pages/CoursesPage"
 const LessonsPage = React.lazy(() => import("./features/learn/pages/LessonsPage"));
 const LessonDetailPage = React.lazy(() => import("./features/learn/pages/LessonDetailPage")); // Nueva importación
 const ExerciseDetailPage = React.lazy(() => import("./features/learn/pages/ExerciseDetailPage")); // Nueva importación
+const DailyLessonPage = React.lazy(() => import("./features/learn/pages/DailyLessonPage")); // Nueva importación
 const ProgressPage = React.lazy(() => import("./features/learn/pages/ProgressPage"));
+const GamificationPage = React.lazy(() => import("./features/dashboard/pages/GamificationPage")); // Nueva importación
 const ProfilePage = React.lazy(() => import("./features/settings/pages/ProfilePage"));
 const SecurityPage = React.lazy(() => import("./features/settings/pages/SecurityPage"));
 const SettingsPage = React.lazy(() => import("./features/settings/pages/SettingsPage"));
@@ -66,8 +68,10 @@ function App() {
               {/* Las siguientes rutas se mantendrán por ahora, pero podrían necesitar páginas dedicadas en el futuro */}
               <Route path="/learn/lesson/:id" element={<LessonDetailPage />} /> {/* Usar LessonDetailPage */}
               <Route path="/learn/exercise/:id" element={<ExerciseDetailPage />} /> {/* Usar ExerciseDetailPage */}
+              <Route path="/learn/daily-lesson" element={<DailyLessonPage />} /> {/* Ruta para la lección diaria */}
 
               <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/gamification" element={<GamificationPage />} /> {/* Ruta para el dashboard de gamificación */}
               <Route path="/inbox" element={<InboxPage />} />
               <Route path="/calendar" element={<CalendarPage />} />
               <Route path="/learn/courses" element={<CoursesPage />} />

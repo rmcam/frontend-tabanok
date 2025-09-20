@@ -80,4 +80,4 @@ Este documento lista las tareas pendientes y los próximos pasos planificados pa
 
 ---
 
-Última actualización: 27/5/2025, 5:51 p. m. (America/Bogota, UTC-5:00)
+Última actualización: 18/9/2025, 3:09 p. m. (America/Bogota, UTC-5:00)

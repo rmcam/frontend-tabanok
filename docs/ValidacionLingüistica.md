@@ -55,4 +55,4 @@ Ver pendientes y estado de cumplimiento en [`docs/Pendientes.md`](./Pendientes.m
 
 ---
 
-Última actualización: 7/5/2025, 12:36 a. m. (America/Bogota, UTC-5:00)
+Última actualización: 18/9/2025, 3:11 p. m. (America/Bogota, UTC-5:00)

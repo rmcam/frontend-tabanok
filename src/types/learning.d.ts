@@ -44,9 +44,40 @@ interface VideoContentData {
 
 interface QuizContentData {
   question: string;
-  options: { id: string; text: string }[];
-  correctAnswerId: string;
+  options: string[]; // Cambiado a array de strings
+  answer: string; // Cambiado a string para la respuesta correcta
   exerciseId: string; // Añadir exerciseId para vincular el quiz a un ejercicio
+}
+
+// Nuevas interfaces para los datos de contenido de ejercicios interactivos
+export interface MatchingContentData {
+  pairs: { id: string; term: string; match: string; }[];
+  exerciseId: string;
+}
+
+export interface FillInTheBlankContentData {
+  text: string; // Texto con marcadores para los espacios en blanco, e.g., "Hola [BLANK] mundo"
+  blanks: { id: string; correctAnswers: string[]; }[]; // Respuestas correctas para cada espacio
+  exerciseId: string;
+}
+
+export interface AudioPronunciationContentData {
+  audioUrl: string;
+  phrase: string;
+  exerciseId: string;
+}
+
+export interface TranslationContentData {
+  sourceText: string;
+  targetLanguage: string; // e.g., 'es', 'en', 'kmt'
+  correctTranslation: string;
+  exerciseId: string;
+}
+
+export interface FunFactContentData {
+  fact: string;
+  imageUrl?: string;
+  exerciseId?: string; // Opcional, ya que no es un ejercicio interactivo per se
 }
 
 // Tipo base para el contenido de aprendizaje
@@ -82,12 +113,43 @@ export interface LearningImageContent extends BaseLearningContent {
   content: { url: string }; // Asumiendo que el contenido de imagen también tiene una URL
 }
 
+// Nuevas interfaces para los tipos de ejercicios interactivos
+export interface LearningMatchingContent extends BaseLearningContent {
+  type: 'matching';
+  content: MatchingContentData;
+}
+
+export interface LearningFillInTheBlankContent extends BaseLearningContent {
+  type: 'fill-in-the-blank';
+  content: FillInTheBlankContentData;
+}
+
+export interface LearningAudioPronunciationContent extends BaseLearningContent {
+  type: 'audio-pronunciation';
+  content: AudioPronunciationContentData;
+}
+
+export interface LearningTranslationContent extends BaseLearningContent {
+  type: 'translation';
+  content: TranslationContentData;
+}
+
+export interface LearningFunFactContent extends BaseLearningContent {
+  type: 'fun-fact';
+  content: FunFactContentData;
+}
+
 // Unión de todos los tipos de contenido posibles
 export type LearningContent =
   | LearningTextContent
   | LearningVideoContent
   | LearningQuizContent
   | LearningImageContent
+  | LearningMatchingContent
+  | LearningFillInTheBlankContent
+  | LearningAudioPronunciationContent
+  | LearningTranslationContent
+  | LearningFunFactContent
   | BaseLearningContent; // Incluir BaseLearningContent para tipos desconocidos o futuros
 
 export interface LearningTopic extends Topic {

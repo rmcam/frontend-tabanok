@@ -73,12 +73,6 @@ export async function apiRequest<T>(
     finalHeaders['Content-Type'] = 'application/json';
   }
 
-  // Añadir el encabezado Authorization si hay un token de acceso en localStorage y no está ya presente
-  const accessToken = localStorage.getItem('accessToken'); // Asumiendo que el token se guarda aquí
-  if (accessToken && !finalHeaders['Authorization']) {
-    finalHeaders['Authorization'] = `Bearer ${accessToken}`;
-  }
-
   const config: RequestInit = {
     method,
     headers: finalHeaders,

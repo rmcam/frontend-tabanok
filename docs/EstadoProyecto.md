@@ -34,7 +34,6 @@ El frontend es una aplicación **React + Vite** con una estructura modular bien 
 *   Se agregó el componente `LatestActivities` para mostrar las últimas actividades realizadas por los estudiantes, obteniendo datos del backend (`GET /activities`) y filtrando los resultados en el frontend.
 *   Se han añadido indicadores de carga a los componentes del dashboard.
 *   Se movió la verificación de la variable de entorno `VITE_API_URL` al componente `App.tsx` para que se realice solo una vez al inicio de la aplicación.
-  - Implementar la funcionalidad de edición de contenido en el componente `ContentManager`. (Completado: Se ha implementado la funcionalidad de edición de contenido).
 *   **Módulos/Vistas Implementadas (Configuración Inicial o Integración Básica de Datos):** Se ha completado la implementación inicial de las páginas del sidebar con componentes de Shadcn y datos simulados, incluyendo la configuración de rutas y la obtención básica de datos donde fue aplicable. Los módulos/vistas implementados son:
     1.  **DashboardPage (`DashboardPage.tsx`)**: Implementada con un resumen de cursos recientes/en progreso, utilizando tarjetas con iconos y barras de progreso.
     2.  **InboxPage (`InboxPage.tsx`)**: Implementada con un listado de notificaciones en formato de tarjeta, con iconos y acciones.
@@ -56,7 +55,9 @@ El frontend es una aplicación **React + Vite** con una estructura modular bien 
     17. Vista de Multimedia (`MultimediaPage.tsx`)
     18. Vista de Actividad - Quiz (`QuizActivity.tsx`)
     19. Vista de Actividad - Matching (`MatchingActivity.tsx`)
-  *   **Diseño de la lista de unidades:** Se ha mejorado el diseño de la lista de unidades (`UnitListPage.tsx`) utilizando componentes de la interfaz de usuario y ajustando la tipografía y el espaciado. Se ha agregado una sombra a las tarjetas y se ha aumentado el tamaño de las imágenes. **Se ha implementado la funcionalidad de apertura, la navegación de regreso y el diseño responsive para las unidades. Cada tarjeta de unidad ahora es un enlace que navega a la página de detalles de la unidad, la cual contiene un botón "Regresar" y migas de pan para facilitar la navegación de regreso a la lista de unidades. Además, se han agregado media queries al archivo src/index.css para adaptar el diseño a diferentes tamaños de pantalla.**
+    20. **Vista de Detalle de Ejercicio (`ExerciseDetailPage.tsx`)**: Se han corregido errores relacionados con el manejo de respuestas del backend (`Cannot read properties of undefined`), el envío de la respuesta del usuario (`userAnswer`) como una cadena de texto para quizzes de respuesta única, y la lógica de feedback visual para reflejar correctamente si una respuesta es correcta o incorrecta según la evaluación del backend.
+*   **Diseño de la lista de unidades:** Se ha mejorado el diseño de la lista de unidades (`UnitListPage.tsx`) utilizando componentes de la interfaz de usuario y ajustando la tipografía y el espaciado. Se ha agregado una sombra a las tarjetas y se ha aumentado el tamaño de las imágenes. **Se ha implementado la funcionalidad de apertura, la navegación de regreso y el diseño responsive para las unidades. Cada tarjeta de unidad ahora es un enlace que navega a la página de detalles de la unidad, la cual contiene un botón "Regresar" y migas de pan para facilitar la navegación de regreso a la lista de unidades. Además, se han agregado media queries al archivo src/index.css para adaptar el diseño a diferentes tamaños de pantalla.**
+*   **Corrección de errores PWA**: Se ha resuelto el error `Error while trying to use the following icon from the Manifest: http://localhost:5173/pwa-192x192.png` eliminando las referencias a iconos PWA no existentes en `public/manifest.webmanifest` y en `index.html`.
 
 ### Estado del Backend
 
@@ -100,4 +101,4 @@ Ver lista detallada y estado de cumplimiento en [`./Pendientes.md`](./Pendientes
 
 ---
 
-Última actualización: 12/5/2025, 11:59 p. m. (America/Bogota, UTC-5:00)
+Última actualización: 18/9/2025, 3:06 p. m. (America/Bogota, UTC-5:00)

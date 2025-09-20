@@ -42,6 +42,7 @@ El frontend de Tabanok organiza sus componentes y páginas de la siguiente maner
         *   `pages/CoursesPage.tsx`: Implementada con una cuadrícula de tarjetas de cursos, incluyendo búsqueda y filtros, y mostrando información detallada como número de lecciones y nivel.
         *   `pages/LessonsPage.tsx`: Implementada con organización por unidades/temas usando componentes colapsables, y tarjetas de lección con tipo de contenido, progreso y estado de bloqueo.
         *   `pages/ProgressPage.tsx`: Implementada con métricas clave, progreso por curso y una galería de logros/insignias.
+        *   **`pages/ExerciseDetailPage.tsx`**: Se han corregido errores relacionados con el manejo de respuestas del backend (`Cannot read properties of undefined`), el envío de la respuesta del usuario (`userAnswer`) como una cadena de texto para quizzes de respuesta única, y la lógica de feedback visual para reflejar correctamente si una respuesta es correcta o incorrecta según la evaluación del backend.
     *   `settings/`: Contiene las páginas de configuración.
         *   `pages/ProfilePage.tsx`: Implementada con información de perfil editable, previsualización de avatar y separación de opciones de seguridad.
         *   `pages/SecurityPage.tsx`: Implementada con secciones para cambiar contraseña y configurar autenticación de dos factores (2FA).
@@ -67,6 +68,7 @@ Se utilizan hooks personalizados como `useAuth` (`src/auth/hooks/useAuth.ts`), `
 
 *   `useSidebar.ts`: Hook para acceder al contexto de la Sidebar.
 *   `useSidebarCookie.ts`: Hook para gestionar la persistencia del estado de la Sidebar en cookies.
+*   `useFetchData.ts`: Hook genérico para la obtención de datos con manejo de carga y errores.
 
 ### Gestión de Rutas
 
@@ -98,6 +100,7 @@ El frontend implementa diseño responsive utilizando **Tailwind CSS** con clases
 
 Se han realizado ajustes específicos para mejorar la responsividad en:
 *   **Lista de Unidades:** Se ha mejorado el diseño de la lista de unidades (`UnitListPage.tsx`) utilizando componentes de la interfaz de usuario y ajustando la tipografía y el espaciado. Se ha agregado una sombra a las tarjetas y se ha aumentado el tamaño de las imágenes. Se han añadido media queries al archivo `src/index.css` para adaptar el diseño a diferentes tamaños de pantalla, apilando las tarjetas en pantallas pequeñas y reduciendo los márgenes y el tamaño de la fuente.
+*   **Corrección de errores PWA**: Se ha resuelto el error `Error while trying to use the following icon from the Manifest: http://localhost:5173/pwa-192x192.png` eliminando las referencias a iconos PWA no existentes en `public/manifest.webmanifest` y en `index.html`.
 
 El frontend implementa diseño responsive utilizando **Tailwind CSS** con clases de utilidad para controlar el layout, tamaño y visibilidad de los elementos en diferentes puntos de quiebre (`sm:`, `md:`, `lg:`, etc.). Se utilizan **CSS Grid** y **Flexbox** para crear layouts flexibles y adaptables, como en el Dashboard y los componentes de UI. Componentes de UI genéricos como `Card`, `Dialog`, `Sheet` y `Table` están diseñados con responsive en mente, incluyendo el uso de **container queries** en las tarjetas y `overflow-x-auto` para tablas. La barra lateral tiene una implementación específica para móviles (`MobileSidebar`) que se espera que se muestre como un panel deslizable en pantallas pequeñas, controlada por un trigger.
 
@@ -111,4 +114,4 @@ El frontend consume la API RESTful proporcionada por el backend para obtener dat
 
 ---
 
-Última actualización: 27/5/2025, 5:51 p. m. (America/Bogota, UTC-5:00)
+Última actualización: 18/9/2025, 3:07 p. m. (America/Bogota, UTC-5:00)

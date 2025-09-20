@@ -5,7 +5,6 @@ export * from './modules/modules.service';
 export * from './unities/unities.service';
 export * from './lessons/lessons.service';
 export * from './topics/topics.service';
-export * from './activities/activities.service';
 export * from './exercises/exercises.service';
 export * from './multimedia/multimedia.service';
 export * from './vocabulary/vocabulary.service';
