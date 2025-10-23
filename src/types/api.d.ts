@@ -67,7 +67,8 @@ export interface RegisterRequest {
   email: string; // Correo electrónico del usuario
   password: string; // Contraseña del usuario
   languages?: string[]; // Idiomas que habla el usuario (opcional)
-  preferences?: { // Preferencias del usuario (opcional)
+  preferences?: {
+    // Preferencias del usuario (opcional)
     notifications: boolean;
     language: string;
     theme: string;
@@ -343,6 +344,7 @@ export interface Lesson {
  */
 export interface SubmitExerciseDto {
   userAnswer: string | Record<string, any>; // Puede ser string o un objeto complejo
+  score: number;
 }
 
 /**
@@ -350,12 +352,13 @@ export interface SubmitExerciseDto {
  * @description Interfaz para la respuesta del backend al enviar un ejercicio.
  */
 export interface SubmitExerciseResponse {
-  message: string;
   isCorrect: boolean;
   score: number;
   awardedPoints: number;
-  exerciseTitle: string;
+  message?: string; // Mensaje opcional para notificaciones
+  exerciseTitle?: string; // Opcional, si el backend lo envía
   details?: any; // Añadido para el feedback detallado
+  userAnswer?: string; // Añadido si el backend devuelve la respuesta del usuario
 }
 
 /**
@@ -392,21 +395,21 @@ export interface LeaderboardEntryDto {
  * @interface Leaderboard
  * @description Interfaz para la tabla de clasificación completa.
  */
-  export interface LeaderboardRanking {
-    userId: string;
-    username: string;
-    avatarUrl?: string;
-    totalPoints: number;
-  }
+export interface LeaderboardRanking {
+  userId: string;
+  username: string;
+  avatarUrl?: string;
+  totalPoints: number;
+}
 
-  export interface Leaderboard {
-    id: string;
-    week: number;
-    year: number;
-    rankings: LeaderboardRanking[];
-    createdAt: Date;
-    updatedAt: Date;
-  }
+export interface Leaderboard {
+  id: string;
+  week: number;
+  year: number;
+  rankings: LeaderboardRanking[];
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 /**
  * @interface CreateLessonDto
@@ -519,7 +522,7 @@ export interface Exercise {
   description: string; // Añadido 'description'
   type: string; // Ej. 'quiz', 'mission' (según el feedback)
   content: any; // Tipo flexible para el contenido del ejercicio
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  difficulty: "beginner" | "intermediate" | "advanced";
   points: number;
   timeLimit?: number; // Añadido según el feedback
   isActive: boolean;
@@ -547,7 +550,7 @@ export interface CreateExerciseDto {
   description: string;
   type: string;
   content: any;
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  difficulty: "beginner" | "intermediate" | "advanced";
   points: number;
   timeLimit?: number;
   isActive?: boolean;
@@ -564,7 +567,7 @@ export interface UpdateExerciseDto {
   description?: string;
   type?: string;
   content?: any;
-  difficulty?: 'beginner' | 'intermediate' | 'advanced';
+  difficulty?: "beginner" | "intermediate" | "advanced";
   points?: number;
   timeLimit?: number;
   isActive?: boolean;
@@ -590,7 +593,6 @@ export interface Multimedia {
   lesson?: string;
   // Añadir otros campos relevantes del modelo Multimedia
 }
-
 
 /**
  * @interface Vocabulary
@@ -827,7 +829,7 @@ export interface UserMissionDto {
   userId: string;
   missionTemplateId: string;
   missionTemplate: MissionTemplate; // Información de la plantilla de misión
-  status: 'active' | 'completed' | 'failed'; // Estado de la misión para el usuario
+  status: "active" | "completed" | "failed"; // Estado de la misión para el usuario
   progress?: number; // Progreso de la misión (si aplica)
   assignedAt: string; // Fecha en que se asignó la misión
   completedAt?: string; // Fecha en que se completó la misión (si aplica)
@@ -1014,7 +1016,7 @@ export interface RecordSessionDto {
  * @description DTO para actualizar el estado de una mentoría.
  */
 export interface UpdateMentorshipStatusDto {
-  status: 'pending' | 'active' | 'completed' | 'cancelled';
+  status: "pending" | "active" | "completed" | "cancelled";
 }
 
 /**
@@ -1144,11 +1146,11 @@ export interface Content {
 }
 
 export enum UserRole {
-  ADMIN = 'admin',
-  USER = 'user',
-  MENTOR = 'mentor',
-  TEACHER = 'teacher',
-  STUDENT = 'student', // Añadido para compatibilidad con RegisterForm
+  ADMIN = "admin",
+  USER = "user",
+  MENTOR = "mentor",
+  TEACHER = "teacher",
+  STUDENT = "student", // Añadido para compatibilidad con RegisterForm
 }
 
 /**
