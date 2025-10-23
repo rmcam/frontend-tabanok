@@ -94,6 +94,15 @@ module.exports = {
             transform: "translate(0px, 0px) scale(1)",
           },
         },
+        "pulse-once": {
+          "0%": { opacity: "1", transform: "scale(1)" },
+          "50%": { opacity: "0.7", transform: "scale(1.05)" },
+          "100%": { opacity: "1", transform: "scale(1)" },
+        },
+        "fade-in-up": {
+          "0%": { opacity: "0", transform: "translateY(20px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -102,7 +111,9 @@ module.exports = {
         "blob-reverse": "blob-reverse 7s infinite",
         "bounce-slow": "bounce 3s infinite",
         "spin-slow": "spin 10s linear infinite",
-        "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite", // Añadir una animación de pulso más lenta
+        "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        "pulse-once": "pulse-once 1s ease-out", // Animación de pulso una vez
+        "fade-in-up": "fade-in-up 0.5s ease-out forwards", // Animación de aparición y deslizamiento hacia arriba
       },
     },
   },

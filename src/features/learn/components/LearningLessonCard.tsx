@@ -3,10 +3,21 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CheckCircle, Lock } from "lucide-react";
 import { Progress } from '@/components/ui/progress'; // Importar Progress
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"; // Importar componentes de AlertDialog
+import { LightbulbIcon } from 'lucide-react'; // Importar LightbulbIcon
 import type { LearningLessonCardProps } from '@/types/learning'; // Usar la interfaz global y UserProgress
 
 const LearningLessonCard: React.FC<LearningLessonCardProps> = memo(({ lesson, userProgress, isPreviousLessonCompleted }) => {
   const { t } = useTranslation();
+  const [isGuideOpen, setIsGuideOpen] = React.useState(false); // Estado para controlar el modal de la guía
 
   // Determinar si la lección está bloqueada
   const isLocked = lesson.isLocked || !isPreviousLessonCompleted;
@@ -63,6 +74,34 @@ const LearningLessonCard: React.FC<LearningLessonCardProps> = memo(({ lesson, us
           </div>
         </div>
       </div>
+      {lesson.guideContent && (
+        <AlertDialog open={isGuideOpen} onOpenChange={setIsGuideOpen}>
+          <AlertDialogTrigger asChild>
+            <button
+              className={`ml-2 p-2 rounded-full ${isLocked ? 'bg-gray-500 text-gray-300 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600'} transition-colors`}
+              onClick={(e) => {
+                e.preventDefault(); // Prevenir la navegación de la lección
+                if (!isLocked) {
+                  setIsGuideOpen(true);
+                }
+              }}
+              disabled={isLocked}
+              aria-label={t("Ver notas de la lección")}
+            >
+              <LightbulbIcon className="h-5 w-5" />
+            </button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("Notas de la Lección")}: {lesson.title}</AlertDialogTitle>
+              <AlertDialogDescription>
+                <div dangerouslySetInnerHTML={{ __html: lesson.guideContent }} />
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogAction onClick={() => setIsGuideOpen(false)}>{t("Cerrar")}</AlertDialogAction>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </Link>
   );
 });

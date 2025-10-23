@@ -6,19 +6,21 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { CheckCircle2, XCircle, RefreshCw } from 'lucide-react';
 import type { TranslationContentData } from '@/types/learning';
-import { useSubmitExercise } from '@/hooks/progress/progress.hooks';
+import { useSubmitExercise } from '@/hooks/exercises/exercises.hooks'; // Corregir importación
 import { useHeartsStore } from '@/stores/heartsStore';
 
 interface LearningTranslationProps {
+  exerciseId: string; // Añadir exerciseId como prop
   translation: TranslationContentData;
   onComplete?: (isCorrect: boolean, awardedPoints?: number) => void;
 }
 
-const LearningTranslation: React.FC<LearningTranslationProps> = ({ translation, onComplete }) => {
+const LearningTranslation: React.FC<LearningTranslationProps> = ({ exerciseId, translation, onComplete }) => { // Aceptar exerciseId
   const { t } = useTranslation();
   const [userAnswer, setUserAnswer] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+  const [submissionResponse, setSubmissionResponse] = useState<any>(null); // Nuevo estado para la respuesta
 
   const { decrementHeart } = useHeartsStore();
   const { mutate: submitExerciseMutation, isPending: isSubmitting } = useSubmitExercise();
@@ -35,25 +37,25 @@ const LearningTranslation: React.FC<LearningTranslationProps> = ({ translation, 
     }
 
     const submission = {
-      exerciseId: translation.exerciseId,
       userAnswer: userAnswer.trim(),
     };
 
     submitExerciseMutation({
-      id: translation.exerciseId,
+      id: exerciseId, // Usar la prop exerciseId
       submission: submission,
     }, {
       onSuccess: (response) => {
-        const correct = response.data.isCorrect;
+        setSubmissionResponse(response); // Guardar la respuesta completa
+        const correct = response.isCorrect;
         setIsCorrect(correct);
         setIsSubmitted(true);
         if (correct) {
-          toast.success(t("¡Traducción correcta! Has ganado {{points}} puntos.", { points: response.data.awardedPoints }));
+          toast.success(t("¡Traducción correcta! Has ganado {{points}} puntos.", { points: response.awardedPoints }));
         } else {
-          toast.error(t("Traducción incorrecta. La respuesta correcta era: {{correctTranslation}}", { correctTranslation: translation.correctTranslation }));
+          toast.error(t("Traducción incorrecta. La respuesta correcta era: {{correctTranslation}}", { correctTranslation: response.details?.correctTranslation || translation.correctTranslation }));
           decrementHeart();
         }
-        onComplete?.(correct, response.data.awardedPoints);
+        onComplete?.(correct, response.awardedPoints);
       },
       onError: (error) => {
         console.error('Error al enviar traducción:', error);
@@ -95,14 +97,23 @@ const LearningTranslation: React.FC<LearningTranslationProps> = ({ translation, 
 
         {isSubmitted && isCorrect !== null && (
           <div
-            className={`flex items-center justify-center p-4 rounded-md ${isCorrect ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}
+            className={`mt-6 p-4 rounded-md flex flex-col items-center justify-center space-y-2 transition-all duration-300 ease-in-out transform ${isCorrect ? 'bg-green-100 text-green-700 scale-105' : 'bg-red-100 text-red-700 scale-105'}`}
             role="status"
             aria-live="polite"
           >
-            {isCorrect ? <CheckCircle2 className="h-6 w-6 mr-2" /> : <XCircle className="h-6 w-6 mr-2" />}
-            <p className="text-lg font-semibold">
+            {isCorrect ? (
+              <CheckCircle2 className="h-10 w-10 text-green-600 animate-bounce" />
+            ) : (
+              <XCircle className="h-10 w-10 text-red-600 animate-shake" />
+            )}
+            <p className="text-xl font-bold">
               {isCorrect ? t("¡Traducción Correcta!") : t("Traducción Incorrecta.")}
             </p>
+            {!isCorrect && submissionResponse?.details && submissionResponse.details.correctTranslation && (
+              <p className="text-md text-center">
+                {t("La respuesta correcta era:")} <span className="font-semibold">{submissionResponse.details.correctTranslation}</span>
+              </p>
+            )}
           </div>
         )}
       </CardContent>

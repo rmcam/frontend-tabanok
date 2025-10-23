@@ -3,9 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, CheckCircle2, XCircle } from 'lucide-react'; // Importar CheckCircle2 y XCircle
-import { useExerciseById } from '@/hooks/exercises/exercises.hooks'; // Importar useExerciseById
+import { useExerciseById, useSubmitExercise } from '@/hooks/exercises/exercises.hooks'; // Importar useExerciseById y useSubmitExercise
 import { useProfile } from '@/hooks/auth/auth.hooks'; // Importar useProfile
-import { useSubmitExercise } from '@/hooks/progress/progress.hooks'; // Importar useSubmitExercise desde progress.hooks
 import type { LearningQuizContent, LearningMatchingContent, LearningFillInTheBlankContent, LearningAudioPronunciationContent, LearningTranslationContent, LearningFunFactContent } from '@/types/learning'; // Importar todos los tipos de contenido de aprendizaje
 import LearningQuiz from '../components/LearningQuiz';
 import LearningMatching from '../components/LearningMatching';
@@ -98,39 +97,46 @@ const ExerciseDetailPage: React.FC = () => {
           <p>{exercise.description}</p>
 
           {/* Renderizar contenido específico del ejercicio según su tipo */}
-          {exercise.type === 'quiz' && (
+          {exercise.type === 'multiple-choice' && (
             <LearningQuiz
+              exerciseId={exercise.id} // Pasar exercise.id como prop
               quiz={exercise.content as LearningQuizContent['content']}
               onComplete={handleExerciseComplete}
             />
           )}
           {exercise.type === 'matching' && (
             <LearningMatching
+              exerciseId={exercise.id} // Pasar exercise.id como prop
               matching={exercise.content as LearningMatchingContent['content']}
               onComplete={handleExerciseComplete}
             />
           )}
           {exercise.type === 'fill-in-the-blank' && (
             <LearningFillInTheBlank
+              exerciseId={exercise.id} // Pasar exercise.id como prop
               fillInTheBlank={exercise.content as LearningFillInTheBlankContent['content']}
               onComplete={handleExerciseComplete}
             />
           )}
           {exercise.type === 'audio-pronunciation' && (
             <LearningAudioPronunciation
+              exerciseId={exercise.id} // Pasar exercise.id como prop
               audioPronunciation={exercise.content as LearningAudioPronunciationContent['content']}
               onComplete={handleExerciseComplete}
             />
           )}
           {exercise.type === 'translation' && (
             <LearningTranslation
+              exerciseId={exercise.id} // Pasar exercise.id como prop
               translation={exercise.content as LearningTranslationContent['content']}
               onComplete={handleExerciseComplete}
             />
           )}
           {exercise.type === 'fun-fact' && (
             <LearningFunFact
+              exerciseId={exercise.id} // Pasar exercise.id como prop
               funFact={exercise.content as LearningFunFactContent['content']}
+              onComplete={handleExerciseComplete} // Pasar onComplete
             />
           )}
 
@@ -152,7 +158,7 @@ const ExerciseDetailPage: React.FC = () => {
           )}
 
           {/* Manejar tipos de ejercicio desconocidos */}
-          {!['quiz', 'matching', 'fill-in-the-blank', 'audio-pronunciation', 'translation', 'fun-fact'].includes(exercise.type) && (
+          {!['multiple-choice', 'matching', 'fill-in-the-blank', 'audio-pronunciation', 'translation', 'fun-fact'].includes(exercise.type) && (
             <div className="mt-8 p-4 rounded-md bg-yellow-100 text-yellow-800">
               <p className="font-semibold">{t('Tipo de ejercicio desconocido')}: {exercise.type}</p>
               <pre className="mt-2 text-sm bg-yellow-50 p-3 rounded-md overflow-auto">

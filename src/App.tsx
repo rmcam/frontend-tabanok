@@ -15,6 +15,7 @@ const LearnPage = React.lazy(importLearnPage); // Importación explícita de la 
 
 const ModuleDetailPage = React.lazy(() => import("./features/learn/pages/ModuleDetailPage")); // Nueva importación
 const UnitDetailPage = React.lazy(() => import("./features/learn/pages/UnitDetailPage")); // Importación de UnitDetailPage
+const LearningPathPage = React.lazy(() => import("./features/learn/pages/LearningPathPage")); // Nueva importación para el camino de aprendizaje
 
 const importDashboardPage = () => import("./features/dashboard/pages/DashboardPage");
 const DashboardPage = React.lazy(importDashboardPage);
@@ -41,16 +42,14 @@ const SettingsPage = React.lazy(() => import("./features/settings/pages/Settings
 function App() {
   const location = useLocation();
   const isLandingPage = location.pathname === "/";
-  const { data: userProfile, isLoading: isSessionLoading } = useVerifySession(); // Obtener estado de la sesión
+  // Solo verificar la sesión si no estamos en la página de aterrizaje
+  const { data: userProfile, isLoading: isSessionLoading } = useVerifySession({ enabled: !isLandingPage });
 
+  // La lógica de precarga de componentes se puede mantener, pero no dependerá de userProfile en la landing page
   useEffect(() => {
-    // Precargar componentes clave si el usuario está autenticado
     if (!isSessionLoading && userProfile) {
-      // Precargar DashboardPage
       importDashboardPage();
-      // Precargar LearnPage
       importLearnPage();
-      // Puedes añadir más páginas aquí según la probabilidad de navegación
     }
   }, [isSessionLoading, userProfile]);
 
@@ -69,6 +68,7 @@ function App() {
               <Route path="/learn/lesson/:id" element={<LessonDetailPage />} /> {/* Usar LessonDetailPage */}
               <Route path="/learn/exercise/:id" element={<ExerciseDetailPage />} /> {/* Usar ExerciseDetailPage */}
               <Route path="/learn/daily-lesson" element={<DailyLessonPage />} /> {/* Ruta para la lección diaria */}
+              <Route path="/learn/path" element={<LearningPathPage />} /> {/* Ruta para el camino de aprendizaje */}
 
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/gamification" element={<GamificationPage />} /> {/* Ruta para el dashboard de gamificación */}

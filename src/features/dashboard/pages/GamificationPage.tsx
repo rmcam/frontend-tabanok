@@ -1,16 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button'; // Importar Button
+import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Trophy, Award, Gem, Heart, Zap } from 'lucide-react';
 import { useProfile } from '@/hooks/auth/auth.hooks';
-import { useCurrentLeaderboard, useAllAchievements, useAllMissionTemplates, useHeartRecharge } from '@/hooks/gamification/gamification.hooks'; // Importar hooks de gamificación
-import type { LeaderboardRanking, GamificationUserStatsDto, Achievement, MissionTemplate } from '@/types/api'; // Importar tipos de la API
-import AchievementCard from '../components/AchievementCard'; // Importar AchievementCard
-import MissionCard from '../components/MissionCard'; // Importar MissionCard
+import { useCurrentLeaderboard, useAllAchievements, useAllMissionTemplates, useHeartRecharge, useGamificationUserStats } from '@/hooks/gamification/gamification.hooks';
+import type { LeaderboardRanking, GamificationUserStatsDto, Achievement, MissionTemplate } from '@/types/api';
+import AchievementCard from '../components/AchievementCard';
+import MissionCard from '../components/MissionCard';
+import { useSoundEffect } from '@/hooks/gamification/useSoundEffect';
+import { useUserStore } from '@/stores/userStore';
 
 const GamificationPage: React.FC = () => {
   const { t } = useTranslation();
@@ -19,8 +21,28 @@ const GamificationPage: React.FC = () => {
   const { data: achievements, isLoading: isLoadingAchievements } = useAllAchievements(); // Obtener todos los logros
   const { data: missionTemplates, isLoading: isLoadingMissionTemplates } = useAllMissionTemplates(); // Obtener todas las plantillas de misión
   const rechargeHeartsMutation = useHeartRecharge(); // Inicializar el hook de recarga de vidas
+  const playSound = useSoundEffect(); // Inicializar el hook de sonido
+  const { user } = useUserStore(); // Obtener el usuario del store
+  const { data: userStats, isLoading: isLoadingUserStats } = useGamificationUserStats(user?.id || ''); // Obtener userStats aquí
 
-  if (isLoadingProfile || isLoadingLeaderboard || isLoadingAchievements || isLoadingMissionTemplates) {
+  // Efecto para detectar nuevos logros o misiones completadas
+  useEffect(() => {
+    if (userStats) {
+      // Lógica para detectar nuevos logros
+      // Esto requeriría comparar el estado actual con un estado anterior,
+      // lo cual es más complejo y podría requerir un useRef o un estado local.
+      // Por simplicidad, aquí solo se muestra la idea.
+      // Por ejemplo, si el backend envía un evento o un campo 'newlyEarnedAchievementId'
+      // se podría reproducir el sonido.
+
+      // Para esta implementación, asumiremos que el sonido de "levelUp" es suficiente
+      // para indicar un progreso significativo, y los sonidos de "correct" y "unlock"
+      // ya se manejan en LearningPathNode.
+    }
+  }, [userStats, playSound]);
+
+
+  if (isLoadingProfile || isLoadingLeaderboard || isLoadingAchievements || isLoadingMissionTemplates || isLoadingUserStats) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
         <p className="text-lg">{t("Cargando dashboard de gamificación...")}</p>
@@ -36,19 +58,21 @@ const GamificationPage: React.FC = () => {
     );
   }
 
-  const userStats: GamificationUserStatsDto = userProfile.gameStats || {
+  // userStats ya se obtiene del hook useGamificationUserStats
+  const currentUserStats: GamificationUserStatsDto = userStats ?? {
     level: 1,
     points: 0,
-    totalPoints: 0, // Asegurar que totalPoints esté inicializado
+    totalPoints: 0,
     streak: 0,
     hearts: 5,
     achievements: [],
     missions: [],
     league: 'Bronze',
+    lastActivity: new Date().toISOString(), // Añadir lastActivity para cumplir con la interfaz
   };
 
-  const currentLevelProgress = (userStats.points % 1000) / 10; // Asumiendo 1000 puntos por nivel
-  const nextLevelPoints = 1000 - (userStats.points % 1000);
+  const currentLevelProgress = ((currentUserStats?.points ?? 0) % 1000) / 10; // Asumiendo 1000 puntos por nivel
+  const nextLevelPoints = 1000 - ((currentUserStats?.points ?? 0) % 1000);
 
   return (
     <div className="flex flex-col flex-grow p-4 md:p-8 max-w-7xl mx-auto">
@@ -69,8 +93,8 @@ const GamificationPage: React.FC = () => {
             <Award className="h-6 w-6 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-5xl font-bold text-primary">{userStats.totalPoints} XP</div>
-            <p className="text-sm text-muted-foreground">{t("Nivel")}: {userStats.level}</p>
+            <div className="text-5xl font-bold text-primary">{currentUserStats.totalPoints} XP</div>
+            <p className="text-sm text-muted-foreground">{t("Nivel")}: {currentUserStats.level}</p>
             <Progress value={currentLevelProgress} className="w-full h-2 mt-4" />
             <p className="text-xs text-muted-foreground mt-2">
               {t("Faltan")} {nextLevelPoints} {t("XP para el siguiente nivel")}
@@ -85,11 +109,11 @@ const GamificationPage: React.FC = () => {
             <Heart className="h-6 w-6 text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-5xl font-bold text-primary">{userStats.streak || 0} {t("días")}</div>
+            <div className="text-5xl font-bold text-primary">{currentUserStats.streak || 0} {t("días")}</div>
             <p className="text-sm text-muted-foreground">{t("Racha de aprendizaje")}</p>
             <div className="flex items-center mt-4">
               <Heart className="h-6 w-6 text-red-500 mr-2" />
-              <span className="text-xl font-bold">{userStats.hearts} {t("Vidas")}</span>
+              <span className="text-xl font-bold">{currentUserStats.hearts} {t("Vidas")}</span>
             </div>
             <p className="text-xs text-muted-foreground mt-2">
               {t("Las vidas se recargan con el tiempo o se pueden ganar.")}
@@ -112,11 +136,11 @@ const GamificationPage: React.FC = () => {
             <Trophy className="h-6 w-6 text-yellow-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-5xl font-bold text-primary">{userStats.league}</div>
+            <div className="text-5xl font-bold text-primary">{currentUserStats.league}</div>
             <p className="text-sm text-muted-foreground">{t("Compite semanalmente por el primer puesto.")}</p>
             <div className="flex items-center mt-4">
               <Gem className="h-6 w-6 text-blue-500 mr-2" />
-              <span className="text-xl font-bold">{t("Tu Ranking")}: {leaderboard?.rankings.findIndex(r => r.userId === userProfile.id) + 1 || '-'}</span>
+              <span className="text-xl font-bold">{t("Tu Ranking")}: {(leaderboard?.rankings || []).findIndex(r => r.userId === userProfile.id) + 1 || '-'}</span>
             </div>
             <p className="text-xs text-muted-foreground mt-2">
               {t("La liga se actualiza cada lunes.")}
@@ -186,7 +210,7 @@ const GamificationPage: React.FC = () => {
                 <AchievementCard
                   key={achievement.id}
                   achievement={achievement}
-                  isEarned={userStats.achievements?.some(ua => ua.achievementId === achievement.id) || false}
+                  isEarned={currentUserStats.achievements?.some(ua => ua.achievementId === achievement.id) || false}
                 />
               ))
             )}
@@ -211,7 +235,7 @@ const GamificationPage: React.FC = () => {
                 <MissionCard
                   key={mission.id}
                   mission={mission}
-                  userMission={userStats.missions?.find(um => um.missionTemplateId === mission.id)}
+                  userMission={currentUserStats.missions?.find(um => um.missionTemplateId === mission.id)}
                 />
               ))
             )}

@@ -5,15 +5,16 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { CheckCircle2, XCircle, Volume2, Mic, StopCircle, RefreshCw } from 'lucide-react';
 import type { AudioPronunciationContentData } from '@/types/learning';
-import { useSubmitExercise } from '@/hooks/progress/progress.hooks';
+import { useSubmitExercise } from '@/hooks/exercises/exercises.hooks'; // Corregir importación
 import { useHeartsStore } from '@/stores/heartsStore';
 
 interface LearningAudioPronunciationProps {
+  exerciseId: string; // Añadir exerciseId como prop
   audioPronunciation: AudioPronunciationContentData;
   onComplete?: (isCorrect: boolean, awardedPoints?: number) => void;
 }
 
-const LearningAudioPronunciation: React.FC<LearningAudioPronunciationProps> = ({ audioPronunciation, onComplete }) => {
+const LearningAudioPronunciation: React.FC<LearningAudioPronunciationProps> = ({ exerciseId, audioPronunciation, onComplete }) => { // Aceptar exerciseId
   const { t } = useTranslation();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -21,6 +22,7 @@ const LearningAudioPronunciation: React.FC<LearningAudioPronunciationProps> = ({
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const [submissionResponse, setSubmissionResponse] = useState<any>(null); // Nuevo estado para la respuesta
 
   const { decrementHeart } = useHeartsStore();
   const { mutate: submitExerciseMutation, isPending: isSubmitting } = useSubmitExercise();
@@ -72,50 +74,36 @@ const LearningAudioPronunciation: React.FC<LearningAudioPronunciationProps> = ({
     // En un escenario real, aquí enviarías el audioBlob al backend para su evaluación.
     // Por ahora, simularemos una respuesta.
     // El backend debería tener un endpoint que reciba el archivo de audio y la frase esperada,
+    // En un escenario real, aquí enviarías el audioBlob al backend para su evaluación.
+    // Esto requeriría un endpoint de backend que reciba el archivo de audio y la frase esperada,
     // y use un modelo de reconocimiento de voz para evaluar la pronunciación.
+    // Por ahora, el `userAnswer` será un placeholder.
 
-    // Ejemplo de cómo podrías enviar el Blob (requiere un backend que lo maneje)
-    const formData = new FormData();
-    formData.append('exerciseId', audioPronunciation.exerciseId);
-    formData.append('userAudio', audioBlob, 'pronunciation.webm');
-    formData.append('phrase', audioPronunciation.phrase); // Enviar la frase esperada para evaluación
-
-    // Simulamos la llamada a la API
-    // const response = await fetch('/api/submit-pronunciation', { method: 'POST', body: formData });
-    // const result = await response.json();
-
-    // Para la simulación, asumimos que el backend devuelve { isCorrect: boolean, awardedPoints: number }
-    const isSimulatedCorrect = Math.random() > 0.5; // 50% de probabilidad de ser correcto
-    const simulatedResponse = {
-      isCorrect: isSimulatedCorrect,
-      awardedPoints: isSimulatedCorrect ? 10 : 0,
-      userId: 'simulated-user-id', // Placeholder
-      exerciseId: audioPronunciation.exerciseId,
+    const submission = {
+      userAnswer: {
+        audioSubmitted: true,
+        // En un futuro, aquí se podría enviar la transcripción del frontend si se usa un modelo local
+        // o la URL de un audio subido a un servicio de almacenamiento.
+        transcription: "simulated transcription" // Placeholder
+      }
     };
 
     submitExerciseMutation({
-      id: audioPronunciation.exerciseId,
-      submission: {
-        exerciseId: audioPronunciation.exerciseId,
-        userAnswer: {
-          // Aquí iría la referencia al audio subido o la transcripción si el frontend la hiciera
-          // Para esta simulación, solo enviamos un placeholder
-          audioSubmitted: true,
-          transcription: "simulated transcription"
-        }
-      },
+      id: exerciseId, // Usar la prop exerciseId
+      submission: submission,
     }, {
       onSuccess: (response) => {
-        const correct = response.data.isCorrect;
+        setSubmissionResponse(response); // Guardar la respuesta completa
+        const correct = response.isCorrect;
         setIsCorrect(correct);
         setIsSubmitted(true);
         if (correct) {
-          toast.success(t("¡Pronunciación correcta! Has ganado {{points}} puntos.", { points: response.data.awardedPoints }));
+          toast.success(t("¡Pronunciación correcta! Has ganado {{points}} puntos.", { points: response.awardedPoints }));
         } else {
           toast.error(t("Pronunciación incorrecta. Inténtalo de nuevo."));
           decrementHeart();
         }
-        onComplete?.(correct, response.data.awardedPoints);
+        onComplete?.(correct, response.awardedPoints);
       },
       onError: (error) => {
         console.error('Error al enviar pronunciación:', error);
@@ -168,14 +156,23 @@ const LearningAudioPronunciation: React.FC<LearningAudioPronunciationProps> = ({
 
         {isSubmitted && isCorrect !== null && (
           <div
-            className={`flex items-center justify-center p-4 rounded-md ${isCorrect ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}
+            className={`mt-6 p-4 rounded-md flex flex-col items-center justify-center space-y-2 transition-all duration-300 ease-in-out transform ${isCorrect ? 'bg-green-100 text-green-700 scale-105' : 'bg-red-100 text-red-700 scale-105'}`}
             role="status"
             aria-live="polite"
           >
-            {isCorrect ? <CheckCircle2 className="h-6 w-6 mr-2" /> : <XCircle className="h-6 w-6 mr-2" />}
-            <p className="text-lg font-semibold">
+            {isCorrect ? (
+              <CheckCircle2 className="h-10 w-10 text-green-600 animate-bounce" />
+            ) : (
+              <XCircle className="h-10 w-10 text-red-600 animate-shake" />
+            )}
+            <p className="text-xl font-bold">
               {isCorrect ? t("¡Pronunciación Correcta!") : t("Pronunciación Incorrecta.")}
             </p>
+            {!isCorrect && submissionResponse?.details && submissionResponse.details.expectedPhrase && (
+              <p className="text-md text-center">
+                {t("La frase esperada era:")} <span className="font-semibold">{submissionResponse.details.expectedPhrase}</span>
+              </p>
+            )}
           </div>
         )}
       </CardContent>

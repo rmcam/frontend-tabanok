@@ -11,11 +11,12 @@ import { useSubmitExercise } from '@/hooks/exercises/exercises.hooks'; // Import
 import { useHeartsStore } from '@/stores/heartsStore'; // Importar el store de vidas
 
 interface LearningQuizProps {
+  exerciseId: string; // Añadir exerciseId como prop
   quiz: LearningQuizContent['content'];
   onComplete?: (isCorrect: boolean, awardedPoints?: number) => void; // Añadir awardedPoints
 }
 
-const LearningQuiz: React.FC<LearningQuizProps> = ({ quiz, onComplete }) => {
+const LearningQuiz: React.FC<LearningQuizProps> = ({ exerciseId, quiz, onComplete }) => {
   const { t } = useTranslation();
   const [selectedOption, setSelectedOption] = React.useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = React.useState(false);
@@ -33,14 +34,14 @@ const LearningQuiz: React.FC<LearningQuizProps> = ({ quiz, onComplete }) => {
       return;
     }
 
-    if (!userId || !quiz.exerciseId) {
+    if (!userId || !exerciseId) { // Usar la prop exerciseId
       console.error("User ID o Exercise ID no disponibles.");
       return;
     }
 
     submitExerciseMutation({
-      id: quiz.exerciseId,
-      submission: { exerciseId: quiz.exerciseId, userAnswer: selectedOption },
+      id: exerciseId, // Usar la prop exerciseId
+      submission: { userAnswer: selectedOption },
     }, {
       onSuccess: (response) => {
         const correct = response.isCorrect;
@@ -79,9 +80,24 @@ const LearningQuiz: React.FC<LearningQuizProps> = ({ quiz, onComplete }) => {
           ))}
         </RadioGroup>
         {isSubmitted && isCorrect !== null && (
-          <div className={`mt-4 p-3 rounded-md flex items-center ${isCorrect ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-            {isCorrect ? <CheckCircle2 className="mr-2 h-5 w-5" /> : <XCircle className="mr-2 h-5 w-5" />}
-            {isCorrect ? t("¡Correcto!") : t("Incorrecto. La respuesta correcta era:") + ` ${quiz.answer}`}
+          <div
+            className={`mt-6 p-4 rounded-md flex flex-col items-center justify-center space-y-2 transition-all duration-300 ease-in-out transform ${isCorrect ? 'bg-green-100 text-green-700 scale-105' : 'bg-red-100 text-red-700 scale-105'}`}
+            role="status"
+            aria-live="polite"
+          >
+            {isCorrect ? (
+              <CheckCircle2 className="h-10 w-10 text-green-600 animate-bounce" />
+            ) : (
+              <XCircle className="h-10 w-10 text-red-600 animate-shake" />
+            )}
+            <p className="text-xl font-bold">
+              {isCorrect ? t("¡Correcto!") : t("Incorrecto.")}
+            </p>
+            {!isCorrect && (
+              <p className="text-md text-center">
+                {t("La respuesta correcta era:")} <span className="font-semibold">{quiz.answer}</span>
+              </p>
+            )}
           </div>
         )}
       </CardContent>

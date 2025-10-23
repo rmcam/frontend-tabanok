@@ -272,6 +272,7 @@ export interface Unity {
   moduleId: string;
   title: string; // Cambiado de 'name' a 'title'
   description: string;
+  level?: string; // Añadir el campo level
   order: number;
   isLocked: boolean;
   requiredPoints: number; // Cambiado de 'points' a 'requiredPoints'
@@ -280,7 +281,6 @@ export interface Unity {
   lessons?: Lesson[]; // Lecciones dentro de esta unidad
   icon?: string; // Icono para la unidad (ej. emoji o URL)
   topics?: Topic[]; // Añadido para incluir tópicos anidados
-  isLocked?: boolean; // Añadido para la lógica de bloqueo
   // Añadir otros campos relevantes del modelo Unity
 }
 
@@ -326,6 +326,7 @@ export interface Lesson {
   unityId: string;
   title: string; // Cambiado de 'name' a 'title'
   description: string;
+  guideContent?: string; // Añadir el campo guideContent
   order: number;
   isLocked: boolean;
   requiredPoints: number; // Cambiado de 'points' a 'requiredPoints'
@@ -333,8 +334,6 @@ export interface Lesson {
   content: string; // Añadido para el contenido de la lección
   exercises?: Exercise[]; // Cambiado de 'activities' a 'exercises'
   multimedia?: Multimedia[]; // Añadido para incluir multimedia asociada
-  isLocked?: boolean; // Añadido para la lógica de bloqueo
-  exercises?: Exercise[]; // Asegurar que los ejercicios estén incluidos
   // Añadir otros campos relevantes del modelo Lesson
 }
 
@@ -343,7 +342,6 @@ export interface Lesson {
  * @description DTO para enviar la respuesta de un ejercicio.
  */
 export interface SubmitExerciseDto {
-  exerciseId: string; // Añadido para cumplir con la validación del backend
   userAnswer: string | Record<string, any>; // Puede ser string o un objeto complejo
 }
 
@@ -352,14 +350,12 @@ export interface SubmitExerciseDto {
  * @description Interfaz para la respuesta del backend al enviar un ejercicio.
  */
 export interface SubmitExerciseResponse {
-  userId: string; // Añadido para invalidar queries de progreso
-  exerciseId: string; // Añadido para invalidar queries de progreso
+  message: string;
   isCorrect: boolean;
   score: number;
   awardedPoints: number;
-  message?: string;
-  newLevel?: number; // Opcional, si el nivel del usuario cambia
-  totalPoints?: number; // Opcional, puntos totales actualizados
+  exerciseTitle: string;
+  details?: any; // Añadido para el feedback detallado
 }
 
 /**

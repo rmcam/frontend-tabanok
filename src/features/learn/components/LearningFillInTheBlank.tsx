@@ -6,20 +6,22 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { CheckCircle2, XCircle, RefreshCw } from 'lucide-react';
 import type { FillInTheBlankContentData } from '@/types/learning';
-import { useSubmitExercise } from '@/hooks/progress/progress.hooks';
+import { useSubmitExercise } from '@/hooks/exercises/exercises.hooks';
 import { useHeartsStore } from '@/stores/heartsStore';
 
 interface LearningFillInTheBlankProps {
+  exerciseId: string; // Añadir exerciseId como prop
   fillInTheBlank: FillInTheBlankContentData;
   onComplete?: (isCorrect: boolean, awardedPoints?: number) => void;
 }
 
-const LearningFillInTheBlank: React.FC<LearningFillInTheBlankProps> = ({ fillInTheBlank, onComplete }) => {
+const LearningFillInTheBlank: React.FC<LearningFillInTheBlankProps> = ({ exerciseId, fillInTheBlank, onComplete }) => {
   const { t } = useTranslation();
   const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [blankStatus, setBlankStatus] = useState<Record<string, boolean | null>>({});
+  const [submissionResponse, setSubmissionResponse] = useState<any>(null); // Nuevo estado para la respuesta
 
   const { decrementHeart } = useHeartsStore();
   const { mutate: submitExerciseMutation, isPending: isSubmitting } = useSubmitExercise();
@@ -48,34 +50,41 @@ const LearningFillInTheBlank: React.FC<LearningFillInTheBlankProps> = ({ fillInT
     }
 
     const submission = {
-      exerciseId: fillInTheBlank.exerciseId,
       userAnswer: userAnswers,
     };
 
     submitExerciseMutation({
-      id: fillInTheBlank.exerciseId,
+      id: exerciseId, // Usar la prop exerciseId
       submission: submission,
     }, {
       onSuccess: (response) => {
-        const correct = response.data.isCorrect;
+        setSubmissionResponse(response); // Guardar la respuesta completa
+        const correct = response.isCorrect;
         setIsCorrect(correct);
         setIsSubmitted(true);
 
         const newBlankStatus: Record<string, boolean | null> = {};
-        fillInTheBlank.blanks.forEach(blank => {
-          const userAnswer = userAnswers[blank.id]?.trim().toLowerCase();
-          const correctAnswers = blank.correctAnswers.map(ans => ans.toLowerCase());
-          newBlankStatus[blank.id] = correctAnswers.includes(userAnswer);
-        });
+        // Si el backend devuelve detalles de cada blank, usarlos. De lo contrario, usar la lógica local.
+        if (response.details && response.details.blankResults) {
+          response.details.blankResults.forEach((result: { id: string; isCorrect: boolean; }) => {
+            newBlankStatus[result.id] = result.isCorrect;
+          });
+        } else {
+          fillInTheBlank.blanks.forEach(blank => {
+            const userAnswer = userAnswers[blank.id]?.trim().toLowerCase();
+            const correctAnswers = blank.correctAnswers.map(ans => ans.toLowerCase());
+            newBlankStatus[blank.id] = correctAnswers.includes(userAnswer);
+          });
+        }
         setBlankStatus(newBlankStatus);
 
         if (correct) {
-          toast.success(t("¡Correcto! Has ganado {{points}} puntos.", { points: response.data.awardedPoints }));
+          toast.success(t("¡Correcto! Has ganado {{points}} puntos.", { points: response.awardedPoints }));
         } else {
           toast.error(t("Incorrecto. Inténtalo de nuevo."));
           decrementHeart();
         }
-        onComplete?.(correct, response.data.awardedPoints);
+        onComplete?.(correct, response.awardedPoints);
       },
       onError: (error) => {
         console.error('Error al enviar respuesta del ejercicio:', error);
@@ -164,14 +173,23 @@ const LearningFillInTheBlank: React.FC<LearningFillInTheBlankProps> = ({ fillInT
 
         {isSubmitted && isCorrect !== null && (
           <div
-            className={`flex items-center justify-center p-4 rounded-md ${isCorrect ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}
+            className={`mt-6 p-4 rounded-md flex flex-col items-center justify-center space-y-2 transition-all duration-300 ease-in-out transform ${isCorrect ? 'bg-green-100 text-green-700 scale-105' : 'bg-red-100 text-red-700 scale-105'}`}
             role="status"
             aria-live="polite"
           >
-            {isCorrect ? <CheckCircle2 className="h-6 w-6 mr-2" /> : <XCircle className="h-6 w-6 mr-2" />}
-            <p className="text-lg font-semibold">
+            {isCorrect ? (
+              <CheckCircle2 className="h-10 w-10 text-green-600 animate-bounce" />
+            ) : (
+              <XCircle className="h-10 w-10 text-red-600 animate-shake" />
+            )}
+            <p className="text-xl font-bold">
               {isCorrect ? t("¡Respuesta Correcta!") : t("Respuesta Incorrecta.")}
             </p>
+            {!isCorrect && submissionResponse?.details && submissionResponse.details.correctBlanks && (
+              <p className="text-md text-center">
+                {t("Las respuestas correctas eran:")} <span className="font-semibold">{submissionResponse.details.correctBlanks.join(', ')}</span>
+              </p>
+            )}
           </div>
         )}
       </CardContent>

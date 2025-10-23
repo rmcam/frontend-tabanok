@@ -75,6 +75,11 @@ const UnitDetailPage: React.FC = () => {
           <CardHeader>
             <CardTitle className="text-3xl font-bold text-primary">{unit.title}</CardTitle>
             <CardDescription>{unit.description}</CardDescription>
+            {unit.level && (
+              <p className="text-sm text-muted-foreground mt-1">
+                {t("Nivel")}: <span className="font-semibold text-primary">{unit.level}</span>
+              </p>
+            )}
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between text-lg text-muted-foreground">

@@ -21,6 +21,8 @@ export interface LearningLesson extends Lesson {
   topics: LearningTopic[]; // Añadir tópicos a la lección
   url: string;
   isCompleted: boolean;
+  isLocked: boolean; // Asegurar que isLocked esté presente
+  guideContent?: string; // Añadir guideContent
   progress: number; // Añadir progreso a la lección
 }
 
@@ -29,6 +31,8 @@ export interface LearningUnit extends Unity {
   topics: LearningTopic[]; // Redefinido para usar LearningTopic[]
   url: string;
   isCompleted: boolean;
+  isLocked: boolean; // Asegurar que isLocked esté presente
+  level?: string; // Añadir level
   progress: number;
 }
 

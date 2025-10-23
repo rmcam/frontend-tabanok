@@ -127,7 +127,7 @@ export const useRefreshToken = () => {
 };
 
 // Hook para verificar la sesión actual
-export const useVerifySession = () => {
+export const useVerifySession = (options?: { enabled?: boolean }) => {
   return useQuery<UserProfile, ApiError>({ // Cambiar ApiResponse<UserProfile> a UserProfile
     queryKey: ['userProfile'], // Usar 'userProfile' como queryKey para que se invalide con login/signup
     queryFn: async () => await authService.verifySession(), // Devolver el resultado completo
@@ -135,6 +135,7 @@ export const useVerifySession = () => {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     retry: false,
+    enabled: options?.enabled, // Habilitar/deshabilitar la consulta condicionalmente
   });
 };
 
