@@ -137,6 +137,7 @@ const LearningQuiz: React.FC<LearningQuizProps> = ({
           <Button
             onClick={handleSubmit}
             disabled={isPending}
+            className="cursor-pointer"
           >
             {t("Enviar Respuesta")}
           </Button>
