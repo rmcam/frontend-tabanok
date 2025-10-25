@@ -34,7 +34,8 @@ export const exercisesService = {
     // Cambiar el tipo esperado de apiRequest a SubmitExerciseResponse directamente
     return apiRequest<SubmitExerciseResponse>(
       "POST",
-      `/exercises/${exerciseId}/submit`,
+      // `progress/exercises/${exerciseId}/submit`,
+      `progress/${exerciseId}/complete`,
       submission
     );
   },

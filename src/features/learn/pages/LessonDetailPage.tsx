@@ -9,6 +9,7 @@ import { ArrowLeft, ArrowRight, BookOpen, Lightbulb } from "lucide-react";
 import { useLessonById } from "@/hooks/lessons/lessons.hooks";
 import { useUnityById } from "@/hooks/unities/unities.hooks";
 import { useModuleById } from "@/hooks/modules/modules.hooks";
+import { useExercisesByLessonId } from "@/hooks/exercises/exercises.hooks"; // New import
 import LearningContentRenderer from "@/features/learn/components/LearningContentRenderer";
 import LessonHeroSection from "@/features/learn/components/LessonHeroSection";
 import InteractiveExerciseItem from "@/features/learn/components/InteractiveExerciseItem";
@@ -19,7 +20,11 @@ import {
   useGetProgressByUser,
   useCreateProgress,
 } from "@/hooks/progress/progress.hooks";
-import type { LearningTextContent, LearningLesson } from "@/types/learning";
+import type {
+  LearningTextContent,
+  LearningLesson,
+  LearningExercise,
+} from "@/types/learning";
 import { calculateLessonProgress } from "@/lib/learning.utils";
 import { toast } from "sonner";
 
@@ -47,6 +52,13 @@ const LessonDetailPage: React.FC = () => {
   } = useLessonById(lessonId || "");
   const createProgressMutation = useCreateProgress();
 
+  // New hook for exercises
+  const {
+    data: exercisesData,
+    isLoading: isLoadingExercises,
+    error: exercisesError,
+  } = useExercisesByLessonId(lessonId || "");
+
   // Procesar la lecciรณn de la API a un tipo de aprendizaje enriquecido
   const lesson: LearningLesson | undefined =
     lessonData && userProgress
@@ -65,7 +77,8 @@ const LessonDetailPage: React.FC = () => {
     isLoadingLesson ||
     isLoadingProgress ||
     isLoadingUnit ||
-    isLoadingModule
+    isLoadingModule ||
+    isLoadingExercises // Include exercises loading
   ) {
     return (
       <div className="flex flex-col flex-grow p-4 md:p-8 max-w-7xl mx-auto">
@@ -129,11 +142,12 @@ const LessonDetailPage: React.FC = () => {
     );
   }
 
-  if (lessonError) {
+  if (lessonError || exercisesError) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background text-red-500">
         <p className="text-lg">
-          {t("Error al cargar la lecciรณn")}: {lessonError.message}
+          {t("Error al cargar la lecciรณn o los ejercicios")}:{" "}
+          {lessonError?.message || exercisesError?.message}
         </p>
       </div>
     );
@@ -242,6 +256,17 @@ const LessonDetailPage: React.FC = () => {
       }
     : null;
 
+  // Use exercisesData for rendering exercises and map them to LearningExercise
+  const exercises: LearningExercise[] =
+    exercisesData?.map((exercise) => ({
+      ...exercise,
+      url: `/learn/lesson/${lessonId}/exercise/${exercise.id}`, // Construct a URL for the exercise
+      isCompleted: exercise.isCompleted ?? false, // Default to false if undefined
+      isLocked: exercise.isLocked ?? false, // Default to false if undefined
+      progress: exercise.progress ?? 0, // Default to 0 if undefined
+      lessonId: lessonId || "", // Ensure lessonId is always a string
+    })) || [];
+
   return (
     <div className="flex flex-col flex-grow p-4 md:p-8 max-w-7xl mx-auto">
       <div className="mb-8">
@@ -337,14 +362,14 @@ const LessonDetailPage: React.FC = () => {
       )}
 
       {/* Ejercicios de la lecciรณn */}
-      {lesson.exercises && lesson.exercises.length > 0 && (
+      {exercises && exercises.length > 0 && (
         <div className="mb-8">
           <h2 className="flex items-center text-3xl font-bold tracking-tight mb-8 text-secondary-foreground">
             <Lightbulb className="mr-3 h-8 w-8 text-primary" />{" "}
             {t("Ejercicios de la Lecciรณn")}
           </h2>
           <div className="grid gap-4">
-            {lesson.exercises.map((exercise) => (
+            {exercises.map((exercise) => (
               <InteractiveExerciseItem
                 key={exercise.id}
                 exercise={exercise}
@@ -357,20 +382,19 @@ const LessonDetailPage: React.FC = () => {
         </div>
       )}
 
-      {!lessonContent &&
-        (!lesson.exercises || lesson.exercises.length === 0) && (
-          <div className="col-span-full text-center text-muted-foreground mt-8 p-4 border rounded-lg bg-card shadow-lg">
-            <BookOpen className="h-12 w-12 mx-auto mb-4 text-primary" />
-            <p className="text-xl font-semibold mb-2">
-              {t("ยกAรบn no hay contenido ni ejercicios en esta lecciรณn!")}
-            </p>
-            <p>
-              {t(
-                "Parece que esta lecciรณn estรก vacรญa. Por favor, contacta al administrador para que aรฑada contenido."
-              )}
-            </p>
-          </div>
-        )}
+      {!lessonContent && exercises.length === 0 && (
+        <div className="col-span-full text-center text-muted-foreground mt-8 p-4 border rounded-lg bg-card shadow-lg">
+          <BookOpen className="h-12 w-12 mx-auto mb-4 text-primary" />
+          <p className="text-xl font-semibold mb-2">
+            {t("ยกAรบn no hay contenido ni ejercicios en esta lecciรณn!")}
+          </p>
+          <p>
+            {t(
+              "Parece que esta lecciรณn estรก vacรญa. Por favor, contacta al administrador para que aรฑada contenido."
+            )}
+          </p>
+        </div>
+      )}
 
       <div className="mt-8 flex justify-between">
         <Button

@@ -344,7 +344,6 @@ export interface Lesson {
  */
 export interface SubmitExerciseDto {
   userAnswer: string | Record<string, any>; // Puede ser string o un objeto complejo
-  score: number;
 }
 
 /**

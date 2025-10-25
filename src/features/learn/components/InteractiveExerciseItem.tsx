@@ -54,7 +54,12 @@ const InteractiveExerciseItem: React.FC<InteractiveExerciseItemProps> = ({
           <Lock className="h-6 w-6" />
         </div>
       )}
-      <ExerciseDisplayItem exercise={exercise} />
+      <ExerciseDisplayItem
+        exercise={exercise}
+        isCompleted={isCompleted}
+        difficulty={exercise.difficulty}
+        type={exercise.type}
+      />
     </motion.div>
   );
 };

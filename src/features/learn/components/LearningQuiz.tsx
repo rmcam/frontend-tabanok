@@ -55,7 +55,7 @@ const LearningQuiz: React.FC<LearningQuizProps> = ({
     submitExerciseMutation(
       {
         id: exerciseId, // Usar la prop exerciseId
-        submission: { userAnswer: selectedOption, score: 10 },
+        submission: { userAnswer: selectedOption },
       },
       {
         onSuccess: (response) => {
@@ -87,6 +87,7 @@ const LearningQuiz: React.FC<LearningQuizProps> = ({
         <CardTitle>{quiz.question}</CardTitle>
       </CardHeader>
       <CardContent>
+        {JSON.stringify(quiz)}
         <RadioGroup
           onValueChange={setSelectedOption}
           value={selectedOption || ""}
