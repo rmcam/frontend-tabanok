@@ -1,19 +1,125 @@
 import React, { memo } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { CheckCircle, Lock } from "lucide-react";
+import { CheckCircle, Lock, PlayCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import type { LearningUnit } from "@/types/learning"; // Usar la interfaz global
+import { cn } from "@/lib/utils";
+import type { LearningUnit } from "@/types/learning";
 
 interface LearningUnitCardProps {
   unit: LearningUnit;
   index: number;
 }
 
+const getStatusStyles = (unit: LearningUnit) => {
+  if (unit.isCompleted) {
+    return {
+      bgColor: "bg-green-500/10",
+      borderColor: "border-green-500",
+      iconColor: "text-green-500",
+      textColor: "text-green-500",
+      progressColor: "bg-green-500",
+      timelineDot: "bg-green-500 border-green-700",
+    };
+  }
+  if (unit.isLocked) {
+    return {
+      bgColor: "bg-gray-500/10",
+      borderColor: "border-gray-700",
+      iconColor: "text-gray-500",
+      textColor: "text-gray-500",
+      progressColor: "bg-gray-500",
+      timelineDot: "bg-gray-500 border-gray-700",
+    };
+  }
+  return {
+    bgColor: "bg-primary/10",
+    borderColor: "border-primary",
+    iconColor: "text-primary",
+    textColor: "text-primary",
+    progressColor: "bg-primary",
+    timelineDot: "bg-primary border-primary-foreground",
+  };
+};
+
+const StatusIcon = ({ unit }: { unit: LearningUnit }) => {
+  const styles = getStatusStyles(unit);
+  if (unit.isCompleted) {
+    return <CheckCircle className={cn("h-5 w-5", styles.iconColor)} />;
+  }
+  if (unit.isLocked) {
+    return <Lock className={cn("h-5 w-5", styles.iconColor)} />;
+  }
+  return <PlayCircle className={cn("h-5 w-5", styles.iconColor)} />;
+};
+
 const LearningUnitCard: React.FC<LearningUnitCardProps> = memo(
   ({ unit, index }) => {
     const { t } = useTranslation();
     const isEven = index % 2 === 0;
+    const styles = getStatusStyles(unit);
+
+    const cardContent = (
+      <div
+        className={cn(
+          "p-4 border rounded-lg shadow-lg bg-card transition-all duration-300 ease-in-out",
+          "hover:shadow-xl hover:scale-[1.02]",
+          styles.borderColor,
+          styles.bgColor,
+          {
+            "opacity-60 cursor-not-allowed hover:scale-100": unit.isLocked,
+          }
+        )}
+      >
+        <div className="flex flex-col lg:flex-row items-start space-x-4 relative">
+          <div className="absolute top-2 -right-3">
+            <StatusIcon unit={unit} />
+          </div>
+          <div
+            className={cn(
+              "flex-shrink-0 flex items-center justify-center mb-2 lg:mb-0 p-3 border rounded-full shadow-md w-16 h-16",
+              styles.bgColor,
+              styles.borderColor
+            )}
+          >
+            <span className="text-3xl">{unit.icon || "📖"}</span>
+          </div>
+
+          <div className="flex-grow">
+            <div className="flex items-center justify-between">
+              <p className="font-bold text-xl md:pr-10">{unit.title}</p>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1 line-clamp-3">
+              {unit.description}
+            </p>
+          </div>
+        </div>
+        {unit.progress}
+        {unit.progress !== undefined && (
+          <div className="mt-4">
+            <div className="flex items-center justify-between mb-1">
+              <span
+                className="text-xs font-semibold"
+                style={{ color: styles.textColor }}
+              >
+                {t("progreso")}
+              </span>
+              <span
+                className="text-xs font-bold"
+                style={{ color: styles.textColor }}
+              >
+                {unit.progress}%
+              </span>
+            </div>
+            <Progress
+              value={unit.progress}
+              className="h-2"
+              indicatorClassName={styles.progressColor}
+            />
+          </div>
+        )}
+      </div>
+    );
 
     return (
       <div
@@ -22,70 +128,27 @@ const LearningUnitCard: React.FC<LearningUnitCardProps> = memo(
         }`}
       >
         <div className={`w-5/12 ${isEven ? "order-1" : "order-3"}`}>
-          <Link
-            to={
-              unit.isLocked
-                ? "#"
-                : unit.lessons && unit.lessons.length > 0
-                ? `/learn/lesson/${unit.lessons[0].id}`
-                : unit.url
-            }
-            className="block p-4 border rounded-lg shadow-lg bg-card hover:bg-accent transition-colors"
-            onClick={(e) => unit.isLocked && e.preventDefault()}
-          >
-            <div className="flex items-center">
-              <div
-                className={`flex-shrink-0 flex items-center justify-center p-3 border rounded-full shadow-md 
-              ${
-                unit.isCompleted
-                  ? "bg-green-500 text-white"
-                  : unit.isLocked
-                  ? "bg-gray-500 text-gray-200"
-                  : "bg-primary text-primary-foreground"
-              } 
-              transition-colors w-16 h-16 relative`}
-              >
-                <span className="text-3xl">{unit.icon || "📖"}</span>
-                {unit.isCompleted && (
-                  <CheckCircle className="absolute -top-1 -right-1 h-5 w-5 text-white bg-green-600 rounded-full" />
-                )}
-                {unit.isLocked && !unit.isCompleted && (
-                  <Lock className="absolute -top-1 -right-1 h-5 w-5 text-white bg-gray-700 rounded-full" />
-                )}
-              </div>
-              <div className="ml-4">
-                <p className="font-bold text-lg">{unit.title}</p>
-                <p className="text-sm text-muted-foreground">
-                  {unit.description}
-                </p>
-              </div>
-            </div>
-            {unit.progress !== undefined && (
-              <div className="mt-3">
-                <Progress
-                  value={unit.progress}
-                  className="h-2"
-                />
-                <span className="text-xs text-muted-foreground mt-1 block">
-                  {unit.progress}% {t("completado")}
-                </span>
-              </div>
-            )}
-          </Link>
+          {unit.isLocked ? (
+            <div className="cursor-not-allowed">{cardContent}</div>
+          ) : (
+            <Link
+              to={
+                unit.lessons && unit.lessons.length > 0
+                  ? `/learn/lesson/${unit.lessons[0].id}`
+                  : unit.url
+              }
+            >
+              {cardContent}
+            </Link>
+          )}
         </div>
-
         {/* Conector a la línea del tiempo */}
         <div className={`order-2 w-1/12 flex justify-center`}>
           <div
-            className={`w-4 h-4 rounded-full border-2 z-10 
-          ${
-            unit.isCompleted
-              ? "bg-green-500 border-green-700"
-              : unit.isLocked
-              ? "bg-gray-500 border-gray-700"
-              : "bg-primary border-primary-foreground"
-          }
-        `}
+            className={cn(
+              "w-4 h-4 rounded-full border-2 z-10",
+              styles.timelineDot
+            )}
           ></div>
         </div>
       </div>

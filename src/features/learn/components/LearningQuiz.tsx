@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import type { LearningQuizContent } from "@/types/learning";
 import { useProfile } from "@/hooks/auth/auth.hooks";
 import { useSubmitExercise } from "@/hooks/exercises/exercises.hooks"; // Importar useSubmitExercise
@@ -82,7 +82,7 @@ const LearningQuiz: React.FC<LearningQuizProps> = ({
   };
 
   return (
-    <Card className="border-l-4 border-green-500">
+    <Card className="border-l-4 border-green-500 transition-all duration-300 ease-in-out">
       <CardHeader>
         <CardTitle>{quiz.question}</CardTitle>
       </CardHeader>
@@ -95,19 +95,30 @@ const LearningQuiz: React.FC<LearningQuizProps> = ({
           {quiz.options.map((option, index) => (
             <div
               key={index}
-              className="flex items-center space-x-2"
+              className={`flex items-center space-x-2 p-3 rounded-md cursor-pointer transition-all duration-200 ease-in-out ${
+                selectedOption === option
+                  ? "bg-primary text-primary-foreground shadow-md"
+                  : "hover:bg-accent hover:text-accent-foreground"
+              }`}
+              onClick={() => !isSubmitted && setSelectedOption(option)}
             >
               <RadioGroupItem
                 value={option}
                 id={`option-${index}`}
               />
-              <Label htmlFor={`option-${index}`}>{option}</Label>
+              <Label
+                htmlFor={`option-${index}`}
+                className="cursor-pointer"
+              >
+                {option}
+              </Label>
             </div>
           ))}
         </RadioGroup>
         {isSubmitted && isCorrect !== null && (
           <div
-            className={`mt-6 p-4 rounded-md flex flex-col items-center justify-center space-y-2 transition-all duration-300 ease-in-out transform ${
+            key={isSubmitted.toString()} // Key to force re-render and re-trigger animation
+            className={`mt-6 p-4 rounded-md flex flex-col items-center justify-center space-y-2 transition-all duration-300 ease-in-out transform animate-fade-in-up ${
               isCorrect
                 ? "bg-green-100 text-green-700 scale-105"
                 : "bg-red-100 text-red-700 scale-105"
@@ -136,8 +147,10 @@ const LearningQuiz: React.FC<LearningQuizProps> = ({
         {!isSubmitted ? (
           <Button
             onClick={handleSubmit}
-            disabled={isPending}
+            disabled={isPending || selectedOption === null}
+            className="cursor-pointer transition-all duration-200 ease-in-out hover:scale-105"
           >
+            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {t("Enviar Respuesta")}
           </Button>
         ) : (
