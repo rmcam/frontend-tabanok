@@ -163,6 +163,13 @@ const ExerciseModal: React.FC<ExerciseModalProps> = ({
 
         {exercise && exercise.content && (
           <div className="prose dark:prose-invert max-w-none mt-4">
+            {exercise.type === "quiz" && (
+              <LearningQuiz
+                exerciseId={exercise.id}
+                quiz={exercise.content as LearningQuizContent["content"]}
+                onComplete={handleExerciseCompleteInternal}
+              />
+            )}
             {exercise.type === "multiple-choice" && (
               <LearningQuiz
                 exerciseId={exercise.id}
@@ -214,39 +221,9 @@ const ExerciseModal: React.FC<ExerciseModalProps> = ({
               />
             )}
 
-            {/* Mensaje de resultado general del ejercicio */}
-            {isExerciseSubmitted && exerciseIsCorrect !== null && (
-              <Alert
-                className={`mt-6 ${
-                  exerciseIsCorrect
-                    ? "bg-green-100 text-green-700 border-green-500"
-                    : "bg-red-100 text-red-700 border-red-500"
-                }`}
-                role="status"
-                aria-live="polite"
-              >
-                <div className="flex items-center space-x-2">
-                  {exerciseIsCorrect ? (
-                    <CheckCircle2 className="h-6 w-6" />
-                  ) : (
-                    <XCircle className="h-6 w-6" />
-                  )}
-                  <AlertDescription className="text-lg font-semibold">
-                    {exerciseIsCorrect
-                      ? t("¡Ejercicio Completado Correctamente!")
-                      : t("Ejercicio Completado Incorrectamente.")}
-                  </AlertDescription>
-                </div>
-                {awardedPoints > 0 && (
-                  <p className="text-lg font-semibold ml-4 mt-2">
-                    {t("Puntos Ganados")}: {awardedPoints}
-                  </p>
-                )}
-              </Alert>
-            )}
-
             {/* Manejar tipos de ejercicio desconocidos */}
             {![
+              "quiz",
               "multiple-choice",
               "matching",
               "fill-in-the-blank",

@@ -1,4 +1,11 @@
-import type { Module, Unity, Lesson, Exercise, Multimedia, Content } from './api';
+import type {
+  Module,
+  Unity,
+  Lesson,
+  Exercise,
+  Multimedia,
+  Content,
+} from "./api";
 
 // Definir la interfaz UserProgress directamente aquí
 export interface UserProgress {
@@ -24,6 +31,7 @@ export interface LearningLesson extends Lesson {
   isLocked: boolean; // Asegurar que isLocked esté presente
   guideContent?: string; // Añadir guideContent
   progress: number; // Añadir progreso a la lección
+  difficulty: "easy" | "normal" | "hard";
 }
 
 export interface LearningUnit extends Unity {
@@ -55,13 +63,13 @@ interface QuizContentData {
 
 // Nuevas interfaces para los datos de contenido de ejercicios interactivos
 export interface MatchingContentData {
-  pairs: { id: string; term: string; match: string; }[];
+  pairs: { id: string; term: string; match: string }[];
   exerciseId: string;
 }
 
 export interface FillInTheBlankContentData {
   text: string; // Texto con marcadores para los espacios en blanco, e.g., "Hola [BLANK] mundo"
-  blanks: { id: string; correctAnswers: string[]; }[]; // Respuestas correctas para cada espacio
+  blanks: { id: string; correctAnswers: string[] }[]; // Respuestas correctas para cada espacio
   exerciseId: string;
 }
 
@@ -98,48 +106,48 @@ interface BaseLearningContent extends Content {
 
 // Tipos discriminados para LearningContent
 export interface LearningTextContent extends BaseLearningContent {
-  type: 'text' | 'html';
+  type: "text" | "html";
   content: string; // El contenido es una cadena para texto/html
 }
 
 export interface LearningVideoContent extends BaseLearningContent {
-  type: 'video' | 'youtube';
+  type: "video" | "youtube";
   content: VideoContentData; // El contenido es un objeto con URL para video
 }
 
 export interface LearningQuizContent extends BaseLearningContent {
-  type: 'quiz';
+  type: "quiz";
   content: QuizContentData; // El contenido es un objeto con datos del quiz
 }
 
 export interface LearningImageContent extends BaseLearningContent {
-  type: 'image';
+  type: "image";
   content: { url: string }; // Asumiendo que el contenido de imagen también tiene una URL
 }
 
 // Nuevas interfaces para los tipos de ejercicios interactivos
 export interface LearningMatchingContent extends BaseLearningContent {
-  type: 'matching';
+  type: "matching";
   content: MatchingContentData;
 }
 
 export interface LearningFillInTheBlankContent extends BaseLearningContent {
-  type: 'fill-in-the-blank';
+  type: "fill-in-the-blank";
   content: FillInTheBlankContentData;
 }
 
 export interface LearningAudioPronunciationContent extends BaseLearningContent {
-  type: 'audio-pronunciation';
+  type: "audio-pronunciation";
   content: AudioPronunciationContentData;
 }
 
 export interface LearningTranslationContent extends BaseLearningContent {
-  type: 'translation';
+  type: "translation";
   content: TranslationContentData;
 }
 
 export interface LearningFunFactContent extends BaseLearningContent {
-  type: 'fun-fact';
+  type: "fun-fact";
   content: FunFactContentData;
 }
 
