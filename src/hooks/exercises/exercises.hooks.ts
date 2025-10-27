@@ -1,7 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { exercisesService } from "../../services/exercises/exercises.service";
+import ProgressService from "../../services/progress/progress.service"; // Importar ProgressService
 import { ApiError } from "../../services/_shared";
+import { useProfile } from "../auth/auth.hooks"; // Importar useProfile
 import type {
   ApiResponse,
   Exercise,
@@ -10,6 +12,7 @@ import type {
   SubmitExerciseDto,
   SubmitExerciseResponse,
   GamificationUserStatsDto, // Para invalidar o actualizar las estadísticas del usuario
+  ProgressDto, // Importar ProgressDto
 } from "../../types/api";
 
 /**
@@ -109,13 +112,42 @@ export const useDeleteExercise = () => {
 
 export const useSubmitExercise = () => {
   const queryClient = useQueryClient();
+  const { data: userProfile } = useProfile(); // Asumiendo que useProfile está disponible y devuelve el perfil del usuario
+
   return useMutation<
     SubmitExerciseResponse,
     ApiError,
     { id: string; submission: SubmitExerciseDto }
   >({
-    mutationFn: ({ id, submission }) =>
-      exercisesService.submitExercise(id, submission),
+    mutationFn: async ({ id: exerciseId, submission }) => {
+      if (!userProfile?.id) {
+        throw new Error("User not authenticated.");
+      }
+
+      // 1. Obtener o crear el progreso para el usuario y el ejercicio
+      const progress: ProgressDto = await ProgressService.getOrCreateProgress(
+        userProfile.id,
+        exerciseId
+      );
+
+      // 2. Enviar las respuestas al endpoint de completar progreso
+      const response = await ProgressService.markProgressAsCompleted(
+        progress.id,
+        { answers: submission }
+      );
+
+      // El backend ahora devuelve el score y si es correcto, así que mapeamos la respuesta
+      return {
+        isCorrect: response.score && response.score > 0 ? true : false, // Asumimos que un score > 0 significa correcto
+        score: response.score || 0,
+        awardedPoints: response.score || 0, // O ajustar según la lógica de puntos del backend
+        message: response.isCompleted
+          ? "Ejercicio completado."
+          : "Progreso actualizado.",
+        details: response.answers,
+        userAnswer: JSON.stringify(submission),
+      };
+    },
     onSuccess: (data, variables) => {
       toast.success(
         data.message ||
@@ -128,21 +160,11 @@ export const useSubmitExercise = () => {
       queryClient.invalidateQueries({ queryKey: ["user-progress"] }); // Invalidar el progreso del usuario
       queryClient.invalidateQueries({ queryKey: ["user-stats"] }); // Invalidar las estadísticas del usuario para gamificación
 
-      // Opcional: Actualizar directamente las estadísticas del usuario si la respuesta lo incluye
-      if (data.newLevel || data.totalPoints) {
-        queryClient.setQueryData<GamificationUserStatsDto>(
-          ["user-stats"],
-          (oldStats) => {
-            if (!oldStats) return oldStats;
-            return {
-              ...oldStats,
-              level: data.newLevel ?? oldStats.level,
-              points: (oldStats.points || 0) + (data.awardedPoints ?? 0), // Sumar puntos ganados
-              totalPoints: data.totalPoints ?? oldStats.totalPoints,
-            };
-          }
-        );
-      }
+      // La lógica de actualización de estadísticas de gamificación (newLevel, totalPoints)
+      // debe manejarse en el backend o en un hook de gamificación separado
+      // si la respuesta de `markProgressAsCompleted` no incluye estos campos.
+      // Por ahora, se elimina la lógica que espera estos campos directamente de SubmitExerciseResponse.
+      queryClient.invalidateQueries({ queryKey: ["user-stats"] }); // Asegurar que las estadísticas se refetchean
     },
     onError: (error) => {
       console.error(

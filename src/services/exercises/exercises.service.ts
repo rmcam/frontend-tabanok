@@ -30,13 +30,4 @@ export const exercisesService = {
   getExercisesByLessonId: (lessonId: string) =>
     apiRequest<Exercise[]>("GET", `/exercises/by-lesson/${lessonId}`),
 
-  submitExercise: async (exerciseId: string, submission: SubmitExerciseDto) => {
-    // Cambiar el tipo esperado de apiRequest a SubmitExerciseResponse directamente
-    return apiRequest<SubmitExerciseResponse>(
-      "POST",
-      // `progress/exercises/${exerciseId}/submit`,
-      `progress/${exerciseId}/complete`,
-      submission
-    );
-  },
 };
