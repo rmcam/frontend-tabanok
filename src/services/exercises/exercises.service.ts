@@ -22,10 +22,13 @@ export const exercisesService = {
     apiRequest<ApiResponse<Exercise>>("POST", "/exercises", exerciseData),
   getAllExercises: (pagination?: PaginationParams) => {
     const params = new URLSearchParams();
-    if (pagination?.page) params.append('page', pagination.page.toString());
-    if (pagination?.limit) params.append('limit', pagination.limit.toString());
+    if (pagination?.page) params.append("page", pagination.page.toString());
+    if (pagination?.limit) params.append("limit", pagination.limit.toString());
     const queryString = params.toString();
-    return apiRequest<Exercise[]>("GET", `/exercises${queryString ? `?${queryString}` : ''}`);
+    return apiRequest<Exercise[]>(
+      "GET",
+      `/exercises${queryString ? `?${queryString}` : ""}`
+    );
   },
   getExerciseById: (id: string) =>
     apiRequest<Exercise>("GET", `/exercises/${id}`),
@@ -36,18 +39,23 @@ export const exercisesService = {
 
   getExercisesByTopicId: (topicId: string, pagination?: PaginationParams) => {
     const params = new URLSearchParams();
-    if (pagination?.page) params.append('page', pagination.page.toString());
-    if (pagination?.limit) params.append('limit', pagination.limit.toString());
+    if (pagination?.page) params.append("page", pagination.page.toString());
+    if (pagination?.limit) params.append("limit", pagination.limit.toString());
     const queryString = params.toString();
-    return apiRequest<Exercise[]>("GET", `/exercises/by-topic/${topicId}${queryString ? `?${queryString}` : ''}`);
+    return apiRequest<Exercise[]>(
+      "GET",
+      `/exercises/by-topic/${topicId}${queryString ? `?${queryString}` : ""}`
+    );
   },
 
   getExercisesByLessonId: (lessonId: string, pagination?: PaginationParams) => {
     const params = new URLSearchParams();
-    if (pagination?.page) params.append('page', pagination.page.toString());
-    if (pagination?.limit) params.append('limit', pagination.limit.toString());
+    if (pagination?.page) params.append("page", pagination.page.toString());
+    if (pagination?.limit) params.append("limit", pagination.limit.toString());
     const queryString = params.toString();
-    return apiRequest<Exercise[]>("GET", `/exercises/by-lesson/${lessonId}${queryString ? `?${queryString}` : ''}`);
+    return apiRequest<Exercise[]>(
+      "GET",
+      `/exercises/by-lesson/${lessonId}${queryString ? `?${queryString}` : ""}`
+    );
   },
-
 };
