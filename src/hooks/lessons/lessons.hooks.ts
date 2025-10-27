@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { lessonsService } from '@/services/lessons/lessons.service';
-import type { Lesson } from '@/types/api'; // Importar Lesson de api.d.ts
+import type { Lesson, Unity } from '@/types/api'; // Importar Lesson y Unity de api.d.ts
 
 /**
  * Hook para obtener una lección por su ID.
@@ -25,5 +25,16 @@ export function useDailyLesson(userId: string) {
     queryKey: ['dailyLesson', userId],
     queryFn: () => lessonsService.getDailyLesson(userId),
     enabled: !!userId, // Solo ejecutar la query si userId existe
+  });
+}
+
+/**
+ * Hook para obtener todas las unidades con sus lecciones anidadas.
+ * @returns Un objeto de React Query con los datos de las unidades, estado de carga y error.
+ */
+export function useAllUnitsWithLessons() {
+  return useQuery<Unity[], Error>({
+    queryKey: ['allUnitsWithLessons'],
+    queryFn: () => lessonsService.getAllUnitsWithLessons(),
   });
 }

@@ -332,10 +332,14 @@ export interface Lesson {
   isLocked: boolean;
   requiredPoints: number; // Cambiado de 'points' a 'requiredPoints'
   isCompleted: boolean;
-  content: string; // Añadido para el contenido de la lección
-  exercises?: Exercise[]; // Cambiado de 'activities' a 'exercises'
+  isFeatured?: boolean; // Añadido según los datos de ejemplo
+  isActive?: boolean; // Añadido según los datos de ejemplo
   multimedia?: Multimedia[]; // Añadido para incluir multimedia asociada
-  // Añadir otros campos relevantes del modelo Lesson
+  topics?: Topic[]; // Añadido para incluir tópicos anidados
+  createdAt: string; // Añadido según los datos de ejemplo
+  updatedAt: string; // Añadido según los datos de ejemplo
+  // El progreso se inferirá o se manejará de otra manera en el frontend
+  // El tipo de contenido (video, texto, quiz, audio) se inferirá en el frontend
 }
 
 /**
@@ -358,6 +362,8 @@ export interface SubmitExerciseResponse {
   exerciseTitle?: string; // Opcional, si el backend lo envía
   details?: any; // Añadido para el feedback detallado
   userAnswer?: string; // Añadido si el backend devuelve la respuesta del usuario
+  userId?: string; // Añadido para el progreso del usuario
+  exerciseId?: string; // Añadido para el progreso del ejercicio
 }
 
 /**
@@ -1187,4 +1193,30 @@ export interface UpdateContentDto {
   isLocked?: boolean;
 }
 
-// Added a comment to try and force a type refresh
+/**
+ * @interface UserLessonProgress
+ * @description Interfaz para el progreso de una lección específica de un usuario.
+ */
+export interface UserLessonProgress {
+  id: string;
+  userId: string;
+  lessonId: string;
+  progress: number; // Porcentaje de progreso (0-100)
+  isCompleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * @interface UserUnityProgress
+ * @description Interfaz para el progreso de una unidad específica de un usuario.
+ */
+export interface UserUnityProgress {
+  id: string;
+  userId: string;
+  unityId: string;
+  progress: number; // Porcentaje de progreso (0-100)
+  isCompleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+}

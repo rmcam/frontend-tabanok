@@ -1,6 +1,6 @@
 import { apiRequest } from '../_shared';
-import type { ProgressDto, CreateProgressDto, ApiResponse } from '../../types/api'; // Asegúrate de que estos tipos existan
-import type { Exercise } from '../../types/api'; // Importar Exercise para el tipo de retorno de getOrCreateProgress
+import type { ProgressDto, CreateProgressDto, ApiResponse, UserLessonProgress, UserUnityProgress, SubmitExerciseDto, SubmitExerciseResponse } from '../../types/api';
+import type { Exercise } from '../../types/api';
 
 const ProgressService = {
   getProgressByUser: (userId: string) => {
@@ -10,12 +10,10 @@ const ProgressService = {
     return apiRequest<ProgressDto>('POST', '/progress', progressData);
   },
   getOrCreateProgress: async (userId: string, exerciseId: string): Promise<ProgressDto> => {
-    // Primero, intentar obtener el progreso existente para este usuario y ejercicio
     const userProgresses = await apiRequest<ProgressDto[]>('GET', `/progress/user/${userId}`);
     let progress = userProgresses.find(p => p.exerciseId === exerciseId);
 
     if (!progress) {
-      // Si no existe, crear un nuevo progreso
       const newProgressData: CreateProgressDto = {
         userId,
         exerciseId,
@@ -32,6 +30,17 @@ const ProgressService = {
   },
   updateProgressScore: (progressId: string, data: { score: number }) => {
     return apiRequest<ProgressDto>('PATCH', `/progress/${progressId}/score`, data);
+  },
+  submitExercise: (id: string, submission: SubmitExerciseDto) => {
+    return apiRequest<ApiResponse<SubmitExerciseResponse>>('POST', `/progress/${id}/submit-exercise`, submission);
+  },
+
+  // Nuevos métodos para progreso de lecciones y unidades
+  getAllUserLessonProgress: (userId: string) => {
+    return apiRequest<UserLessonProgress[]>('GET', `/user-lesson-progress/user/${userId}/all-lessons`);
+  },
+  getAllUserUnityProgress: (userId: string) => {
+    return apiRequest<UserUnityProgress[]>('GET', `/user-unity-progress/user/${userId}/all-unities`);
   },
 };
 

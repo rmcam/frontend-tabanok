@@ -1,4 +1,4 @@
-import type { ApiResponse, CreateLessonDto, UpdateLessonDto, Lesson } from '../../types/api';
+import type { ApiResponse, CreateLessonDto, UpdateLessonDto, Lesson, Unity } from '../../types/api';
 import type { LearningLesson } from '../../types/learning'; // Mantener por si se usa en otros lugares
 
 import { apiRequest } from '../_shared';
@@ -29,4 +29,6 @@ export const lessonsService = {
     apiRequest<ApiResponse<Lesson>>('PATCH', `/lesson/${id}/complete`),
   getDailyLesson: (userId: string) =>
     apiRequest<Lesson>('GET', `/lesson/daily-lesson/${userId}`),
+  getAllUnitsWithLessons: () =>
+    apiRequest<Unity[]>('GET', '/unity/all-with-lessons'), // Nuevo endpoint para obtener unidades con lecciones
 };

@@ -110,6 +110,12 @@ export const useDeleteExercise = () => {
   });
 };
 
+interface SubmitExerciseContext {
+  previousExercise?: Exercise;
+  previousUserProgress?: ProgressDto[];
+  previousUserStats?: GamificationUserStatsDto;
+}
+
 export const useSubmitExercise = () => {
   const queryClient = useQueryClient();
   const { data: userProfile } = useProfile(); // Asumiendo que useProfile está disponible y devuelve el perfil del usuario
@@ -117,7 +123,8 @@ export const useSubmitExercise = () => {
   return useMutation<
     SubmitExerciseResponse,
     ApiError,
-    { id: string; submission: SubmitExerciseDto }
+    { id: string; submission: SubmitExerciseDto },
+    SubmitExerciseContext // Añadir el tipo de contexto aquí
   >({
     mutationFn: async ({ id: exerciseId, submission }) => {
       if (!userProfile?.id) {
@@ -148,6 +155,63 @@ export const useSubmitExercise = () => {
         userAnswer: JSON.stringify(submission),
       };
     },
+    onMutate: async ({ id: exerciseId, submission }) => {
+      // Cancelar cualquier refetching pendiente para las queries afectadas
+      await queryClient.cancelQueries({ queryKey: ["exercises", exerciseId] });
+      await queryClient.cancelQueries({ queryKey: ["user-progress"] });
+      await queryClient.cancelQueries({ queryKey: ["user-stats"] });
+
+      // Snapshot del valor anterior
+      const previousExercise = queryClient.getQueryData<Exercise>([
+        "exercises",
+        exerciseId,
+      ]);
+      const previousUserProgress = queryClient.getQueryData<ProgressDto[]>([
+        "user-progress",
+      ]);
+      const previousUserStats = queryClient.getQueryData<GamificationUserStatsDto>([
+        "user-stats",
+      ]);
+
+      // Optimistic update para el ejercicio
+      if (previousExercise) {
+        queryClient.setQueryData<Exercise>(["exercises", exerciseId], {
+          ...previousExercise,
+          isCompleted: true,
+          progress: previousExercise.points, // Asumir puntos completos para la actualización optimista
+        });
+      }
+
+      // Optimistic update para el progreso del usuario (si es relevante)
+      if (previousUserProgress && userProfile?.id) {
+        const updatedProgresses = previousUserProgress.map((p) =>
+          p.exerciseId === exerciseId
+            ? { ...p, isCompleted: true, score: previousExercise?.points || 0 }
+            : p
+        );
+        queryClient.setQueryData<ProgressDto[]>(
+          ["user-progress"],
+          updatedProgresses
+        );
+      }
+
+      // Optimistic update para las estadísticas del usuario (puntos)
+      if (previousUserStats && previousExercise) {
+        queryClient.setQueryData<GamificationUserStatsDto>(
+          ["user-stats"],
+          (oldStats) => {
+            if (!oldStats) return oldStats;
+            return {
+              ...oldStats,
+              points: (oldStats.points || 0) + previousExercise.points,
+              totalPoints: (oldStats.totalPoints || 0) + previousExercise.points,
+            };
+          }
+        );
+      }
+
+      return { previousExercise, previousUserProgress, previousUserStats };
+    },
     onSuccess: (data, variables) => {
       toast.success(
         data.message ||
@@ -155,24 +219,40 @@ export const useSubmitExercise = () => {
             ? "¡Respuesta correcta! Ganaste puntos."
             : "Respuesta incorrecta. Inténtalo de nuevo.")
       );
+      // Invalidar queries para refetching de datos reales
       queryClient.invalidateQueries({ queryKey: ["exercises", variables.id] });
-      queryClient.invalidateQueries({ queryKey: ["lesson"] }); // Invalidar lecciones para actualizar el progreso
-      queryClient.invalidateQueries({ queryKey: ["user-progress"] }); // Invalidar el progreso del usuario
-      queryClient.invalidateQueries({ queryKey: ["user-stats"] }); // Invalidar las estadísticas del usuario para gamificación
-
-      // La lógica de actualización de estadísticas de gamificación (newLevel, totalPoints)
-      // debe manejarse en el backend o en un hook de gamificación separado
-      // si la respuesta de `markProgressAsCompleted` no incluye estos campos.
-      // Por ahora, se elimina la lógica que espera estos campos directamente de SubmitExerciseResponse.
-      queryClient.invalidateQueries({ queryKey: ["user-stats"] }); // Asegurar que las estadísticas se refetchean
+      queryClient.invalidateQueries({ queryKey: ["lesson"] });
+      queryClient.invalidateQueries({ queryKey: ["user-progress"] });
+      queryClient.invalidateQueries({ queryKey: ["user-stats"] });
     },
-    onError: (error) => {
+    onError: (error, variables, context) => {
       console.error(
         "Error al enviar respuesta del ejercicio:",
         error.message,
         error.details
       );
       toast.error("Error al enviar respuesta del ejercicio.");
+
+      // Revertir a los datos anteriores en caso de error
+      if (context?.previousExercise) {
+        queryClient.setQueryData(
+          ["exercises", variables.id],
+          context.previousExercise
+        );
+      }
+      if (context?.previousUserProgress) {
+        queryClient.setQueryData(["user-progress"], context.previousUserProgress);
+      }
+      if (context?.previousUserStats) {
+        queryClient.setQueryData(["user-stats"], context.previousUserStats);
+      }
+    },
+    onSettled: (data, error, variables) => {
+      // Asegurar que las queries se refetcheen después de que la mutación se asiente
+      queryClient.invalidateQueries({ queryKey: ["exercises", variables.id] });
+      queryClient.invalidateQueries({ queryKey: ["lesson"] });
+      queryClient.invalidateQueries({ queryKey: ["user-progress"] });
+      queryClient.invalidateQueries({ queryKey: ["user-stats"] });
     },
   });
 };
