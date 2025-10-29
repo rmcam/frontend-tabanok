@@ -1,6 +1,8 @@
 // src/types/learning/learning.d.ts
 
 import { Multimedia } from "../multimedia/multimedia.d";
+import { Content } from "../content/content.d"; // Importar Content
+export { Content } from "../content/content.d"; // Reexportar Content
 
 /**
  * @interface Module
@@ -14,6 +16,7 @@ export interface Module {
   isLocked: boolean;
   points: number;
   progress?: number; // Progreso del módulo (0-100)
+  unities?: Unity[]; // Añadir las unidades al módulo
   // Añadir otros campos relevantes del modelo Module
 }
 
@@ -56,6 +59,9 @@ export interface Unity {
   progress?: number; // Progreso de la unidad (0-100)
   isCompleted?: boolean; // Si la unidad está completada
   icon?: string; // Icono para la unidad (ej. emoji o URL)
+  lessons?: Lesson[]; // Añadir las lecciones a la unidad
+  topics?: Topic[]; // Añadir tópicos a la unidad
+  isActive: boolean; // Añadir isActive a la unidad
   // Añadir otros campos relevantes del modelo Unity
 }
 
@@ -92,6 +98,8 @@ export interface UpdateUnityDto {
  * @interface Lesson
  * @description Interfaz para el modelo de lección.
  */
+import { Exercise, Multimedia, Topic } from './index'; // Importar Exercise, Multimedia y Topic
+
 export interface Lesson {
   id: string;
   unityId: string;
@@ -106,8 +114,12 @@ export interface Lesson {
   isActive?: boolean; // Añadido según los datos de ejemplo
   createdAt: string; // Añadido según los datos de ejemplo
   updatedAt: string; // Añadido según los datos de ejemplo
-  // El progreso se inferirá o se manejará de otra manera en el frontend
-  // El tipo de contenido (video, texto, quiz, audio) se inferirá en el frontend
+  exercises?: Exercise[]; // Añadir ejercicios
+  multimedia?: Multimedia[]; // Añadir multimedia
+  topics?: Topic[]; // Añadir tópicos
+  url?: string; // Añadir URL
+  progress?: number; // Añadir progreso
+  difficulty?: "easy" | "normal" | "hard"; // Añadir dificultad
 }
 
 /**
@@ -150,6 +162,8 @@ export interface Topic {
   isLocked: boolean; // Añadido según la descripción de la tarea
   requiredPoints: number; // Añadido según la descripción de la tarea
   isActive: boolean; // Añadido según la descripción de la tarea
+  contents?: Content[]; // Añadir contenidos al tópico
+  exercises?: Exercise[]; // Añadir ejercicios al tópico
   // Añadir otros campos relevantes del modelo Topic
 }
 
@@ -172,69 +186,169 @@ export interface UpdateTopicDto {
 }
 
 /**
- * @interface Exercise
- * @description Interfaz para el modelo de ejercicio.
+ * @interface BaseExercise
+ * @description Interfaz base para el modelo de ejercicio.
  */
-export interface Exercise {
+export interface BaseExercise {
   id: string;
-  title: string; // Añadido 'title'
-  description: string; // Añadido 'description'
-  type: string; // Ej. 'quiz', 'mission' (según el feedback)
-  content: any; // Tipo flexible para el contenido del ejercicio
+  title: string;
+  description: string;
   difficulty: "beginner" | "intermediate" | "advanced";
   points: number;
-  timeLimit?: number; // Añadido según el feedback
+  timeLimit?: number;
   isActive: boolean;
-  topicId?: string; // Añadido según el feedback
-  topic?: Topic; // Añadido según el feedback
-  tags?: string[]; // Añadido según el feedback
-  timesCompleted?: number; // Añadido según el feedback
-  averageScore?: number; // Añadido según el feedback
+  topicId?: string;
+  topic?: Topic;
+  tags?: string[];
+  timesCompleted?: number;
+  averageScore?: number;
   createdAt: string;
   updatedAt: string;
-  lesson?: string; // Añadido según el feedback
-  progress?: number; // Cambiado a number para consistencia con LearningExercise
+  lesson?: string;
+  progress?: number;
   isCompleted?: boolean;
-  isLocked?: boolean; // Añadido para la lógica de bloqueo
-  // Añadir otros campos relevantes del modelo Exercise
+  isLocked?: boolean;
 }
+
+/**
+ * @interface QuizContent
+ * @description Interfaz para el contenido de un ejercicio de tipo quiz.
+ */
+export interface QuizContent {
+  question: string;
+  options: string[];
+  answer: string;
+}
+
+/**
+ * @interface QuizExercise
+ * @description Interfaz para un ejercicio de tipo quiz.
+ */
+export interface QuizExercise extends BaseExercise {
+  type: "quiz";
+  content: QuizContent;
+}
+
+/**
+ * @interface MatchingContent
+ * @description Interfaz para el contenido de un ejercicio de tipo matching.
+ */
+export interface MatchingContent {
+  pairs: { id: string; term: string; match: string }[];
+}
+
+/**
+ * @interface MatchingExercise
+ * @description Interfaz para un ejercicio de tipo matching.
+ */
+export interface MatchingExercise extends BaseExercise {
+  type: "matching";
+  content: MatchingContent;
+}
+
+/**
+ * @interface FillInTheBlankContent
+ * @description Interfaz para el contenido de un ejercicio de tipo fill-in-the-blank.
+ */
+export interface FillInTheBlankContent {
+  text: string;
+  blanks: { id: string; correctAnswers: string[] }[];
+  options?: string[]; // Opcional, para ejercicios con opciones predefinidas
+}
+
+/**
+ * @interface FillInTheBlankExercise
+ * @description Interfaz para un ejercicio de tipo fill-in-the-blank.
+ */
+export interface FillInTheBlankExercise extends BaseExercise {
+  type: "fill-in-the-blank";
+  content: FillInTheBlankContent;
+}
+
+/**
+ * @interface AudioPronunciationContent
+ * @description Interfaz para el contenido de un ejercicio de tipo audio-pronunciation.
+ */
+export interface AudioPronunciationContent {
+  text: string; // La frase a pronunciar
+  audioUrl: string; // URL del audio de referencia
+}
+
+/**
+ * @interface AudioPronunciationExercise
+ * @description Interfaz para un ejercicio de tipo audio-pronunciation.
+ */
+export interface AudioPronunciationExercise extends BaseExercise {
+  type: "audio-pronunciation";
+  content: AudioPronunciationContent;
+}
+
+/**
+ * @interface TranslationContent
+ * @description Interfaz para el contenido de un ejercicio de tipo translation.
+ */
+export interface TranslationContent {
+  sourceText: string; // El texto a traducir
+  targetLanguage: string; // El idioma al que se debe traducir (ej. "es", "kmt")
+  correctTranslation: string; // La traducción correcta
+}
+
+/**
+ * @interface TranslationExercise
+ * @description Interfaz para un ejercicio de tipo translation.
+ */
+export interface TranslationExercise extends BaseExercise {
+  type: "translation";
+  content: TranslationContent;
+}
+
+/**
+ * @interface FunFactContent
+ * @description Interfaz para el contenido de un ejercicio de tipo fun-fact.
+ */
+export interface FunFactContent {
+  fact: string;
+  imageUrl?: string; // URL de una imagen relacionada con el dato curioso (opcional)
+}
+
+/**
+ * @interface FunFactExercise
+ * @description Interfaz para un ejercicio de tipo fun-fact.
+ */
+export interface FunFactExercise extends BaseExercise {
+  type: "fun-fact";
+  content: FunFactContent;
+}
+
+/**
+ * @type Exercise
+ * @description Tipo unido para todos los ejercicios.
+ */
+export type Exercise =
+  | QuizExercise
+  | MatchingExercise
+  | FillInTheBlankExercise
+  | AudioPronunciationExercise
+  | TranslationExercise
+  | FunFactExercise;
 
 /**
  * @interface CreateExerciseDto
  * @description DTO para crear un nuevo ejercicio.
  */
-export interface CreateExerciseDto {
-  lessonId?: string; // Cambiado de activityId a lessonId, y hecho opcional
-  title: string;
-  description: string;
-  type: string;
-  content: any;
-  difficulty: "beginner" | "intermediate" | "advanced";
-  points: number;
-  timeLimit?: number;
-  isActive?: boolean;
-  topicId?: string;
-  tags?: string[];
-}
+export type CreateExerciseDto =
+  | Omit<QuizExercise, "id" | "createdAt" | "updatedAt" | "topic"> & { lessonId?: string }
+  | Omit<MatchingExercise, "id" | "createdAt" | "updatedAt" | "topic"> & { lessonId?: string }
+  | Omit<FillInTheBlankExercise, "id" | "createdAt" | "updatedAt" | "topic"> & { lessonId?: string }
+  | Omit<AudioPronunciationExercise, "id" | "createdAt" | "updatedAt" | "topic"> & { lessonId?: string }
+  | Omit<TranslationExercise, "id" | "createdAt" | "updatedAt" | "topic"> & { lessonId?: string }
+  | Omit<FunFactExercise, "id" | "createdAt" | "updatedAt" | "topic"> & { lessonId?: string };
 
 /**
  * @interface UpdateExerciseDto
  * @description DTO para actualizar un ejercicio existente.
  */
-export interface UpdateExerciseDto {
-  title?: string;
-  description?: string;
-  type?: string;
-  content?: any;
-  difficulty?: "beginner" | "intermediate" | "advanced";
-  points?: number;
-  timeLimit?: number;
-  isActive?: boolean;
-  topicId?: string;
-  tags?: string[];
-  isCompleted?: boolean;
-  isLocked?: boolean;
-}
+export type UpdateExerciseDto = Partial<CreateExerciseDto>;
 
 /**
  * @interface LearningPathDto

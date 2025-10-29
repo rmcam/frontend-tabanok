@@ -16,3 +16,16 @@ export interface Multimedia {
   lesson?: string;
   // Añadir otros campos relevantes del modelo Multimedia
 }
+
+/**
+ * @interface MultimediaQueryParams
+ * @description Interfaz para los parámetros de consulta al obtener archivos multimedia.
+ */
+export interface MultimediaQueryParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  fileType?: string;
+  userId?: string;
+  // Añadir otros parámetros de filtro si son necesarios
+}

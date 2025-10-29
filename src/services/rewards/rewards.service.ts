@@ -1,8 +1,5 @@
-import type {
-  ApiResponse,
-  Reward,
-  CreateRewardDto,
-} from '../../types/api';
+import type { ApiResponse } from '../../types/common/common.d';
+import type { Reward, CreateRewardDto, AwardRewardDto, RewardStatusDto } from '../../types/gamification/gamification.d';
 
 import { apiRequest } from '../_shared';
 
@@ -21,5 +18,5 @@ export const rewardsService = {
   consumeReward: (userId: string, rewardId: string) =>
     apiRequest<ApiResponse<void>>('PUT', `/rewards/user/${userId}/reward/${rewardId}/consume`),
   checkRewardStatus: (userId: string, rewardId: string) =>
-    apiRequest<ApiResponse<any>>('GET', `/rewards/user/${userId}/reward/${rewardId}/status`), // Ajustar tipo de respuesta
+    apiRequest<ApiResponse<RewardStatusDto>>('GET', `/rewards/user/${userId}/reward/${rewardId}/status`),
 };

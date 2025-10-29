@@ -11,7 +11,7 @@ import LearningLessonCard from '@/features/learn/components/LearningLessonCard';
 import LearningTopicSection from '@/features/learn/components/LearningTopicSection';
 import LearningExerciseItem from '@/features/learn/components/LearningExerciseItem';
 import type { LearningUnit } from '@/types/learning'; // Importar LearningUnit
-import type { Module } from '@/types/api'; // Importar Module
+import type { Module } from '@/types/learning/learning.d'; // Importar Module
 import { useProfile } from '@/hooks/auth/auth.hooks';
 import { useGetProgressByUser } from '@/hooks/progress/progress.hooks';
 import { useUnitProgress } from '@/hooks/learn/useUnitProgress'; // Nueva importación

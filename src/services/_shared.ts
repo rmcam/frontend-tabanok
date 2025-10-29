@@ -1,9 +1,7 @@
 import type {
   ApiError as IApiError,
-} from '../types/api';
+} from '../types/common/common';
 
-// No es necesario importar el store de autenticación aquí si el token se maneja con cookies.
-// import { useAuthStore } from '../stores/authStore'; // Eliminar o comentar esta línea
 
 export const API_URL = import.meta.env.VITE_API_URL;
 
@@ -34,10 +32,16 @@ export async function handleApiResponse<T>(response: Response): Promise<T> {
     throw new ApiError(errorData.message || `Error: ${response.statusText}`, response.status, errorData.details);
   }
   const contentType = response.headers.get('content-type');
+  if (response.status === 204) { // No Content
+    return null as T;
+  }
   if (contentType && contentType.includes('application/json')) {
     return response.json();
   } else {
-    return response.text() as Promise<T>; // Asumir que es texto si no es JSON
+    // Si la respuesta es OK pero no es JSON, y no es 204 No Content,
+    // asumimos que no hay un cuerpo de datos relevante para el tipo esperado (T).
+    // Devolver null es la opción más segura para evitar errores de tipo.
+    return null as T;
   }
 }
 

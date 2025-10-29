@@ -1,4 +1,5 @@
-import type { ApiResponse, LeaderboardEntryDto, GamificationUserStatsDto, Achievement, MissionTemplate, Leaderboard } from '../../types/api';
+import type { ApiResponse } from '../../types/common/common.d';
+import type { Leaderboard, GamificationUserStatsDto, Achievement, MissionTemplate, GrantPointsDto, AssignMissionDto } from '../../types/gamification/gamification.d';
 import { apiRequest } from '../_shared';
 
 /**
@@ -16,4 +17,10 @@ export const gamificationService = {
     apiRequest<ApiResponse<MissionTemplate[]>>('GET', '/gamification/missions'),
   rechargeHearts: (userId: string) =>
     apiRequest<ApiResponse<GamificationUserStatsDto>>('POST', `/gamification/recharge-hearts/${userId}`),
+
+  grantPoints: (userId: string, data: GrantPointsDto) =>
+    apiRequest<ApiResponse<GamificationUserStatsDto>>('POST', `/gamification/grant-points/${userId}`, data),
+
+  assignMission: (userId: string, missionId: string) =>
+    apiRequest<ApiResponse<GamificationUserStatsDto>>('POST', `/gamification/${userId}/assign-mission/${missionId}`),
 };

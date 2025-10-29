@@ -1,6 +1,6 @@
 import { apiRequest } from '../_shared';
-import type { ApiResponse, SubmitExerciseDto, SubmitExerciseResponse, ProgressDto, CreateProgressDto } from '../../types';
-import type { UserLessonProgressResponse, UserUnityProgressResponse, UserExerciseProgressResponse } from '../../types/progress/progress.d';
+import type { ApiResponse } from '../../types/common/common.d';
+import type { SubmitExerciseDto, SubmitExerciseResponse, ProgressDto, CreateProgressDto, UserLessonProgressResponse, UserUnityProgressResponse, UserExerciseProgressResponse } from '../../types/progress/progress.d';
 import type { Exercise } from '../../types/learning/learning.d';
 
 interface PaginationParams {
@@ -14,14 +14,17 @@ const ProgressService = {
     if (pagination?.page) params.append('page', pagination.page.toString());
     if (pagination?.limit) params.append('limit', pagination.limit.toString());
     const queryString = params.toString();
-    return apiRequest<UserExerciseProgressResponse[]>('GET', `/progress/user/${userId}${queryString ? `?${queryString}` : ''}`);
+    // Cambiado a devolver ProgressDto[] para consistencia con getOrCreateProgress
+    return apiRequest<ApiResponse<ProgressDto[]>>('GET', `/progress/user/${userId}${queryString ? `?${queryString}` : ''}`);
   },
   createProgress: (progressData: CreateProgressDto) => {
-    return apiRequest<UserExerciseProgressResponse>('POST', '/progress', progressData);
+    return apiRequest<ApiResponse<ProgressDto>>('POST', '/progress', progressData);
   },
-  getOrCreateProgress: async (userId: string, exerciseId: string, pagination?: PaginationParams): Promise<UserExerciseProgressResponse> => {
-    const userProgresses = await ProgressService.getProgressByUser(userId, pagination);
-    let progress = userProgresses.find(p => p.exercise.id === exerciseId); // Acceder a p.exercise.id
+  getOrCreateProgress: async (userId: string, exerciseId: string, pagination?: PaginationParams): Promise<ApiResponse<ProgressDto>> => {
+    const userProgressesResponse = await ProgressService.getProgressByUser(userId, pagination);
+    const userProgresses = userProgressesResponse.data;
+
+    const progress = userProgresses.find(p => p.exerciseId === exerciseId); // Buscar por exerciseId en ProgressDto
 
     if (!progress) {
       const newProgressData: CreateProgressDto = {
@@ -31,15 +34,16 @@ const ProgressService = {
         score: 0,
         answers: {},
       };
-      progress = await apiRequest<UserExerciseProgressResponse>('POST', '/progress', newProgressData);
+      const newProgressResponse = await apiRequest<ApiResponse<ProgressDto>>('POST', '/progress', newProgressData);
+      return newProgressResponse;
     }
-    return progress;
+    return { data: progress };
   },
   markProgressAsCompleted: (progressId: string, data: { answers: Record<string, any> }) => {
-    return apiRequest<UserExerciseProgressResponse>('PATCH', `/progress/${progressId}/complete`, data);
+    return apiRequest<ApiResponse<UserExerciseProgressResponse>>('PATCH', `/progress/${progressId}/complete`, data);
   },
   updateProgressScore: (progressId: string, data: { score: number }) => {
-    return apiRequest<UserExerciseProgressResponse>('PATCH', `/progress/${progressId}/score`, data);
+    return apiRequest<ApiResponse<UserExerciseProgressResponse>>('PATCH', `/progress/${progressId}/score`, data);
   },
   submitExercise: (id: string, submission: SubmitExerciseDto) => {
     return apiRequest<ApiResponse<SubmitExerciseResponse>>('POST', `/progress/${id}/submit-exercise`, submission);
@@ -51,14 +55,14 @@ const ProgressService = {
     if (pagination?.page) params.append('page', pagination.page.toString());
     if (pagination?.limit) params.append('limit', pagination.limit.toString());
     const queryString = params.toString();
-    return apiRequest<UserLessonProgressResponse[]>('GET', `/user-lesson-progress/user/${userId}/all-lessons${queryString ? `?${queryString}` : ''}`);
+    return apiRequest<ApiResponse<UserLessonProgressResponse[]>>('GET', `/user-lesson-progress/user/${userId}/all-lessons${queryString ? `?${queryString}` : ''}`);
   },
   getAllUserUnityProgress: (userId: string, pagination?: PaginationParams) => {
     const params = new URLSearchParams();
     if (pagination?.page) params.append('page', pagination.page.toString());
     if (pagination?.limit) params.append('limit', pagination.limit.toString());
     const queryString = params.toString();
-    return apiRequest<UserUnityProgressResponse[]>('GET', `/user-unity-progress/user/${userId}/all-unities${queryString ? `?${queryString}` : ''}`);
+    return apiRequest<ApiResponse<UserUnityProgressResponse[]>>('GET', `/user-unity-progress/user/${userId}/all-unities${queryString ? `?${queryString}` : ''}`);
   },
 };
 

@@ -1,11 +1,39 @@
 import type {
-  Module,
-  Unity,
-  Lesson,
-  Exercise,
+  Module as BaseModule, // Renombrar Module para evitar conflictos
+  Unity as BaseUnity,   // Renombrar Unity para evitar conflictos
+  Lesson as BaseLesson, // Renombrar Lesson a BaseLesson
+  Exercise as BaseExercise, // Renombrar Exercise a BaseExercise
   Multimedia,
-  Content,
-} from "./api";
+  Topic as BaseTopic, // Renombrar Topic a BaseTopic
+} from "./learning/learning.d"; // Importar directamente de learning/learning.d
+
+// Extender las interfaces base para incluir propiedades de aprendizaje
+export interface LearningModule extends BaseModule {
+  id: string;
+  name: string;
+  description?: string;
+  progress?: number; // Añadir progreso al módulo
+  units: LearningUnit[]; // Añadir unidades procesadas
+  url: string;
+  isCompleted: boolean;
+}
+
+export interface LearningUnit extends BaseUnity {
+  id: string;
+  moduleId: string; // Añadir explícitamente moduleId
+  title: string;
+  description?: string;
+  order: number;
+  isLocked: boolean;
+  requiredPoints: number;
+  isActive: boolean;
+  lessons: LearningLesson[]; // Redefinido para usar LearningLesson[]
+  topics: LearningTopic[]; // Redefinido para usar LearningTopic[]
+  url: string;
+  isCompleted: boolean;
+  level?: string; // Añadir level
+  progress: number;
+}
 
 // Definir la interfaz UserProgress directamente aquí
 export interface UserProgress {
@@ -14,7 +42,8 @@ export interface UserProgress {
 }
 
 // Definir tipos para el camino de aprendizaje procesado
-export interface LearningExercise extends Exercise {
+export interface LearningExercise extends BaseExercise {
+  id: string; // Añadir explícitamente id
   url: string;
   isCompleted: boolean;
   isLocked: boolean;
@@ -22,7 +51,9 @@ export interface LearningExercise extends Exercise {
   lessonId: string; // Añadir lessonId para vincular el ejercicio a una lección
 }
 
-export interface LearningLesson extends Lesson {
+export interface LearningLesson extends BaseLesson {
+  id: string; // Añadir explícitamente id
+  unityId: string; // Añadir explícitamente unityId
   exercises: LearningExercise[];
   multimedia: Multimedia[]; // Usar Multimedia[] directamente
   topics: LearningTopic[]; // Añadir tópicos a la lección
@@ -32,16 +63,6 @@ export interface LearningLesson extends Lesson {
   guideContent?: string; // Añadir guideContent
   progress: number; // Añadir progreso a la lección
   difficulty: "easy" | "normal" | "hard";
-}
-
-export interface LearningUnit extends Unity {
-  lessons: LearningLesson[]; // Redefinido para usar LearningLesson[]
-  topics: LearningTopic[]; // Redefinido para usar LearningTopic[]
-  url: string;
-  isCompleted: boolean;
-  isLocked: boolean; // Asegurar que isLocked esté presente
-  level?: string; // Añadir level
-  progress: number;
 }
 
 // Tipos específicos para el campo 'content' basado en el 'type'
@@ -207,4 +228,9 @@ export interface LearningModule extends Module {
   isCompleted: boolean;
   progress: number;
 }
-// Forzar actualización de TypeScript
+
+export interface LearningUnitCardProps {
+  unit: LearningUnit;
+  userProgress: UserProgress | undefined;
+  isPreviousUnitCompleted: boolean;
+}

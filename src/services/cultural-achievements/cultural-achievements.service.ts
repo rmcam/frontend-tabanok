@@ -1,8 +1,5 @@
-import type {
-  ApiResponse,
-  Achievement,
-  CreateAchievementDto,
-} from '../../types/api';
+import type { ApiResponse } from '../../types/common/common.d';
+import type { Achievement, CreateAchievementDto, UpdateProgressDto } from '../../types/gamification/gamification.d';
 
 import { apiRequest } from '../_shared';
 
@@ -16,10 +13,10 @@ export const culturalAchievementsService = {
     apiRequest<ApiResponse<Achievement[]>>('GET', '/cultural-achievements'),
   initializeProgress: (achievementId: string, userId: string) =>
     apiRequest<ApiResponse<void>>('POST', `/cultural-achievements/${achievementId}/progress/${userId}`),
-  updateProgress: (achievementId: string, userId: string, progressData: any) => // Ajustar tipo de progressData
+  updateProgress: (achievementId: string, userId: string, progressData: UpdateProgressDto) =>
     apiRequest<ApiResponse<void>>('PUT', `/cultural-achievements/${achievementId}/progress/${userId}`, progressData),
   getAchievementProgress: (achievementId: string, userId: string) =>
-    apiRequest<ApiResponse<any>>('GET', `/cultural-achievements/${achievementId}/progress/${userId}`), // Ajustar tipo de respuesta
+    apiRequest<ApiResponse<UpdateProgressDto>>('GET', `/cultural-achievements/${achievementId}/progress/${userId}`),
   getUserAchievements: (userId: string) =>
     apiRequest<ApiResponse<Achievement[]>>('GET', `/cultural-achievements/users/${userId}`),
 };

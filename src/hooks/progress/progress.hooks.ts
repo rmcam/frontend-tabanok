@@ -1,9 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import ProgressService from '../../services/progress/progress.service';
-import { ApiError } from '../../services/_shared';
-import type { UserModuleProgressResponse, UserUnityProgressResponse, UserLessonProgressResponse, UserExerciseProgressResponse, CreateProgressDto } from '../../types/progress/progress.d';
-import { useUserStore } from '../../stores/userStore';
+import ProgressService from '@/services/progress/progress.service';
+import { ApiError } from '@/services/_shared';
+import type { UserModuleProgressResponse, UserUnityProgressResponse, UserLessonProgressResponse, UserExerciseProgressResponse, CreateProgressDto, ProgressDto } from '@/types/progress/progress.d';
+import { useUserStore } from '@/stores/userStore';
+import type { ApiResponse } from '@/types/common/common.d';
 
 interface PaginationParams {
   page?: number;
@@ -26,21 +27,22 @@ export interface UserGeneralProgress {
  * @returns Un objeto de React Query con los datos de progreso, estado de carga y error.
  */
 export function useGetProgressByUser(userId: string | undefined, pagination?: PaginationParams) {
-  return useQuery<UserGeneralProgress, Error>({
+  return useQuery<UserGeneralProgress, ApiError>({
     queryKey: ['userGeneralProgress', userId, pagination],
     queryFn: async () => {
       if (!userId) {
         return { completedExerciseIds: [], completedContentIds: [] };
       }
-      const progressList = await ProgressService.getProgressByUser(userId, pagination);
-      const completedExerciseIds = progressList
-        .filter(p => p.isCompleted && p.exercise?.id) // Acceder a p.exercise.id
-        .map(p => p.exercise.id);
+      const progressListResponse = await ProgressService.getProgressByUser(userId, pagination);
+      const progressList = progressListResponse.data || []; // Asegurarse de que progressList sea un array
 
-      // Si el backend ya no devuelve contentId en el progreso de ejercicios,
-      // esta parte se dejará como un array vacío o se obtendrá de otro endpoint.
-      // Por ahora, se asume que no hay contentId en UserExerciseProgressResponse.
-      const completedContentIds: string[] = [];
+      const completedExerciseIds = progressList
+        .filter(p => p.isCompleted && p.exerciseId)
+        .map(p => p.exerciseId!);
+
+      const completedContentIds: string[] = progressList
+        .filter(p => p.isCompleted && p.contentId)
+        .map(p => p.contentId!);
 
       return { completedExerciseIds, completedContentIds };
     },
@@ -55,10 +57,10 @@ export function useGetProgressByUser(userId: string | undefined, pagination?: Pa
 export const useCreateProgress = () => {
   const queryClient = useQueryClient();
   return useMutation<
-    UserExerciseProgressResponse, // Cambiado de ProgressDto
+    ApiResponse<ProgressDto>, // Tipo de retorno corregido
     ApiError,
     CreateProgressDto,
-    { previousUserGeneralProgress?: UserGeneralProgress; previousAllUserLessonProgress?: UserLessonProgressResponse[]; previousAllUserUnityProgress?: UserUnityProgressResponse[] } // Tipos actualizados
+    { previousUserGeneralProgress?: UserGeneralProgress; previousAllUserLessonProgress?: ApiResponse<UserLessonProgressResponse[]>; previousAllUserUnityProgress?: ApiResponse<UserUnityProgressResponse[]> } // Tipos actualizados
   >({
     mutationFn: (progressData: CreateProgressDto) => ProgressService.createProgress(progressData),
     onMutate: async (newProgressData) => {
@@ -69,8 +71,8 @@ export const useCreateProgress = () => {
 
       // Snapshot del valor anterior
       const previousUserGeneralProgress = queryClient.getQueryData<UserGeneralProgress>(['userGeneralProgress', newProgressData.userId]);
-      const previousAllUserLessonProgress = queryClient.getQueryData<UserLessonProgressResponse[]>(['allUserLessonProgress', newProgressData.userId]);
-      const previousAllUserUnityProgress = queryClient.getQueryData<UserUnityProgressResponse[]>(['allUserUnityProgress', newProgressData.userId]);
+      const previousAllUserLessonProgress = queryClient.getQueryData<ApiResponse<UserLessonProgressResponse[]>>(['allUserLessonProgress', newProgressData.userId]);
+      const previousAllUserUnityProgress = queryClient.getQueryData<ApiResponse<UserUnityProgressResponse[]>>(['allUserUnityProgress', newProgressData.userId]);
 
       // Optimistic update para userGeneralProgress
       if (previousUserGeneralProgress) {
@@ -130,9 +132,9 @@ export function useAllUserLessonProgress(pagination?: PaginationParams) {
   const { user } = useUserStore();
   const userId = user?.id;
 
-  return useQuery<UserLessonProgressResponse[], Error>({ // Tipo actualizado
+  return useQuery<UserLessonProgressResponse[], ApiError>({ // Tipo actualizado
     queryKey: ['allUserLessonProgress', userId, pagination],
-    queryFn: () => ProgressService.getAllUserLessonProgress(userId!, pagination),
+    queryFn: async () => (await ProgressService.getAllUserLessonProgress(userId!, pagination)).data,
     enabled: !!userId,
   });
 }
@@ -146,9 +148,9 @@ export function useAllUserUnityProgress(pagination?: PaginationParams) {
   const { user } = useUserStore();
   const userId = user?.id;
 
-  return useQuery<UserUnityProgressResponse[], Error>({ // Tipo actualizado
+  return useQuery<UserUnityProgressResponse[], ApiError>({ // Tipo actualizado
     queryKey: ['allUserUnityProgress', userId, pagination],
-    queryFn: () => ProgressService.getAllUserUnityProgress(userId!, pagination),
+    queryFn: async () => (await ProgressService.getAllUserUnityProgress(userId!, pagination)).data,
     enabled: !!userId,
   });
 }

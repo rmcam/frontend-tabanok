@@ -4,13 +4,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { CheckCircle2, XCircle, RefreshCw } from 'lucide-react';
-import type { MatchingContentData } from '@/types/learning';
+import type { MatchingContent } from '@/types/learning/learning.d';
 import { useSubmitExercise } from '@/hooks/exercises/exercises.hooks'; // Corregir importación
 import { useHeartsStore } from '@/stores/heartsStore';
 
 interface LearningMatchingProps {
-  exerciseId: string; // Añadir exerciseId como prop
-  matching: MatchingContentData;
+  exerciseId: string;
+  matching: MatchingContent;
   onComplete?: (isCorrect: boolean, awardedPoints?: number) => void;
 }
 
@@ -19,8 +19,8 @@ const LearningMatching: React.FC<LearningMatchingProps> = ({ exerciseId, matchin
   const [selectedTerm, setSelectedTerm] = useState<string | null>(null);
   const [selectedMatch, setSelectedMatch] = useState<string | null>(null);
   const [userPairs, setUserPairs] = useState<{ term: string; match: string }[]>([]);
-  const [availableTerms, setAvailableTerms] = useState(matching.pairs.map(p => p.term));
-  const [availableMatches, setAvailableMatches] = useState(matching.pairs.map(p => p.match).sort(() => Math.random() - 0.5)); // Mezclar matches
+  const [availableTerms, setAvailableTerms] = useState(matching.pairs ? matching.pairs.map(p => p.term) : []);
+  const [availableMatches, setAvailableMatches] = useState(matching.pairs ? matching.pairs.map(p => p.match).sort(() => Math.random() - 0.5) : []); // Mezclar matches
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [submissionResponse, setSubmissionResponse] = useState<any>(null); // Nuevo estado para la respuesta
@@ -53,7 +53,7 @@ const LearningMatching: React.FC<LearningMatchingProps> = ({ exerciseId, matchin
   };
 
   const handleSubmit = () => {
-    if (userPairs.length !== matching.pairs.length) {
+    if (!matching.pairs || userPairs.length !== matching.pairs.length) {
       toast.error(t("Por favor, empareja todos los elementos antes de enviar."));
       return;
     }
@@ -94,8 +94,8 @@ const LearningMatching: React.FC<LearningMatchingProps> = ({ exerciseId, matchin
     setSelectedTerm(null);
     setSelectedMatch(null);
     setUserPairs([]);
-    setAvailableTerms(matching.pairs.map(p => p.term));
-    setAvailableMatches(matching.pairs.map(p => p.match).sort(() => Math.random() - 0.5));
+    setAvailableTerms(matching.pairs ? matching.pairs.map(p => p.term) : []);
+    setAvailableMatches(matching.pairs ? matching.pairs.map(p => p.match).sort(() => Math.random() - 0.5) : []);
     setIsSubmitted(false);
     setIsCorrect(null);
   };
@@ -107,38 +107,42 @@ const LearningMatching: React.FC<LearningMatchingProps> = ({ exerciseId, matchin
         <CardDescription>{t("Empareja cada término con su definición o traducción correcta.")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex flex-col space-y-2">
-            <h3 className="text-lg font-semibold">{t("Términos")}</h3>
-            {availableTerms.map((term, index) => (
-              <Button
-                key={index}
-                variant={selectedTerm === term ? "default" : "outline"}
-                onClick={() => handleTermClick(term)}
-                disabled={isSubmitted}
-                className="justify-start"
-                aria-label={t("Seleccionar término: {{term}}", { term })}
-              >
-                {term}
-              </Button>
-            ))}
+        {matching.pairs && matching.pairs.length > 0 ? (
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col space-y-2">
+              <h3 className="text-lg font-semibold">{t("Términos")}</h3>
+              {availableTerms.map((term, index) => (
+                <Button
+                  key={index}
+                  variant={selectedTerm === term ? "default" : "outline"}
+                  onClick={() => handleTermClick(term)}
+                  disabled={isSubmitted}
+                  className="justify-start"
+                  aria-label={t("Seleccionar término: {{term}}", { term })}
+                >
+                  {term}
+                </Button>
+              ))}
+            </div>
+            <div className="flex flex-col space-y-2">
+              <h3 className="text-lg font-semibold">{t("Coincidencias")}</h3>
+              {availableMatches.map((match, index) => (
+                <Button
+                  key={index}
+                  variant={selectedMatch === match ? "default" : "outline"}
+                  onClick={() => handleMatchClick(match)}
+                  disabled={isSubmitted}
+                  className="justify-start"
+                  aria-label={t("Seleccionar coincidencia: {{match}}", { match })}
+                >
+                  {match}
+                </Button>
+              ))}
+            </div>
           </div>
-          <div className="flex flex-col space-y-2">
-            <h3 className="text-lg font-semibold">{t("Coincidencias")}</h3>
-            {availableMatches.map((match, index) => (
-              <Button
-                key={index}
-                variant={selectedMatch === match ? "default" : "outline"}
-                onClick={() => handleMatchClick(match)}
-                disabled={isSubmitted}
-                className="justify-start"
-                aria-label={t("Seleccionar coincidencia: {{match}}", { match })}
-              >
-                {match}
-              </Button>
-            ))}
-          </div>
-        </div>
+        ) : (
+          <p className="text-muted-foreground">{t("Pares de emparejamiento no disponibles.")}</p>
+        )}
 
         {userPairs.length > 0 && (
           <div className="mt-6">
@@ -180,7 +184,7 @@ const LearningMatching: React.FC<LearningMatchingProps> = ({ exerciseId, matchin
         <Button variant="outline" onClick={handleReset} disabled={isSubmitting}>
           <RefreshCw className="h-4 w-4 mr-2" /> {t("Reiniciar")}
         </Button>
-        <Button onClick={handleSubmit} disabled={isSubmitting || isSubmitted || userPairs.length !== matching.pairs.length}>
+        <Button onClick={handleSubmit} disabled={isSubmitting || isSubmitted || !matching.pairs || userPairs.length !== matching.pairs.length}>
           {isSubmitting ? t("Enviando...") : t("Enviar Respuesta")}
         </Button>
       </CardFooter>

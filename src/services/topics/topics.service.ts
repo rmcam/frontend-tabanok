@@ -1,9 +1,12 @@
 import type {
   ApiResponse,
+} from '../../types/common/common.d';
+import type {
   Topic,
   CreateTopicDto,
   UpdateTopicDto,
-} from '../../types/api';
+} from '../../types/learning/learning.d';
+import type { TopicQueryParams } from '../../types/topics/topics.d'; // Asumiendo que se creará este tipo
 
 import { apiRequest } from '../_shared';
 
@@ -13,8 +16,8 @@ import { apiRequest } from '../_shared';
 export const topicsService = {
   createTopic: (topicData: CreateTopicDto) =>
     apiRequest<ApiResponse<Topic>>('POST', '/topics', topicData),
-  getAllTopics: () =>
-    apiRequest<ApiResponse<Topic[]>>('GET', '/topics'),
+  getAllTopics: (params?: TopicQueryParams) =>
+    apiRequest<ApiResponse<Topic[]>>('GET', '/topics', params),
   getTopicById: (id: string) =>
     apiRequest<ApiResponse<Topic>>('GET', `/topics/${id}`),
   updateTopic: (id: string, topicData: UpdateTopicDto) =>

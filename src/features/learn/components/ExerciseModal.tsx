@@ -17,13 +17,14 @@ import {
 } from "@/hooks/exercises/exercises.hooks";
 import { useProfile } from "@/hooks/auth/auth.hooks";
 import type {
-  LearningQuizContent,
-  LearningMatchingContent,
-  LearningFillInTheBlankContent,
-  LearningAudioPronunciationContent,
-  LearningTranslationContent,
-  LearningFunFactContent,
-} from "@/types/learning";
+  Exercise,
+  QuizContent,
+  MatchingContent,
+  FillInTheBlankContent,
+  AudioPronunciationContent,
+  TranslationContent,
+  FunFactContent,
+} from "@/types/learning/learning.d";
 import LearningQuiz from "./LearningQuiz";
 import LearningMatching from "./LearningMatching";
 import LearningFillInTheBlank from "./LearningFillInTheBlank";
@@ -121,10 +122,8 @@ const ExerciseModal: React.FC<ExerciseModalProps> = ({
             </DialogTitle>
           ) : (
             <DialogTitle className="text-3xl font-bold text-primary">
-              {exercise?.title && exercise.title !== "undefined"
-                ? exercise.title
-                : t("Ejercicio")}
-              {exercise?.type && exercise.type !== "undefined" && (
+              {exercise?.title || t("Ejercicio")}
+              {exercise?.type && (
                 <span className="text-xl font-semibold text-secondary-foreground ml-2">
                   ({t(exercise.type)})
                 </span>
@@ -135,9 +134,7 @@ const ExerciseModal: React.FC<ExerciseModalProps> = ({
             <Skeleton className="h-4 w-full" />
           ) : (
             <DialogDescription className="text-muted-foreground">
-              {exercise?.description && exercise.description !== "undefined"
-                ? exercise.description
-                : t("Descripción del ejercicio no disponible.")}
+              {exercise?.description || t("Descripción del ejercicio no disponible.")}
             </DialogDescription>
           )}
         </DialogHeader>
@@ -166,57 +163,42 @@ const ExerciseModal: React.FC<ExerciseModalProps> = ({
             {exercise.type === "quiz" && (
               <LearningQuiz
                 exerciseId={exercise.id}
-                quiz={exercise.content as LearningQuizContent["content"]}
-                onComplete={handleExerciseCompleteInternal}
-              />
-            )}
-            {exercise.type === "multiple-choice" && (
-              <LearningQuiz
-                exerciseId={exercise.id}
-                quiz={exercise.content as LearningQuizContent["content"]}
+                quiz={exercise.content as QuizContent}
                 onComplete={handleExerciseCompleteInternal}
               />
             )}
             {exercise.type === "matching" && (
               <LearningMatching
                 exerciseId={exercise.id}
-                matching={
-                  exercise.content as LearningMatchingContent["content"]
-                }
+                matching={exercise.content as MatchingContent}
                 onComplete={handleExerciseCompleteInternal}
               />
             )}
             {exercise.type === "fill-in-the-blank" && (
               <LearningFillInTheBlank
                 exerciseId={exercise.id}
-                fillInTheBlank={
-                  exercise.content as LearningFillInTheBlankContent["content"]
-                }
+                fillInTheBlank={exercise.content as FillInTheBlankContent}
                 onComplete={handleExerciseCompleteInternal}
               />
             )}
             {exercise.type === "audio-pronunciation" && (
               <LearningAudioPronunciation
                 exerciseId={exercise.id}
-                audioPronunciation={
-                  exercise.content as LearningAudioPronunciationContent["content"]
-                }
+                audioPronunciation={exercise.content as AudioPronunciationContent}
                 onComplete={handleExerciseCompleteInternal}
               />
             )}
             {exercise.type === "translation" && (
               <LearningTranslation
                 exerciseId={exercise.id}
-                translation={
-                  exercise.content as LearningTranslationContent["content"]
-                }
+                translation={exercise.content as TranslationContent}
                 onComplete={handleExerciseCompleteInternal}
               />
             )}
             {exercise.type === "fun-fact" && (
               <LearningFunFact
                 exerciseId={exercise.id}
-                funFact={exercise.content as LearningFunFactContent["content"]}
+                funFact={exercise.content as FunFactContent}
                 onComplete={handleExerciseCompleteInternal}
               />
             )}
@@ -224,7 +206,6 @@ const ExerciseModal: React.FC<ExerciseModalProps> = ({
             {/* Manejar tipos de ejercicio desconocidos */}
             {![
               "quiz",
-              "multiple-choice",
               "matching",
               "fill-in-the-blank",
               "audio-pronunciation",

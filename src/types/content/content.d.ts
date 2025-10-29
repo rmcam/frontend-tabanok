@@ -57,3 +57,17 @@ export interface UpdateContentDto {
   multimedia?: Multimedia[];
   isLocked?: boolean;
 }
+
+/**
+ * @interface ContentQueryParams
+ * @description Interfaz para los parámetros de consulta al obtener contenido.
+ */
+export interface ContentQueryParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  type?: string;
+  unityId?: string;
+  topicId?: string;
+  // Añadir otros parámetros de filtro si son necesarios
+}

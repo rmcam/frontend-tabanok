@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner'; // Asumiendo que 'sonner' es la librería de notificaciones
 import { gamificationService } from '@/services/gamification/gamification.service';
-import type { Leaderboard, GamificationUserStatsDto, Achievement, MissionTemplate, ApiResponse } from '@/types/api'; // Importar ApiResponse
+import type { Leaderboard, GamificationUserStatsDto, Achievement, MissionTemplate } from '@/types/gamification/gamification.d';
+import type { ApiResponse } from '@/types/common/common.d';
 import { ApiError } from '@/services/_shared'; // Importar ApiError
 import { useHeartsStore } from '@/stores/heartsStore'; // Importar el store de vidas
 
@@ -69,6 +70,44 @@ export function useHeartRecharge() {
     onError: (error) => {
       console.error('Error al recargar vidas:', error.message, error.details);
       toast.error('Error al recargar vidas.');
+    },
+  });
+}
+
+/**
+ * Hook para otorgar puntos a un usuario.
+ */
+export function useGrantPoints() {
+  const queryClient = useQueryClient();
+  return useMutation<ApiResponse<GamificationUserStatsDto>, ApiError, { userId: string; points: number }>({
+    mutationFn: ({ userId, points }) => gamificationService.grantPoints(userId, { points }),
+    onSuccess: (response, { userId }) => {
+      toast.success('Puntos otorgados exitosamente.');
+      queryClient.invalidateQueries({ queryKey: ['userStats', userId] });
+      queryClient.invalidateQueries({ queryKey: ['currentLeaderboard'] });
+    },
+    onError: (error) => {
+      console.error('Error al otorgar puntos:', error.message, error.details);
+      toast.error('Error al otorgar puntos.');
+    },
+  });
+}
+
+/**
+ * Hook para asignar una misión a un usuario.
+ */
+export function useAssignMission() {
+  const queryClient = useQueryClient();
+  return useMutation<ApiResponse<GamificationUserStatsDto>, ApiError, { userId: string; missionId: string }>({
+    mutationFn: ({ userId, missionId }) => gamificationService.assignMission(userId, missionId),
+    onSuccess: (response, { userId }) => {
+      toast.success('Misión asignada exitosamente.');
+      queryClient.invalidateQueries({ queryKey: ['userStats', userId] });
+      queryClient.invalidateQueries({ queryKey: ['missionTemplates'] });
+    },
+    onError: (error) => {
+      console.error('Error al asignar misión:', error.message, error.details);
+      toast.error('Error al asignar misión.');
     },
   });
 }

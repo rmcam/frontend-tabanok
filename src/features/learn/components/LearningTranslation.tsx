@@ -12,13 +12,13 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { CheckCircle2, XCircle, RefreshCw } from "lucide-react";
-import type { TranslationContentData } from "@/types/learning";
+import type { TranslationContent } from "@/types/learning/learning.d";
 import { useSubmitExercise } from "@/hooks/exercises/exercises.hooks"; // Corregir importación
 import { useHeartsStore } from "@/stores/heartsStore";
 
 interface LearningTranslationProps {
-  exerciseId: string; // Añadir exerciseId como prop
-  translation: TranslationContentData;
+  exerciseId: string;
+  translation: TranslationContent;
   onComplete?: (isCorrect: boolean, awardedPoints?: number) => void;
 }
 
@@ -111,20 +111,24 @@ const LearningTranslation: React.FC<LearningTranslationProps> = ({
           {t("Traducción")}
         </CardTitle>
         <CardDescription>
-          {t("Traduce la siguiente frase al {{targetLanguage}}.", {
+          {translation.targetLanguage ? t("Traduce la siguiente frase al {{targetLanguage}}.", {
             targetLanguage:
               translation.targetLanguage === "es"
                 ? t("español")
                 : t("Kamentsá"),
-          })}
+          }) : t("Traduce la siguiente frase.")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="p-4 border rounded-md bg-muted">
-          <p className="text-xl font-semibold text-foreground">
-            {translation.sourceText}
-          </p>
-        </div>
+        {translation.sourceText ? (
+          <div className="p-4 border rounded-md bg-muted">
+            <p className="text-xl font-semibold text-foreground">
+              {translation.sourceText}
+            </p>
+          </div>
+        ) : (
+          <p className="text-muted-foreground">{t("Frase a traducir no disponible.")}</p>
+        )}
 
         <Textarea
           placeholder={t("Escribe tu traducción aquí...")}
@@ -180,7 +184,7 @@ const LearningTranslation: React.FC<LearningTranslationProps> = ({
         </Button>
         <Button
           onClick={handleSubmit}
-          disabled={isSubmitting || isSubmitted || userAnswer.trim() === ""}
+          disabled={isSubmitting || isSubmitted || userAnswer.trim() === "" || !translation.sourceText}
           className="cursor-pointer"
         >
           {isSubmitting ? t("Enviando...") : t("Enviar Traducción")}

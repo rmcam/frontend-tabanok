@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Lightbulb, CheckCircle2 } from 'lucide-react'; // Añadir CheckCircle2
-import type { FunFactContentData } from '@/types/learning';
+import type { FunFactContent } from '@/types/learning/learning.d';
 import { useSubmitExercise } from '@/hooks/exercises/exercises.hooks'; // Importar useSubmitExercise
 import { useHeartsStore } from '@/stores/heartsStore'; // Importar el store de vidas
 import { toast } from 'sonner'; // Importar toast
@@ -10,8 +10,8 @@ import { Button } from '@/components/ui/button'; // Importar Button
 import { CardFooter } from '@/components/ui/card'; // Importar CardFooter
 
 interface LearningFunFactProps {
-  exerciseId: string; // Añadir exerciseId como prop
-  funFact: FunFactContentData;
+  exerciseId: string;
+  funFact: FunFactContent;
   onComplete?: (isCorrect: boolean, awardedPoints?: number) => void;
 }
 
@@ -55,7 +55,11 @@ const LearningFunFact: React.FC<LearningFunFactProps> = ({ exerciseId, funFact, 
         <CardDescription>{t("Aprende algo interesante sobre la cultura Kamentsá.")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-lg text-foreground">{funFact.fact}</p>
+        {funFact.fact ? (
+          <p className="text-lg text-foreground">{funFact.fact}</p>
+        ) : (
+          <p className="text-muted-foreground">{t("Dato curioso no disponible.")}</p>
+        )}
         {funFact.imageUrl && (
           <div className="mt-4 flex justify-center">
             <img src={funFact.imageUrl} alt={t("Imagen de dato curioso")} className="max-h-64 w-auto object-contain rounded-md shadow-md" />
@@ -64,7 +68,7 @@ const LearningFunFact: React.FC<LearningFunFactProps> = ({ exerciseId, funFact, 
       </CardContent>
       <CardFooter className="flex justify-end">
         {!isSubmitted ? (
-          <Button onClick={handleComplete} disabled={isSubmitting}>
+          <Button onClick={handleComplete} disabled={isSubmitting || !funFact.fact}>
             {isSubmitting ? t("Completando...") : t("Entendido")}
           </Button>
         ) : (

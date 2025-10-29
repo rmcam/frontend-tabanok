@@ -13,7 +13,7 @@ const LandingPage = React.lazy(() => import("./features/landing"));
 const importLearnPage = () => import("./features/learn/pages/LearnPage");
 const LearnPage = React.lazy(importLearnPage); // Importación explícita de la página
 
-const ModuleDetailPage = React.lazy(() => import("./features/learn/pages/ModuleDetailPage")); // Nueva importación
+const ModuleUnitsPage = React.lazy(() => import("./features/learn/pages/ModuleUnitsPage")); // Nueva importación para la vista de unidades del módulo
 const UnitDetailPage = React.lazy(() => import("./features/learn/pages/UnitDetailPage")); // Importación de UnitDetailPage
 const LearningPathPage = React.lazy(() => import("./features/learn/pages/LearningPathPage")); // Nueva importación para el camino de aprendizaje
 
@@ -62,7 +62,7 @@ function App() {
             {/* Rutas protegidas */}
             <Route element={<AuthGuard />}>
               <Route path="/learn" element={<LearnPage />} /> {/* Muestra todos los módulos */}
-              <Route path="/learn/module/:moduleId" element={<ModuleDetailPage />} /> {/* Muestra las unidades de un módulo */}
+              <Route path="/learn/module/:moduleId" element={<ModuleUnitsPage />} /> {/* Muestra las unidades de un módulo */}
               <Route path="/learn/unit/:unitId" element={<UnitDetailPage />} /> {/* Muestra las lecciones y ejercicios de una unidad */}
               {/* Las siguientes rutas se mantendrán por ahora, pero podrían necesitar páginas dedicadas en el futuro */}
               <Route path="/learn/lesson/:id" element={<LessonDetailPage />} /> {/* Usar LessonDetailPage */}

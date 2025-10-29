@@ -5,13 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { CheckCircle2, XCircle, RefreshCw } from 'lucide-react';
-import type { FillInTheBlankContentData } from '@/types/learning';
+import type { FillInTheBlankContent } from '@/types/learning/learning.d';
 import { useSubmitExercise } from '@/hooks/exercises/exercises.hooks';
 import { useHeartsStore } from '@/stores/heartsStore';
 
 interface LearningFillInTheBlankProps {
-  exerciseId: string; // Añadir exerciseId como prop
-  fillInTheBlank: FillInTheBlankContentData;
+  exerciseId: string;
+  fillInTheBlank: FillInTheBlankContent;
   onComplete?: (isCorrect: boolean, awardedPoints?: number) => void;
 }
 
@@ -29,10 +29,12 @@ const LearningFillInTheBlank: React.FC<LearningFillInTheBlankProps> = ({ exercis
   useEffect(() => {
     const initialAnswers: Record<string, string> = {};
     const initialStatus: Record<string, boolean | null> = {};
-    fillInTheBlank.blanks.forEach(blank => {
-      initialAnswers[blank.id] = '';
-      initialStatus[blank.id] = null;
-    });
+    if (fillInTheBlank.blanks) {
+      fillInTheBlank.blanks.forEach(blank => {
+        initialAnswers[blank.id] = '';
+        initialStatus[blank.id] = null;
+      });
+    }
     setUserAnswers(initialAnswers);
     setBlankStatus(initialStatus);
   }, [fillInTheBlank]);
@@ -43,6 +45,10 @@ const LearningFillInTheBlank: React.FC<LearningFillInTheBlankProps> = ({ exercis
   };
 
   const handleSubmit = () => {
+    if (!fillInTheBlank.blanks) {
+      toast.error(t("Contenido del ejercicio no disponible."));
+      return;
+    }
     const allBlanksFilled = fillInTheBlank.blanks.every(blank => userAnswers[blank.id]?.trim() !== '');
     if (!allBlanksFilled) {
       toast.error(t("Por favor, rellena todos los espacios en blanco antes de enviar."));
@@ -69,7 +75,7 @@ const LearningFillInTheBlank: React.FC<LearningFillInTheBlankProps> = ({ exercis
           response.details.blankResults.forEach((result: { id: string; isCorrect: boolean; }) => {
             newBlankStatus[result.id] = result.isCorrect;
           });
-        } else {
+        } else if (fillInTheBlank.blanks) {
           fillInTheBlank.blanks.forEach(blank => {
             const userAnswer = userAnswers[blank.id]?.trim().toLowerCase();
             const correctAnswers = blank.correctAnswers.map(ans => ans.toLowerCase());
@@ -100,10 +106,12 @@ const LearningFillInTheBlank: React.FC<LearningFillInTheBlankProps> = ({ exercis
   const handleReset = () => {
     const initialAnswers: Record<string, string> = {};
     const initialStatus: Record<string, boolean | null> = {};
-    fillInTheBlank.blanks.forEach(blank => {
-      initialAnswers[blank.id] = '';
-      initialStatus[blank.id] = null;
-    });
+    if (fillInTheBlank.blanks) {
+      fillInTheBlank.blanks.forEach(blank => {
+        initialAnswers[blank.id] = '';
+        initialStatus[blank.id] = null;
+      });
+    }
     setUserAnswers(initialAnswers);
     setBlankStatus(initialStatus);
     setIsSubmitted(false);
@@ -111,6 +119,9 @@ const LearningFillInTheBlank: React.FC<LearningFillInTheBlankProps> = ({ exercis
   };
 
   const renderTextWithBlanks = () => {
+    if (!fillInTheBlank.text || !fillInTheBlank.blanks) {
+      return <p className="text-muted-foreground">{t("Contenido del ejercicio no disponible.")}</p>;
+    }
     const currentText = fillInTheBlank.text;
     const elements: React.ReactNode[] = [];
     let lastIndex = 0;

@@ -18,3 +18,8 @@ export * from "./mentorship/mentorship.d";
 export * from "./badges/badges.d";
 export * from "./common/common.d";
 export * from "./content/content.d";
+export * from "./lessons/lessons.d";
+export * from "./activities/activities.d";
+export * from "./exercises/exercises.d";
+export * from "./topics/topics.d";
+export * from "./unities/unities.d";

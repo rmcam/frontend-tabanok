@@ -11,15 +11,15 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
-import type { LearningQuizContent } from "@/types/learning";
+import type { QuizContent } from "@/types/learning/learning.d";
 import { useProfile } from "@/hooks/auth/auth.hooks";
 import { useSubmitExercise } from "@/hooks/exercises/exercises.hooks"; // Importar useSubmitExercise
 import { useHeartsStore } from "@/stores/heartsStore"; // Importar el store de vidas
 
 interface LearningQuizProps {
-  exerciseId: string; // Añadir exerciseId como prop
-  quiz: LearningQuizContent["content"];
-  onComplete?: (isCorrect: boolean, awardedPoints?: number) => void; // Añadir awardedPoints
+  exerciseId: string;
+  quiz: QuizContent;
+  onComplete?: (isCorrect: boolean, awardedPoints?: number) => void;
 }
 
 const LearningQuiz: React.FC<LearningQuizProps> = ({
@@ -84,41 +84,46 @@ const LearningQuiz: React.FC<LearningQuizProps> = ({
   return (
     <Card className="border-l-4 border-green-500 transition-all duration-300 ease-in-out">
       <CardHeader>
-        <CardTitle>{quiz.question}</CardTitle>
+        <CardTitle>{quiz?.question || t("Cargando pregunta...")}</CardTitle>
       </CardHeader>
       <CardContent>
-        {JSON.stringify(quiz)}
-        <RadioGroup
-          onValueChange={setSelectedOption}
-          value={selectedOption || ""}
-          disabled={isSubmitted}
-        >
-          {quiz.options.map((option, index) => (
-            <div
-              key={index}
-              className={`flex items-center space-x-2 p-3 rounded-md cursor-pointer transition-all duration-200 ease-in-out ${
-                selectedOption === option
-                  ? "bg-primary text-primary-foreground shadow-md"
-                  : "hover:bg-accent hover:text-accent-foreground"
-              }`}
-              onClick={() => !isSubmitted && setSelectedOption(option)}
-            >
-              <RadioGroupItem
-                value={option}
-                id={`option-${index}`}
-              />
-              <Label
-                htmlFor={`option-${index}`}
-                className="cursor-pointer"
+        {/* {JSON.stringify(quiz)} */} {/* Comentado para evitar mostrar el objeto completo */}
+        {quiz?.options && quiz.options.length > 0 ? (
+          <RadioGroup
+            onValueChange={setSelectedOption}
+            value={selectedOption || ""}
+            disabled={isSubmitted}
+          >
+            {quiz.options.map((option, index) => (
+              <div
+                key={index}
+                className={`flex items-center space-x-2 p-3 rounded-md cursor-pointer transition-all duration-200 ease-in-out ${
+                  selectedOption === option
+                    ? "bg-primary text-primary-foreground shadow-md"
+                    : "hover:bg-accent hover:text-accent-foreground"
+                }`}
+                onClick={() => !isSubmitted && setSelectedOption(option)}
               >
-                {option}
-              </Label>
-            </div>
-          ))}
-        </RadioGroup>
+                <RadioGroupItem
+                  value={option}
+                  id={`option-${index}`}
+                />
+                <Label
+                  htmlFor={`option-${index}`}
+                  className="cursor-pointer"
+                >
+                  {option}
+                </Label>
+              </div>
+            ))}
+          </RadioGroup>
+        ) : (
+          <p className="text-muted-foreground">{t("Opciones no disponibles.")}</p>
+        )}
+
         {isSubmitted && isCorrect !== null && (
           <div
-            key={isSubmitted.toString()} // Key to force re-render and re-trigger animation
+            key={isSubmitted.toString()}
             className={`mt-6 p-4 rounded-md flex flex-col items-center justify-center space-y-2 transition-all duration-300 ease-in-out transform animate-fade-in-up ${
               isCorrect
                 ? "bg-green-100 text-green-700 scale-105"
@@ -135,7 +140,7 @@ const LearningQuiz: React.FC<LearningQuizProps> = ({
             <p className="text-xl font-bold">
               {isCorrect ? t("¡Correcto!") : t("Incorrecto.")}
             </p>
-            {!isCorrect && (
+            {!isCorrect && quiz?.answer && (
               <p className="text-md text-center">
                 {t("La respuesta correcta era:")}{" "}
                 <span className="font-semibold">{quiz.answer}</span>

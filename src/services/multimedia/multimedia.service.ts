@@ -1,7 +1,10 @@
 import type {
   ApiResponse,
+} from '../../types/common/common.d';
+import type {
   Multimedia,
-} from '../../types/api';
+  MultimediaQueryParams,
+} from '../../types/multimedia/multimedia.d';
 
 import { apiRequest } from '../_shared';
 
@@ -11,12 +14,12 @@ import { apiRequest } from '../_shared';
 export const multimediaService = {
   uploadFile: (file: FormData) =>
     apiRequest<ApiResponse<Multimedia>>('POST', '/multimedia/upload', file, { 'Content-Type': 'multipart/form-data' }),
-  getAllMultimedia: () =>
-    apiRequest<ApiResponse<Multimedia[]>>('GET', '/multimedia'),
+  getAllMultimedia: (params?: MultimediaQueryParams) =>
+    apiRequest<ApiResponse<Multimedia[]>>('GET', '/multimedia', params),
   getMultimediaById: (id: string) =>
     apiRequest<ApiResponse<Multimedia>>('GET', `/multimedia/${id}`),
   deleteMultimedia: (id: string) =>
     apiRequest<ApiResponse<void>>('DELETE', `/multimedia/${id}`),
   getMultimediaFile: (id: string) =>
-    apiRequest<Blob>('GET', `/multimedia/${id}/file`), // Asumiendo que devuelve un Blob para archivos
+    apiRequest<ApiResponse<Blob>>('GET', `/multimedia/${id}/file`), // Devuelve ApiResponse<Blob>
 };

@@ -4,13 +4,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { CheckCircle2, XCircle, Volume2, Mic, StopCircle, RefreshCw } from 'lucide-react';
-import type { AudioPronunciationContentData } from '@/types/learning';
+import type { AudioPronunciationContent } from '@/types/learning/learning.d';
 import { useSubmitExercise } from '@/hooks/exercises/exercises.hooks'; // Corregir importación
 import { useHeartsStore } from '@/stores/heartsStore';
 
 interface LearningAudioPronunciationProps {
-  exerciseId: string; // Añadir exerciseId como prop
-  audioPronunciation: AudioPronunciationContentData;
+  exerciseId: string;
+  audioPronunciation: AudioPronunciationContent;
   onComplete?: (isCorrect: boolean, awardedPoints?: number) => void;
 }
 
@@ -28,8 +28,12 @@ const LearningAudioPronunciation: React.FC<LearningAudioPronunciationProps> = ({
   const { mutate: submitExerciseMutation, isPending: isSubmitting } = useSubmitExercise();
 
   const handlePlayAudio = () => {
-    const audio = new Audio(audioPronunciation.audioUrl);
-    audio.play();
+    if (audioPronunciation.audioUrl) {
+      const audio = new Audio(audioPronunciation.audioUrl);
+      audio.play();
+    } else {
+      toast.error(t("URL de audio no disponible."));
+    }
   };
 
   const startRecording = async () => {
@@ -132,12 +136,16 @@ const LearningAudioPronunciation: React.FC<LearningAudioPronunciationProps> = ({
         <CardDescription>{t("Escucha la frase y graba tu pronunciación.")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="flex items-center justify-center p-4 border rounded-md bg-muted">
-          <Button onClick={handlePlayAudio} variant="outline" size="icon" className="mr-4" aria-label={t("Reproducir audio de la frase: {{phrase}}", { phrase: audioPronunciation.phrase })}>
-            <Volume2 className="h-6 w-6" />
-          </Button>
-          <p className="text-xl font-semibold text-foreground">{audioPronunciation.phrase}</p>
-        </div>
+        {audioPronunciation.text && audioPronunciation.audioUrl ? (
+          <div className="flex items-center justify-center p-4 border rounded-md bg-muted">
+            <Button onClick={handlePlayAudio} variant="outline" size="icon" className="mr-4" aria-label={t("Reproducir audio de la frase: {{phrase}}", { phrase: audioPronunciation.text })}>
+              <Volume2 className="h-6 w-6" />
+            </Button>
+            <p className="text-xl font-semibold text-foreground">{audioPronunciation.text}</p>
+          </div>
+        ) : (
+          <p className="text-muted-foreground">{t("Contenido de audio no disponible.")}</p>
+        )}
 
         <div className="flex justify-center items-center space-x-4">
           <Button

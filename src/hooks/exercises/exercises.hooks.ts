@@ -1,43 +1,29 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { exercisesService } from "../../services/exercises/exercises.service";
-import ProgressService from "../../services/progress/progress.service"; // Importar ProgressService
-import { ApiError } from "../../services/_shared";
-import { useProfile } from "../auth/auth.hooks"; // Importar useProfile
-import type {
-  ApiResponse,
-  CreateExerciseDto,
-  UpdateExerciseDto,
-  SubmitExerciseDto,
-  SubmitExerciseResponse,
-  GamificationUserStatsDto,
-} from "../../types";
-import type { Exercise } from "../../types/learning/learning.d";
-import type { ProgressDto } from "../../types/progress/progress.d";
-
-interface PaginationParams {
-  page?: number;
-  limit?: number;
-}
+import { exercisesService } from "@/services/exercises/exercises.service";
+import ProgressService from "@/services/progress/progress.service";
+import { ApiError } from "@/services/_shared";
+import { useProfile } from "../auth/auth.hooks";
+import type { ApiResponse } from "@/types/common/common.d";
+import type { GamificationUserStatsDto } from "@/types/gamification/gamification.d";
+import type { Exercise, CreateExerciseDto, UpdateExerciseDto } from "@/types/learning/learning.d";
+import type { ProgressDto, SubmitExerciseDto, SubmitExerciseResponse } from "@/types/progress/progress.d";
+import type { ExerciseQueryParams } from "@/types/exercises/exercises.d";
 
 /**
  * Hooks para los endpoints de ejercicios.
  */
-export const useAllExercises = (pagination?: PaginationParams) => {
+export const useAllExercises = (params?: ExerciseQueryParams) => {
   return useQuery<Exercise[], ApiError>({
-    queryKey: ["exercises", pagination],
-    queryFn: async () => exercisesService.getAllExercises(pagination),
+    queryKey: ["exercises", params],
+    queryFn: async () => (await exercisesService.getAllExercises(params)).data,
   });
 };
 
 export const useExerciseById = (id: string) => {
   return useQuery<Exercise, ApiError>({
     queryKey: ["exercises", id],
-    queryFn: async () => {
-      const response = await exercisesService.getExerciseById(id);
-      // Asumimos que el backend devuelve directamente el Exercise, no envuelto en ApiResponse.data
-      return response as Exercise;
-    },
+    queryFn: async () => (await exercisesService.getExerciseById(id)).data,
     enabled: !!id,
   });
 };
@@ -53,22 +39,23 @@ export const useCreateExercise = () => {
     },
     onError: (error) => {
       console.error("Error al crear ejercicio:", error.message, error.details);
+      toast.error("Error al crear ejercicio.");
     },
   });
 };
 
-export const useExercisesByTopicId = (topicId: string, pagination?: PaginationParams) => {
+export const useExercisesByTopicId = (topicId: string, params?: ExerciseQueryParams) => {
   return useQuery<Exercise[], ApiError>({
-    queryKey: ["exercises", { topicId }, pagination],
-    queryFn: async () => exercisesService.getExercisesByTopicId(topicId, pagination),
+    queryKey: ["exercises", { topicId }, params],
+    queryFn: async () => (await exercisesService.getExercisesByTopicId(topicId, params)).data,
     enabled: !!topicId,
   });
 };
 
-export const useExercisesByLessonId = (lessonId: string, pagination?: PaginationParams) => {
+export const useExercisesByLessonId = (lessonId: string, params?: ExerciseQueryParams) => {
   return useQuery<Exercise[], ApiError>({
-    queryKey: ["exercises", { lessonId }, pagination],
-    queryFn: async () => exercisesService.getExercisesByLessonId(lessonId, pagination),
+    queryKey: ["exercises", { lessonId }, params],
+    queryFn: async () => (await exercisesService.getExercisesByLessonId(lessonId, params)).data,
     enabled: !!lessonId,
   });
 };
@@ -93,6 +80,7 @@ export const useUpdateExercise = () => {
         error.message,
         error.details
       );
+      toast.error("Error al actualizar ejercicio.");
     },
   });
 };
@@ -112,6 +100,7 @@ export const useDeleteExercise = () => {
         error.message,
         error.details
       );
+      toast.error("Error al eliminar ejercicio.");
     },
   });
 };
@@ -124,52 +113,48 @@ interface SubmitExerciseContext {
 
 export const useSubmitExercise = () => {
   const queryClient = useQueryClient();
-  const { data: userProfile } = useProfile(); // Asumiendo que useProfile está disponible y devuelve el perfil del usuario
+  const { data: userProfile } = useProfile();
 
   return useMutation<
     SubmitExerciseResponse,
     ApiError,
     { id: string; submission: SubmitExerciseDto },
-    SubmitExerciseContext // Añadir el tipo de contexto aquí
+    SubmitExerciseContext
   >({
     mutationFn: async ({ id: exerciseId, submission }) => {
       if (!userProfile?.id) {
         throw new Error("User not authenticated.");
       }
 
-      // 1. Obtener o crear el progreso para el usuario y el ejercicio
-      const progress: ProgressDto = await ProgressService.getOrCreateProgress(
+      const progressResponse = await ProgressService.getOrCreateProgress(
         userProfile.id,
         exerciseId
       );
+      const progress: ProgressDto = progressResponse.data;
 
-      // 2. Enviar las respuestas al endpoint de completar progreso
       const response = await ProgressService.markProgressAsCompleted(
         progress.id,
         { answers: submission }
       );
 
-      // El backend ahora devuelve el score y si es correcto, así que mapeamos la respuesta
       return {
-        isCorrect: response.isCompleted,
-        score: response.score || 0,
-        awardedPoints: response.score || 0, // Asumimos que los puntos otorgados son el score
-        message: response.isCompleted
+        isCorrect: response.data.isCompleted,
+        score: response.data.score || 0,
+        awardedPoints: response.data.score || 0,
+        message: response.data.isCompleted
           ? "Ejercicio completado."
           : "Progreso actualizado.",
-        details: response.answers,
+        details: submission, // Usar la submission original para los detalles
         userAnswer: JSON.stringify(submission),
-        userId: response.userId,
-        exerciseId: response.exerciseId,
+        userId: userProfile.id, // Usar el ID del perfil de usuario
+        exerciseId: exerciseId, // Usar el exerciseId de la mutación
       };
     },
-    onMutate: async ({ id: exerciseId, submission }) => {
-      // Cancelar cualquier refetching pendiente para las queries afectadas
+    onMutate: async ({ id: exerciseId, submission: _submission }) => {
       await queryClient.cancelQueries({ queryKey: ["exercises", exerciseId] });
       await queryClient.cancelQueries({ queryKey: ["user-progress"] });
       await queryClient.cancelQueries({ queryKey: ["user-stats"] });
 
-      // Snapshot del valor anterior
       const previousExercise = queryClient.getQueryData<Exercise>([
         "exercises",
         exerciseId,
@@ -181,16 +166,14 @@ export const useSubmitExercise = () => {
         "user-stats",
       ]);
 
-      // Optimistic update para el ejercicio
       if (previousExercise) {
         queryClient.setQueryData<Exercise>(["exercises", exerciseId], {
           ...previousExercise,
           isCompleted: true,
-          progress: previousExercise.points, // Asumir puntos completos para la actualización optimista
+          progress: previousExercise.points,
         });
       }
 
-      // Optimistic update para el progreso del usuario (si es relevante)
       if (previousUserProgress && userProfile?.id) {
         const updatedProgresses = previousUserProgress.map((p) =>
           p.exerciseId === exerciseId
@@ -203,7 +186,6 @@ export const useSubmitExercise = () => {
         );
       }
 
-      // Optimistic update para las estadísticas del usuario (puntos)
       if (previousUserStats && previousExercise) {
         queryClient.setQueryData<GamificationUserStatsDto>(
           ["user-stats"],
@@ -227,7 +209,6 @@ export const useSubmitExercise = () => {
             ? "¡Respuesta correcta! Ganaste puntos."
             : "Respuesta incorrecta. Inténtalo de nuevo.")
       );
-      // Invalidar queries para refetching de datos reales
       queryClient.invalidateQueries({ queryKey: ["exercises", variables.id] });
       queryClient.invalidateQueries({ queryKey: ["lesson"] });
       queryClient.invalidateQueries({ queryKey: ["user-progress"] });
@@ -241,7 +222,6 @@ export const useSubmitExercise = () => {
       );
       toast.error("Error al enviar respuesta del ejercicio.");
 
-      // Revertir a los datos anteriores en caso de error
       if (context?.previousExercise) {
         queryClient.setQueryData(
           ["exercises", variables.id],
@@ -256,7 +236,6 @@ export const useSubmitExercise = () => {
       }
     },
     onSettled: (data, error, variables) => {
-      // Asegurar que las queries se refetcheen después de que la mutación se asiente
       queryClient.invalidateQueries({ queryKey: ["exercises", variables.id] });
       queryClient.invalidateQueries({ queryKey: ["lesson"] });
       queryClient.invalidateQueries({ queryKey: ["user-progress"] });

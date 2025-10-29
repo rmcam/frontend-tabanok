@@ -1,4 +1,4 @@
-import type { Unity, Lesson, Exercise, Topic, Content } from '@/types/api';
+import type { Unity as BackendUnity, Lesson as BackendLesson, Exercise as BackendExercise, Topic as BackendTopic, Content as BackendContent } from '@/types/learning/learning.d';
 import type { LearningUnit, LearningLesson, LearningExercise, LearningTopic, LearningContent, UserProgress } from '@/types/learning'; // Importar UserProgress desde types/learning
 
 /**
@@ -9,7 +9,7 @@ import type { LearningUnit, LearningLesson, LearningExercise, LearningTopic, Lea
  * @returns A LearningExercise object with calculated properties.
  */
 export function calculateExerciseProgress(
-  exercise: Exercise,
+  exercise: BackendExercise,
   userProgress: UserProgress,
   lessonId: string, // Añadir lessonId como parámetro
   isPreviousCompleted: boolean = true // Por defecto, no bloqueado si no se especifica
@@ -38,7 +38,7 @@ export function calculateExerciseProgress(
  * @returns A LearningContent object with calculated properties.
  */
 export function calculateContentProgress(
-  contentItem: Content,
+  contentItem: BackendContent,
   userProgress: UserProgress,
   isPreviousCompleted: boolean = true // Por defecto, no bloqueado si no se especifica
 ): LearningContent {
@@ -67,7 +67,7 @@ export function calculateContentProgress(
  * @returns A LearningLesson object with calculated properties.
  */
 export function calculateLessonProgress(
-  lesson: Lesson,
+  lesson: BackendLesson,
   userProgress: UserProgress,
   isPreviousLessonCompleted: boolean = true
 ): LearningLesson {
@@ -96,6 +96,7 @@ export function calculateLessonProgress(
     isCompleted,
     isLocked, // Añadir isLocked a la lección
     progress,
+    difficulty: lesson.difficulty || 'normal', // Asegurar que difficulty siempre tenga un valor
   };
 }
 
@@ -107,28 +108,26 @@ export function calculateLessonProgress(
  * @returns A LearningTopic object with calculated properties.
  */
 export function calculateTopicProgress(
-  topic: Topic,
+  topic: BackendTopic,
   userProgress: UserProgress,
   isPreviousTopicCompleted: boolean = true
 ): LearningTopic {
   let previousContentCompleted = true;
-  const processedContents = (topic.contents || []).map((contentItem: Content) => {
+  const processedContents = (topic.contents || []).map((contentItem: BackendContent) => {
     const processed = calculateContentProgress(contentItem, userProgress, previousContentCompleted);
     previousContentCompleted = processed.isCompleted; // Actualizar para el siguiente contenido
     return processed;
   });
 
   let previousExerciseCompleted = true;
-  const processedExercises = (topic.exercises || []).map(exercise => {
-    // Si los ejercicios en tópicos no tienen un lessonId directo, se podría pasar un valor por defecto o un string vacío.
-    // Sin embargo, la interfaz LearningExercise requiere lessonId. Esto podría indicar una inconsistencia en el modelo de datos.
-    // Por ahora, pasamos un string vacío para que compile.
-    const processed = calculateExerciseProgress(exercise, userProgress, '', previousExerciseCompleted); // Pasar un string vacío para lessonId
+  const processedExercises = (topic.exercises || []).map((exercise: BackendExercise) => { // Tipar 'exercise'
+    // Para ejercicios dentro de tópicos, usaremos el ID del tópico como lessonId por defecto.
+    const processed = calculateExerciseProgress(exercise, userProgress, topic.id, previousExerciseCompleted);
     previousExerciseCompleted = processed.isCompleted; // Actualizar para el siguiente ejercicio
     return processed;
   });
 
-  const completedContentItems = processedContents.filter(item => item.isCompleted).length;
+  const completedContentItems = processedContents.filter((item: LearningContent) => item.isCompleted).length;
   const totalContentItems = processedContents.length;
 
   const completedExercises = processedExercises.filter(ex => ex.isCompleted).length;
@@ -163,7 +162,7 @@ export function calculateTopicProgress(
  * @returns A LearningUnit object with calculated properties.
  */
 export function calculateUnityProgress(
-  unity: Unity,
+  unity: BackendUnity,
   userProgress: UserProgress,
   isPreviousUnityCompleted: boolean = true
 ): LearningUnit {
@@ -199,5 +198,6 @@ export function calculateUnityProgress(
     isCompleted,
     isLocked, // Añadir isLocked a la unidad
     progress,
+    isActive: unity.isActive, // Asegurar que isActive se propague
   };
 }

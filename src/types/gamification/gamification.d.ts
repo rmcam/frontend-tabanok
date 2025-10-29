@@ -190,3 +190,55 @@ export interface UpdateAchievementStatsDto {
   achievementsCompleted?: number;
   // Otros campos de estadísticas de logros
 }
+
+/**
+ * @interface UpdateProgressDto
+ * @description DTO para actualizar el progreso de un logro cultural.
+ */
+export interface UpdateProgressDto {
+  progress: number; // Porcentaje de progreso o estado específico
+  isCompleted?: boolean;
+}
+
+/**
+ * @interface GrantPointsDto
+ * @description DTO para otorgar puntos a un usuario.
+ */
+export interface GrantPointsDto {
+  points: number;
+}
+
+/**
+ * @interface AssignMissionDto
+ * @description DTO para asignar una misión a un usuario.
+ */
+export interface AssignMissionDto {
+  missionId: string;
+}
+
+/**
+ * @interface AwardRewardDto
+ * @description DTO para otorgar una recompensa a un usuario.
+ */
+export interface AwardRewardDto {
+  userId: string;
+}
+
+/**
+ * @interface ConsumeRewardDto
+ * @description DTO para consumir una recompensa de un usuario.
+ */
+export interface ConsumeRewardDto {
+  userId: string;
+  rewardId: string;
+}
+
+/**
+ * @interface RewardStatusDto
+ * @description DTO para el estado de una recompensa de un usuario.
+ */
+export interface RewardStatusDto {
+  status: 'awarded' | 'consumed' | 'pending';
+  awardedAt: string;
+  consumedAt?: string;
+}

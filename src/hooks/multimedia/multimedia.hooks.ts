@@ -1,19 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { multimediaService } from '../../services/multimedia/multimedia.service';
-import { ApiError } from '../../services/_shared';
-import type {
-  ApiResponse,
-  Multimedia,
-} from '../../types/api';
+import { multimediaService } from '@/services/multimedia/multimedia.service';
+import { ApiError } from '@/services/_shared';
+import type { Multimedia, MultimediaQueryParams } from '@/types/multimedia/multimedia.d';
+import type { ApiResponse } from '@/types/common/common.d';
 
 /**
  * Hooks para los endpoints de multimedia.
  */
-export const useAllMultimedia = () => {
+export const useAllMultimedia = (params?: MultimediaQueryParams) => {
   return useQuery<Multimedia[], ApiError>({
-    queryKey: ['multimedia'],
-    queryFn: async () => (await multimediaService.getAllMultimedia()).data,
+    queryKey: ['multimedia', params],
+    queryFn: async () => (await multimediaService.getAllMultimedia(params)).data,
   });
 };
 
@@ -35,6 +33,7 @@ export const useUploadFile = () => {
     },
     onError: (error) => {
       console.error('Error al subir archivo multimedia:', error.message, error.details);
+      toast.error('Error al subir archivo multimedia.');
     },
   });
 };
@@ -50,6 +49,20 @@ export const useDeleteMultimedia = () => {
     },
     onError: (error) => {
       console.error('Error al eliminar archivo multimedia:', error.message, error.details);
+      toast.error('Error al eliminar archivo multimedia.');
     },
   });
 };
+
+/**
+ * Hook para descargar un archivo multimedia por ID.
+ */
+export function useDownloadMultimedia(id: string) {
+  return useQuery<Blob, ApiError>({
+    queryKey: ['multimediaFile', id],
+    queryFn: async () => (await multimediaService.getMultimediaFile(id)).data,
+    enabled: !!id,
+    staleTime: Infinity, // Los archivos no cambian, así que se pueden cachear indefinidamente
+    gcTime: Infinity, // Usar gcTime en lugar de cacheTime
+  });
+}

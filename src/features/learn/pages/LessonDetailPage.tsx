@@ -9,7 +9,6 @@ import { ArrowLeft, ArrowRight, BookOpen, Lightbulb } from "lucide-react";
 import { useLessonById } from "@/hooks/lessons/lessons.hooks";
 import { useUnityById } from "@/hooks/unities/unities.hooks";
 import { useModuleById } from "@/hooks/modules/modules.hooks";
-import { useExercisesByLessonId } from "@/hooks/exercises/exercises.hooks"; // New import
 import LearningContentRenderer from "@/features/learn/components/LearningContentRenderer";
 import LessonHeroSection from "@/features/learn/components/LessonHeroSection";
 import InteractiveExerciseItem from "@/features/learn/components/InteractiveExerciseItem";
@@ -53,15 +52,9 @@ const LessonDetailPage: React.FC = () => {
   const createProgressMutation = useCreateProgress();
 
   // New hook for exercises
-  const {
-    data: exercisesData,
-    isLoading: isLoadingExercises,
-    error: exercisesError,
-  } = useExercisesByLessonId(lessonId || "");
-
   // Procesar la lecciรณn de la API a un tipo de aprendizaje enriquecido
   const lesson: LearningLesson | undefined =
-    lessonData && userProgress
+    lessonData && userProgress && Object.keys(lessonData).length > 0
       ? calculateLessonProgress(lessonData, userProgress)
       : undefined;
 
@@ -77,8 +70,7 @@ const LessonDetailPage: React.FC = () => {
     isLoadingLesson ||
     isLoadingProgress ||
     isLoadingUnit ||
-    isLoadingModule ||
-    isLoadingExercises // Include exercises loading
+    isLoadingModule
   ) {
     return (
       <div className="flex flex-col flex-grow p-4 md:p-8 max-w-7xl mx-auto">
@@ -142,12 +134,12 @@ const LessonDetailPage: React.FC = () => {
     );
   }
 
-  if (lessonError || exercisesError) {
+  if (lessonError) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background text-red-500">
         <p className="text-lg">
-          {t("Error al cargar la lecciรณn o los ejercicios")}:{" "}
-          {lessonError?.message || exercisesError?.message}
+          {t("Error al cargar la lecciรณn")}:{" "}
+          {lessonError?.message}
         </p>
       </div>
     );
@@ -241,30 +233,29 @@ const LessonDetailPage: React.FC = () => {
   };
 
   // Procesar el contenido principal de la lecciรณn como un LearningTextContent de tipo 'html'
-  const lessonContent: LearningTextContent | null = lesson.content
+  const lessonContent: LearningTextContent | null = lesson.guideContent
     ? {
         id: lesson.id,
         title: lesson.title,
         description: lesson.description,
         type: "html",
-        content: lesson.content,
+        content: lesson.guideContent,
         multimedia: lesson.multimedia || [],
         isCompleted: lesson.isCompleted,
         isLocked: lesson.isLocked,
         progress: lesson.progress,
-        unityId: lesson.unityId,
       }
     : null;
 
-  // Use exercisesData for rendering exercises and map them to LearningExercise
+  // Usar los ejercicios de la lecciรณn directamente
   const exercises: LearningExercise[] =
-    exercisesData?.map((exercise) => ({
+    lesson.exercises?.map((exercise) => ({
       ...exercise,
-      url: `/learn/lesson/${lessonId}/exercise/${exercise.id}`, // Construct a URL for the exercise
-      isCompleted: exercise.isCompleted ?? false, // Default to false if undefined
-      isLocked: exercise.isLocked ?? false, // Default to false if undefined
-      progress: exercise.progress ?? 0, // Default to 0 if undefined
-      lessonId: lessonId || "", // Ensure lessonId is always a string
+      url: `/learn/lesson/${lessonId}/exercise/${exercise.id}`, // Construir una URL para el ejercicio
+      isCompleted: exercise.isCompleted ?? false, // Por defecto a false si es undefined
+      isLocked: exercise.isLocked ?? false, // Por defecto a false si es undefined
+      progress: exercise.progress ?? 0, // Por defecto a 0 si es undefined
+      lessonId: lessonId || "", // Asegurar que lessonId siempre sea un string
     })) || [];
 
   return (

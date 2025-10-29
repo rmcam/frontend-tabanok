@@ -1,10 +1,9 @@
 import type {
-  Module,
   CreateModuleDto,
   UpdateModuleDto,
   ApiResponse,
 } from '../../types'; // Importar desde el índice de tipos
-import type { Unity } from '../../types/learning/learning.d'; // Usar importación de solo tipo
+import type { Unity, Module } from '../../types/learning/learning.d'; // Usar importación de solo tipo
 
 import { apiRequest } from '../_shared';
 
