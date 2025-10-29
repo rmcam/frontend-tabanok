@@ -1,4 +1,4 @@
-import type { LearningPathDto, ApiResponse } from '../../types/api';
+import type { LearningPathDto, ApiResponse } from '../../types';
 import { apiRequest } from '../_shared';
 
 /**

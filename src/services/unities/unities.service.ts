@@ -3,8 +3,8 @@ import type {
   Unity,
   CreateUnityDto,
   UpdateUnityDto,
-  DetailedUnity, // Importar DetailedUnity
-} from '../../types/api';
+} from '../../types'; // Importar desde el índice de tipos
+import type { Lesson, Topic } from '../../types/learning/learning.d'; // Usar importación de solo tipo
 
 import { apiRequest } from '../_shared';
 
@@ -33,16 +33,12 @@ export const unitiesService = {
    * @param id El ID de la unidad.
    * @returns Una promesa que resuelve con la unidad y su contenido anidado.
    */
-  getUnityWithTopicsAndContent: async (id: string): Promise<DetailedUnity> => {
-    try {
-      // Utilizar el nuevo endpoint que devuelve la unidad con tópicos y ejercicios anidados
-      const unity = await apiRequest<DetailedUnity>('GET', `/unity/${id}/with-topics-and-content`);
-
-      return unity;
-
-    } catch (error) {
-      console.error('Error fetching unity with topics and content:', error);
-      throw error; // Re-lanzar el error para que el hook lo maneje
-    }
+  getLessonsByUnityId: async (id: string) => {
+    const response = await apiRequest<Lesson[]>('GET', `/unity/${id}/lessons`);
+    return response;
+  },
+  getTopicsByUnityId: async (id: string) => {
+    const response = await apiRequest<Topic[]>('GET', `/unity/${id}/topics`);
+    return response;
   },
 };

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { modulesService } from '@/services/modules/modules.service';
-import type { Module, Unity } from '@/types/api';
+import type { Module, Unity } from '@/types/learning/learning.d';
 
 /**
  * Hook para obtener todos los módulos de aprendizaje.
@@ -37,8 +37,8 @@ export const useUnitiesByModuleId = (moduleId: string) => {
   return useQuery<Unity[], Error>({
     queryKey: ['modules', moduleId, 'unities'],
     queryFn: async () => {
-      const response = await modulesService.getUnitiesByModuleId(moduleId); // response es de tipo ModuleWithUnities
-      return response.unities || [];
+      const response = await modulesService.getUnitiesByModuleId(moduleId);
+      return response || [];
     },
     enabled: !!moduleId,
   });

@@ -4,11 +4,10 @@ import { unitiesService } from '../../services/unities/unities.service';
 import { ApiError } from '../../services/_shared';
 import type {
   ApiResponse,
-  Unity,
   CreateUnityDto,
   UpdateUnityDto,
-  DetailedUnity, // Importar DetailedUnity
-} from '../../types/api';
+} from '../../types';
+import type { Unity, Lesson, Topic } from '../../types/learning/learning.d';
 
 /**
  * Hooks para los endpoints de unidades de aprendizaje.
@@ -35,19 +34,25 @@ export const useUnityById = (id: string) => {
   });
 };
 
-/**
- * Hook para obtener una unidad específica con sus tópicos y contenido anidado.
- * @param id El ID de la unidad.
- * @returns Un objeto de TanStack Query con la unidad y su contenido anidado.
- */
-export const useUnityWithTopicsAndContent = (id: string) => {
-  return useQuery<DetailedUnity | null, ApiError>({
-    queryKey: ['unities', id, 'with-topics-and-content'],
+export const useLessonsByUnityId = (unityId: string) => {
+  return useQuery<Lesson[], ApiError>({
+    queryKey: ['unities', unityId, 'lessons'],
     queryFn: async () => {
-      const response = await unitiesService.getUnityWithTopicsAndContent(id);
-      return response || null;
+      const response = await unitiesService.getLessonsByUnityId(unityId);
+      return response || [];
     },
-    enabled: !!id, // Solo ejecutar la query si el ID existe
+    enabled: !!unityId,
+  });
+};
+
+export const useTopicsByUnityId = (unityId: string) => {
+  return useQuery<Topic[], ApiError>({
+    queryKey: ['unities', unityId, 'topics'],
+    queryFn: async () => {
+      const response = await unitiesService.getTopicsByUnityId(unityId);
+      return response || [];
+    },
+    enabled: !!unityId,
   });
 };
 

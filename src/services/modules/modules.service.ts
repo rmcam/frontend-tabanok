@@ -3,8 +3,8 @@ import type {
   CreateModuleDto,
   UpdateModuleDto,
   ApiResponse,
-  ModuleWithUnities, // Importar ModuleWithUnities
-} from '../../types/api';
+} from '../../types'; // Importar desde el índice de tipos
+import type { Unity } from '../../types/learning/learning.d'; // Usar importación de solo tipo
 
 import { apiRequest } from '../_shared';
 
@@ -26,10 +26,8 @@ export const modulesService = {
     apiRequest<ApiResponse<Module>>('PUT', `/module/${id}`, moduleData),
   deleteModule: (id: string) =>
     apiRequest<ApiResponse<void>>('DELETE', `/module/${id}`),
-  // Cambiado el tipo de retorno a Module (que contiene unities), según la respuesta real de la API
   getUnitiesByModuleId: async (id: string) => {
-    // Cambiado el tipo de retorno a ModuleWithUnities
-    const response = await apiRequest<ModuleWithUnities>('GET', `/module/${id}/unities`); 
+    const response = await apiRequest<Unity[]>('GET', `/module/${id}/unities`); 
     return response;
   },
 };

@@ -11,7 +11,7 @@ import type {
   AvailableCategoryDto,
   NextMilestoneDto,
   LearningPathDto,
-} from '../../types/api';
+} from '../../types';
 
 import { apiRequest } from '../_shared';
 
@@ -24,7 +24,7 @@ export const statisticsService = {
   getAllStatistics: () =>
     apiRequest<ApiResponse<Statistics[]>>('GET', '/statistics'),
   getStatisticsByUserId: (userId: string) =>
-    apiRequest<ApiResponse<Statistics>>('GET', `/statistics/user/${userId}`),
+    apiRequest<ApiResponse<Statistics>>('GET', `/progress/user/${userId}`),
   updateLearningProgress: (userId: string, progressData: UpdateLearningProgressDto) =>
     apiRequest<ApiResponse<Statistics>>('PUT', `/statistics/user/${userId}/learning-progress`, progressData),
   updateAchievementStats: (userId: string, statsData: UpdateAchievementStatsDto) =>

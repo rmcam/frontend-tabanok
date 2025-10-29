@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import {
   Command,
   CommandEmpty,
@@ -7,6 +7,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command"
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import React from "react"
@@ -71,6 +72,12 @@ export function CommandPalette({ children }: CommandPaletteProps) {
         {children}
       </DialogTrigger>
       <DialogContent className="p-0 max-w-[600px]">
+        <VisuallyHidden asChild>
+          <DialogTitle>{t("Búsqueda de comandos")}</DialogTitle>
+        </VisuallyHidden>
+        <VisuallyHidden asChild>
+          <DialogDescription>{t("Navega por la aplicación usando comandos.")}</DialogDescription>
+        </VisuallyHidden>
         <Command>
           <CommandInput placeholder={t("Buscar en la aplicación...")} />
           <CommandList>

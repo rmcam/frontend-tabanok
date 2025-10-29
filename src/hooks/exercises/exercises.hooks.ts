@@ -6,22 +6,27 @@ import { ApiError } from "../../services/_shared";
 import { useProfile } from "../auth/auth.hooks"; // Importar useProfile
 import type {
   ApiResponse,
-  Exercise,
   CreateExerciseDto,
   UpdateExerciseDto,
   SubmitExerciseDto,
   SubmitExerciseResponse,
-  GamificationUserStatsDto, // Para invalidar o actualizar las estadísticas del usuario
-  ProgressDto, // Importar ProgressDto
-} from "../../types/api";
+  GamificationUserStatsDto,
+} from "../../types";
+import type { Exercise } from "../../types/learning/learning.d";
+import type { ProgressDto } from "../../types/progress/progress.d";
+
+interface PaginationParams {
+  page?: number;
+  limit?: number;
+}
 
 /**
  * Hooks para los endpoints de ejercicios.
  */
-export const useAllExercises = () => {
+export const useAllExercises = (pagination?: PaginationParams) => {
   return useQuery<Exercise[], ApiError>({
-    queryKey: ["exercises"],
-    queryFn: async () => (await exercisesService.getAllExercises()).data,
+    queryKey: ["exercises", pagination],
+    queryFn: async () => exercisesService.getAllExercises(pagination),
   });
 };
 
@@ -41,8 +46,9 @@ export const useCreateExercise = () => {
   const queryClient = useQueryClient();
   return useMutation<ApiResponse<Exercise>, ApiError, CreateExerciseDto>({
     mutationFn: exercisesService.createExercise,
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["exercises"] });
+      queryClient.invalidateQueries({ queryKey: ["exercises", data.data.id] });
       toast.success("Ejercicio creado exitosamente.");
     },
     onError: (error) => {
@@ -51,18 +57,18 @@ export const useCreateExercise = () => {
   });
 };
 
-export const useExercisesByTopicId = (topicId: string) => {
+export const useExercisesByTopicId = (topicId: string, pagination?: PaginationParams) => {
   return useQuery<Exercise[], ApiError>({
-    queryKey: ["exercises", { topicId }],
-    queryFn: async () => exercisesService.getExercisesByTopicId(topicId),
+    queryKey: ["exercises", { topicId }, pagination],
+    queryFn: async () => exercisesService.getExercisesByTopicId(topicId, pagination),
     enabled: !!topicId,
   });
 };
 
-export const useExercisesByLessonId = (lessonId: string) => {
+export const useExercisesByLessonId = (lessonId: string, pagination?: PaginationParams) => {
   return useQuery<Exercise[], ApiError>({
-    queryKey: ["exercises", { lessonId }],
-    queryFn: async () => exercisesService.getExercisesByLessonId(lessonId),
+    queryKey: ["exercises", { lessonId }, pagination],
+    queryFn: async () => exercisesService.getExercisesByLessonId(lessonId, pagination),
     enabled: !!lessonId,
   });
 };
@@ -145,14 +151,16 @@ export const useSubmitExercise = () => {
 
       // El backend ahora devuelve el score y si es correcto, así que mapeamos la respuesta
       return {
-        isCorrect: response.score && response.score > 0 ? true : false, // Asumimos que un score > 0 significa correcto
+        isCorrect: response.isCompleted,
         score: response.score || 0,
-        awardedPoints: response.score || 0, // O ajustar según la lógica de puntos del backend
+        awardedPoints: response.score || 0, // Asumimos que los puntos otorgados son el score
         message: response.isCompleted
           ? "Ejercicio completado."
           : "Progreso actualizado.",
         details: response.answers,
         userAnswer: JSON.stringify(submission),
+        userId: response.userId,
+        exerciseId: response.exerciseId,
       };
     },
     onMutate: async ({ id: exerciseId, submission }) => {

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { progressService } from '../../services/progress';
-import type { ProgressDto, CreateProgressDto, UpdateProgressCompletedDto, UpdateProgressScoreDto } from '../../types/api';
+import type { ProgressDto, CreateProgressDto, UpdateProgressCompletedDto, UpdateProgressScoreDto } from '../../types/progress/progress.d';
 
 /**
  * Claves de consulta para TanStack Query.

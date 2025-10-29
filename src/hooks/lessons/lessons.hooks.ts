@@ -1,6 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { lessonsService } from '@/services/lessons/lessons.service';
-import type { Lesson, Unity } from '@/types/api'; // Importar Lesson y Unity de api.d.ts
+import type { Lesson, Unity } from '@/types/learning/learning.d'; // Importar Lesson y Unity de learning.d.ts
+
+interface PaginationParams {
+  page?: number;
+  limit?: number;
+}
 
 /**
  * Hook para obtener una lección por su ID.
@@ -30,11 +35,12 @@ export function useDailyLesson(userId: string) {
 
 /**
  * Hook para obtener todas las unidades con sus lecciones anidadas.
+ * @param pagination Parámetros de paginación (opcional).
  * @returns Un objeto de React Query con los datos de las unidades, estado de carga y error.
  */
-export function useAllUnitsWithLessons() {
+export function useAllUnitsWithLessons(pagination?: PaginationParams) {
   return useQuery<Unity[], Error>({
-    queryKey: ['allUnitsWithLessons'],
-    queryFn: () => lessonsService.getAllUnitsWithLessons(),
+    queryKey: ['allUnitsWithLessons', pagination],
+    queryFn: () => lessonsService.getAllUnitsWithLessons(pagination),
   });
 }
