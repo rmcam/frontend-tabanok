@@ -57,7 +57,7 @@ const InteractiveExerciseItem: React.FC<InteractiveExerciseItemProps> = ({
       <ExerciseDisplayItem
         exercise={exercise}
         isCompleted={isCompleted}
-        difficulty={exercise.difficulty}
+        difficulty={exercise.difficulty.toLowerCase()}
         type={exercise.type}
       />
     </motion.div>

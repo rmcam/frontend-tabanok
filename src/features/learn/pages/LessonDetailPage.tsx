@@ -138,8 +138,7 @@ const LessonDetailPage: React.FC = () => {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background text-red-500">
         <p className="text-lg">
-          {t("Error al cargar la lecciรณn")}:{" "}
-          {lessonError?.message}
+          {t("Error al cargar la lecciรณn")}: {lessonError?.message}
         </p>
       </div>
     );

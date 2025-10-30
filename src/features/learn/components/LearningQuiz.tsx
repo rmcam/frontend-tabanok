@@ -87,7 +87,8 @@ const LearningQuiz: React.FC<LearningQuizProps> = ({
         <CardTitle>{quiz?.question || t("Cargando pregunta...")}</CardTitle>
       </CardHeader>
       <CardContent>
-        {/* {JSON.stringify(quiz)} */} {/* Comentado para evitar mostrar el objeto completo */}
+        {/* {JSON.stringify(quiz)} */}{" "}
+        {/* Comentado para evitar mostrar el objeto completo */}
         {quiz?.options && quiz.options.length > 0 ? (
           <RadioGroup
             onValueChange={setSelectedOption}
@@ -118,9 +119,10 @@ const LearningQuiz: React.FC<LearningQuizProps> = ({
             ))}
           </RadioGroup>
         ) : (
-          <p className="text-muted-foreground">{t("Opciones no disponibles.")}</p>
+          <p className="text-muted-foreground">
+            {t("Opciones no disponibles.")}
+          </p>
         )}
-
         {isSubmitted && isCorrect !== null && (
           <div
             key={isSubmitted.toString()}
