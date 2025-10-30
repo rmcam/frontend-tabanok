@@ -154,3 +154,53 @@ export interface UserExerciseProgressResponse {
     difficulty: string;
   };
 }
+
+/**
+ * @interface GetUserProgressFilters
+ * @description Interfaz para los parámetros de consulta del endpoint de progreso del usuario.
+ */
+export interface GetUserProgressFilters {
+  page?: number;
+  limit?: number;
+  moduleId?: string;
+  unityId?: string;
+  lessonId?: string;
+  exerciseId?: string;
+  includeExercises?: boolean;
+  includeModules?: boolean;
+}
+
+/**
+ * @interface UserProgressResponse
+ * @description Interfaz para un elemento de progreso del usuario, que puede ser un módulo, unidad, lección o ejercicio.
+ */
+export interface UserProgressResponse {
+  id: string;
+  userId: string;
+  moduleId?: string;
+  unityId?: string;
+  lessonId?: string;
+  exerciseId?: string;
+  score?: number;
+  isCompleted: boolean;
+  completedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+  // Podríamos anidar la información del módulo/unidad/lección/ejercicio aquí si el backend la devuelve
+  module?: UserModuleProgressResponse;
+  unity?: UserUnityProgressResponse;
+  lesson?: UserLessonProgressResponse;
+  exercise?: UserExerciseProgressResponse;
+}
+
+/**
+ * @interface PaginatedUserProgressResponse
+ * @description Interfaz para la respuesta paginada del progreso del usuario.
+ */
+export interface PaginatedUserProgressResponse {
+  data: UserProgressResponse[];
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
+}

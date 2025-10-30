@@ -8,11 +8,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Trophy, Award, Gem, Heart, Zap } from 'lucide-react';
 import { useProfile } from '@/hooks/auth/auth.hooks';
 import { useCurrentLeaderboard, useAllAchievements, useAllMissionTemplates, useHeartRecharge, useGamificationUserStats } from '@/hooks/gamification/gamification.hooks';
-import type { LeaderboardRanking, GamificationUserStatsDto, Achievement, MissionTemplate } from '@/types/api';
+import type { LeaderboardRanking, GamificationUserStatsDto, Achievement, MissionTemplate, UserAchievementDto, UserMissionDto } from '@/types/gamification/gamification.d'; // Importar los tipos correctos
 import AchievementCard from '../components/AchievementCard';
 import MissionCard from '../components/MissionCard';
 import { useSoundEffect } from '@/hooks/gamification/useSoundEffect';
 import { useUserStore } from '@/stores/userStore';
+import { useUserProgress } from '@/hooks/progress/progress.hooks'; // Importar el nuevo hook
+import type { GetUserProgressFilters } from '@/types/progress/progress.d'; // Importar los filtros
 
 const GamificationPage: React.FC = () => {
   const { t } = useTranslation();
@@ -24,6 +26,15 @@ const GamificationPage: React.FC = () => {
   const playSound = useSoundEffect(); // Inicializar el hook de sonido
   const { user } = useUserStore(); // Obtener el usuario del store
   const { data: userStats, isLoading: isLoadingUserStats } = useGamificationUserStats(user?.id || ''); // Obtener userStats aquí
+
+  // Definir filtros para el progreso general del usuario
+  const userProgressFilters: GetUserProgressFilters = {
+    includeExercises: true,
+    includeModules: true,
+    limit: 1, // Solo necesitamos el totalItems para el conteo
+  };
+
+  const { data: userProgress, isLoading: isLoadingUserProgress } = useUserProgress(user?.id, userProgressFilters);
 
   // Efecto para detectar nuevos logros o misiones completadas
   useEffect(() => {
@@ -42,7 +53,7 @@ const GamificationPage: React.FC = () => {
   }, [userStats, playSound]);
 
 
-  if (isLoadingProfile || isLoadingLeaderboard || isLoadingAchievements || isLoadingMissionTemplates || isLoadingUserStats) {
+  if (isLoadingProfile || isLoadingLeaderboard || isLoadingAchievements || isLoadingMissionTemplates || isLoadingUserStats || isLoadingUserProgress) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
         <p className="text-lg">{t("Cargando dashboard de gamificación...")}</p>
@@ -144,6 +155,24 @@ const GamificationPage: React.FC = () => {
             </div>
             <p className="text-xs text-muted-foreground mt-2">
               {t("La liga se actualiza cada lunes.")}
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Nueva Tarjeta de Progreso General */}
+        <Card className="shadow-lg border-primary/20">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-2xl font-bold">{t("Progreso General")}</CardTitle>
+            <Zap className="h-6 w-6 text-blue-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-5xl font-bold text-primary">
+              {userProgress?.totalItems ?? 0}
+            </div>
+            <p className="text-sm text-muted-foreground">{t("Elementos de aprendizaje completados")}</p>
+            <Progress value={userProgress?.totalItems ? (userProgress.totalItems / 100) * 100 : 0} className="w-full h-2 mt-4" /> {/* Asumiendo un total de 100 elementos para un progreso simple */}
+            <p className="text-xs text-muted-foreground mt-2">
+              {t("Continúa aprendiendo para desbloquear más contenido.")}
             </p>
           </CardContent>
         </Card>

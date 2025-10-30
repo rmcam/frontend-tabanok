@@ -14,8 +14,8 @@ export interface GamificationUserStatsDto {
   lastActivity: string;
   hearts: number; // Añadido para la lógica de vidas
   league: string; // Añadido para la lógica de ligas
-  achievements: any[]; // Placeholder, se puede refinar
-  missions: any[]; // Placeholder, se puede refinar
+  achievements: UserAchievementDto[]; // Usar el tipo correcto
+  missions: UserMissionDto[]; // Usar el tipo correcto
 }
 
 /**

@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import ProgressService from '@/services/progress/progress.service';
 import { ApiError } from '@/services/_shared';
-import type { UserModuleProgressResponse, UserUnityProgressResponse, UserLessonProgressResponse, UserExerciseProgressResponse, CreateProgressDto, ProgressDto } from '@/types/progress/progress.d';
+import type { UserModuleProgressResponse, UserUnityProgressResponse, UserLessonProgressResponse, UserExerciseProgressResponse, CreateProgressDto, ProgressDto, GetUserProgressFilters, PaginatedUserProgressResponse } from '@/types/progress/progress.d';
 import { useUserStore } from '@/stores/userStore';
 import type { ApiResponse } from '@/types/common/common.d';
 
@@ -155,4 +155,16 @@ export function useAllUserUnityProgress(pagination?: PaginationParams) {
   });
 }
 
-// Fin de los cambios para refrescar el compilador.
+/**
+ * Hook para obtener el progreso del usuario con filtros.
+ * @param userId El ID del usuario.
+ * @param filters Los filtros para la consulta de progreso.
+ * @returns Un objeto de React Query con los datos de progreso paginados, estado de carga y error.
+ */
+export function useUserProgress(userId: string | undefined, filters?: GetUserProgressFilters) {
+  return useQuery<PaginatedUserProgressResponse, ApiError>({
+    queryKey: ['userProgress', userId, filters],
+    queryFn: async () => (await ProgressService.getUserProgress(userId!, filters)).data,
+    enabled: !!userId,
+  });
+}

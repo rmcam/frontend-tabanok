@@ -1,6 +1,6 @@
 import { apiRequest } from '../_shared';
 import type { ApiResponse } from '../../types/common/common.d';
-import type { SubmitExerciseDto, SubmitExerciseResponse, ProgressDto, CreateProgressDto, UserLessonProgressResponse, UserUnityProgressResponse, UserExerciseProgressResponse } from '../../types/progress/progress.d';
+import type { SubmitExerciseDto, SubmitExerciseResponse, ProgressDto, CreateProgressDto, UserLessonProgressResponse, UserUnityProgressResponse, UserExerciseProgressResponse, GetUserProgressFilters, PaginatedUserProgressResponse } from '../../types/progress/progress.d';
 import type { Exercise } from '../../types/learning/learning.d';
 
 interface PaginationParams {
@@ -9,6 +9,20 @@ interface PaginationParams {
 }
 
 const ProgressService = {
+  getUserProgress: (userId: string, filters?: GetUserProgressFilters) => {
+    const params = new URLSearchParams();
+    if (filters?.page) params.append('page', filters.page.toString());
+    if (filters?.limit) params.append('limit', filters.limit.toString());
+    if (filters?.moduleId) params.append('moduleId', filters.moduleId);
+    if (filters?.unityId) params.append('unityId', filters.unityId);
+    if (filters?.lessonId) params.append('lessonId', filters.lessonId);
+    if (filters?.exerciseId) params.append('exerciseId', filters.exerciseId);
+    if (filters?.includeExercises !== undefined) params.append('includeExercises', filters.includeExercises.toString());
+    if (filters?.includeModules !== undefined) params.append('includeModules', filters.includeModules.toString());
+
+    const queryString = params.toString();
+    return apiRequest<ApiResponse<PaginatedUserProgressResponse>>('GET', `/progress/user/${userId}${queryString ? `?${queryString}` : ''}`);
+  },
   getProgressByUser: (userId: string, pagination?: PaginationParams) => {
     const params = new URLSearchParams();
     if (pagination?.page) params.append('page', pagination.page.toString());
