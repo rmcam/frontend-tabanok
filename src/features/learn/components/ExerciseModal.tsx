@@ -17,7 +17,6 @@ import {
 } from "@/hooks/exercises/exercises.hooks";
 import { useProfile } from "@/hooks/auth/auth.hooks";
 import type {
-  Exercise,
   QuizContent,
   MatchingContent,
   FillInTheBlankContent,
@@ -56,6 +55,8 @@ const ExerciseModal: React.FC<ExerciseModalProps> = ({
     error,
     refetch,
   } = useExerciseById(exerciseId || "");
+
+  // Logs de depuración eliminados
   // The submitExerciseMutation and isSubmitting are handled by child components,
   // so we just import the hook to ensure it's available in the context if needed.
   useSubmitExercise();
@@ -134,7 +135,8 @@ const ExerciseModal: React.FC<ExerciseModalProps> = ({
             <Skeleton className="h-4 w-full" />
           ) : (
             <DialogDescription className="text-muted-foreground">
-              {exercise?.description || t("Descripción del ejercicio no disponible.")}
+              {exercise?.description ||
+                t("Descripción del ejercicio no disponible.")}
             </DialogDescription>
           )}
         </DialogHeader>
@@ -184,7 +186,9 @@ const ExerciseModal: React.FC<ExerciseModalProps> = ({
             {exercise.type === "audio-pronunciation" && (
               <LearningAudioPronunciation
                 exerciseId={exercise.id}
-                audioPronunciation={exercise.content as AudioPronunciationContent}
+                audioPronunciation={
+                  exercise.content as AudioPronunciationContent
+                }
                 onComplete={handleExerciseCompleteInternal}
               />
             )}

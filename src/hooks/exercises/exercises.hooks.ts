@@ -6,8 +6,16 @@ import { ApiError } from "@/services/_shared";
 import { useProfile } from "../auth/auth.hooks";
 import type { ApiResponse } from "@/types/common/common.d";
 import type { GamificationUserStatsDto } from "@/types/gamification/gamification.d";
-import type { Exercise, CreateExerciseDto, UpdateExerciseDto } from "@/types/learning/learning.d";
-import type { ProgressDto, SubmitExerciseDto, SubmitExerciseResponse } from "@/types/progress/progress.d";
+import type {
+  Exercise,
+  CreateExerciseDto,
+  UpdateExerciseDto,
+} from "@/types/learning/learning.d";
+import type {
+  ProgressDto,
+  SubmitExerciseDto,
+  SubmitExerciseResponse,
+} from "@/types/progress/progress.d";
 import type { ExerciseQueryParams } from "@/types/exercises/exercises.d";
 
 /**
@@ -21,11 +29,21 @@ export const useAllExercises = (params?: ExerciseQueryParams) => {
 };
 
 export const useExerciseById = (id: string) => {
-  return useQuery<Exercise, ApiError>({
+  const data = useQuery<Exercise, ApiError>({
     queryKey: ["exercises", id],
-    queryFn: async () => (await exercisesService.getExerciseById(id)).data,
+    queryFn: async () => {
+      const response = await exercisesService.getExerciseById(id);
+      // Logs de depuración eliminados
+      if (!response) {
+        // Ahora verificamos si la respuesta completa es nula/undefined
+        throw new Error("No se encontraron datos para el ejercicio.");
+      }
+      return response; // Accedemos directamente a la respuesta, que ya es el objeto Exercise
+    },
     enabled: !!id,
   });
+  // Log de depuración eliminado
+  return data;
 };
 
 export const useCreateExercise = () => {
@@ -44,18 +62,26 @@ export const useCreateExercise = () => {
   });
 };
 
-export const useExercisesByTopicId = (topicId: string, params?: ExerciseQueryParams) => {
+export const useExercisesByTopicId = (
+  topicId: string,
+  params?: ExerciseQueryParams
+) => {
   return useQuery<Exercise[], ApiError>({
     queryKey: ["exercises", { topicId }, params],
-    queryFn: async () => (await exercisesService.getExercisesByTopicId(topicId, params)).data,
+    queryFn: async () =>
+      (await exercisesService.getExercisesByTopicId(topicId, params)).data,
     enabled: !!topicId,
   });
 };
 
-export const useExercisesByLessonId = (lessonId: string, params?: ExerciseQueryParams) => {
+export const useExercisesByLessonId = (
+  lessonId: string,
+  params?: ExerciseQueryParams
+) => {
   return useQuery<Exercise[], ApiError>({
     queryKey: ["exercises", { lessonId }, params],
-    queryFn: async () => (await exercisesService.getExercisesByLessonId(lessonId, params)).data,
+    queryFn: async () =>
+      (await exercisesService.getExercisesByLessonId(lessonId, params)).data,
     enabled: !!lessonId,
   });
 };
@@ -162,9 +188,8 @@ export const useSubmitExercise = () => {
       const previousUserProgress = queryClient.getQueryData<ProgressDto[]>([
         "user-progress",
       ]);
-      const previousUserStats = queryClient.getQueryData<GamificationUserStatsDto>([
-        "user-stats",
-      ]);
+      const previousUserStats =
+        queryClient.getQueryData<GamificationUserStatsDto>(["user-stats"]);
 
       if (previousExercise) {
         queryClient.setQueryData<Exercise>(["exercises", exerciseId], {
@@ -194,7 +219,8 @@ export const useSubmitExercise = () => {
             return {
               ...oldStats,
               points: (oldStats.points || 0) + previousExercise.points,
-              totalPoints: (oldStats.totalPoints || 0) + previousExercise.points,
+              totalPoints:
+                (oldStats.totalPoints || 0) + previousExercise.points,
             };
           }
         );
@@ -229,7 +255,10 @@ export const useSubmitExercise = () => {
         );
       }
       if (context?.previousUserProgress) {
-        queryClient.setQueryData(["user-progress"], context.previousUserProgress);
+        queryClient.setQueryData(
+          ["user-progress"],
+          context.previousUserProgress
+        );
       }
       if (context?.previousUserStats) {
         queryClient.setQueryData(["user-stats"], context.previousUserStats);
