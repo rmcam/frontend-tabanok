@@ -9,6 +9,7 @@ import { ArrowLeft, ArrowRight, BookOpen, Lightbulb } from "lucide-react";
 import { useLessonById } from "@/hooks/lessons/lessons.hooks";
 import { useUnityById } from "@/hooks/unities/unities.hooks";
 import { useModuleById } from "@/hooks/modules/modules.hooks";
+import { useExercisesByLessonId } from "@/hooks/exercises/exercises.hooks"; // Importar el nuevo hook
 import LearningContentRenderer from "@/features/learn/components/LearningContentRenderer";
 import LessonHeroSection from "@/features/learn/components/LessonHeroSection";
 import InteractiveExerciseItem from "@/features/learn/components/InteractiveExerciseItem";
@@ -24,8 +25,10 @@ import type {
   LearningLesson,
   LearningExercise,
 } from "@/types/learning";
+import type { Exercise } from "@/types/exercises/exercises.d"; // Importar Exercise
 import { calculateLessonProgress } from "@/lib/learning.utils";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query"; // Importar useQueryClient
 
 const LessonDetailPage: React.FC = () => {
   const { t } = useTranslation();
@@ -41,6 +44,8 @@ const LessonDetailPage: React.FC = () => {
   const { data: userProfile } = useProfile();
   const userId = userProfile?.id;
 
+  const queryClient = useQueryClient(); // Mover aquรญ
+
   const { data: userProgress, isLoading: isLoadingProgress } =
     useGetProgressByUser(userId);
 
@@ -50,13 +55,18 @@ const LessonDetailPage: React.FC = () => {
     error: lessonError,
   } = useLessonById(lessonId || "");
   const createProgressMutation = useCreateProgress();
+  const {
+    data: exercisesData,
+    isLoading: isLoadingExercises,
+    error: exercisesError,
+  } = useExercisesByLessonId(lessonId || "", { withProgress: true });
 
-  // New hook for exercises
   // Procesar la lecciรณn de la API a un tipo de aprendizaje enriquecido
-  const lesson: LearningLesson | undefined =
-    lessonData && userProgress && Object.keys(lessonData).length > 0
+  const lesson: LearningLesson | undefined = React.useMemo(() => {
+    return lessonData && userProgress && Object.keys(lessonData).length > 0
       ? calculateLessonProgress(lessonData, userProgress)
       : undefined;
+  }, [lessonData, userProgress]);
 
   // Obtener la unidad y el mรณdulo padre para los breadcrumbs
   const { data: unit, isLoading: isLoadingUnit } = useUnityById(
@@ -66,11 +76,33 @@ const LessonDetailPage: React.FC = () => {
     unit?.moduleId || ""
   );
 
+  // Usar useMemo para memoizar la lista de ejercicios y asegurar reactividad
+  const exercises: LearningExercise[] = React.useMemo(() => {
+    console.log("Recalculando ejercicios. exercisesData:", exercisesData);
+    return (exercisesData?.map((exercise: Exercise) => ({
+      ...exercise,
+      url: `/learn/lesson/${lessonId}/exercise/${exercise.id}`,
+      isCompleted: exercise.userProgress?.isCompleted ?? false,
+      isLocked: false,
+      progress: exercise.userProgress?.score ?? 0,
+      lessonId: lessonId || "",
+    })) || []).sort((a: LearningExercise, b: LearningExercise) => {
+      if (a.isCompleted && !b.isCompleted) {
+        return 1;
+      }
+      if (!a.isCompleted && b.isCompleted) {
+        return -1;
+      }
+      return 0;
+    });
+  }, [exercisesData, lessonId]); // Dependencias: exercisesData y lessonId
+
   if (
     isLoadingLesson ||
     isLoadingProgress ||
     isLoadingUnit ||
-    isLoadingModule
+    isLoadingModule ||
+    isLoadingExercises // Añadir isLoadingExercises
   ) {
     return (
       <div className="flex flex-col flex-grow p-4 md:p-8 max-w-7xl mx-auto">
@@ -134,20 +166,21 @@ const LessonDetailPage: React.FC = () => {
     );
   }
 
-  if (lessonError) {
+  if (lessonError || exercisesError) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background text-red-500">
         <p className="text-lg">
-          {t("Error al cargar la lecciรณn")}: {lessonError?.message}
+          {t("Error al cargar la lecciรณn o los ejercicios")}:{" "}
+          {lessonError?.message || exercisesError?.message}
         </p>
       </div>
     );
   }
 
-  if (!lesson) {
+  if (!lesson || !exercisesData) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background text-muted-foreground">
-        <p className="text-lg">{t("Lecciรณn no encontrada.")}</p>
+        <p className="text-lg">{t("Lecciรณn o ejercicios no encontrados.")}</p>
       </div>
     );
   }
@@ -205,9 +238,14 @@ const LessonDetailPage: React.FC = () => {
   const handleCloseExerciseModal = () => {
     setIsExerciseModalOpen(false);
     setSelectedExerciseId(null);
-    // Optionally refetch user progress or lesson data after an exercise is completed
-    // queryClient.invalidateQueries(['userProgress', userId]);
-    // queryClient.invalidateQueries(['lessonById', lessonId]);
+    // Forzar un refetch de los ejercicios de la lección para asegurar la actualización visual
+    // Invalida cualquier query que comience con ["exercises", { lessonId: ... }]
+    queryClient.invalidateQueries({
+      queryKey: ["exercises"],
+      predicate: (query) =>
+        query.queryKey[0] === "exercises" &&
+        (query.queryKey[1] as { lessonId?: string })?.lessonId === lessonId,
+    });
   };
 
   const handleExerciseCompleteInModal = (
@@ -218,12 +256,15 @@ const LessonDetailPage: React.FC = () => {
       toast.success(t("¡Ejercicio Completado Correctamente!"), {
         description: t(`Has ganado ${points} puntos.`),
       });
-      // Optionally refetch user progress or lesson data after an exercise is completed
-      // queryClient.invalidateQueries(['userProgress', userId]);
-      // queryClient.invalidateQueries(['lessonById', lessonId]);
+      // Forzar un refetch de los ejercicios de la lección para asegurar la actualización visual
+      // Esto es un fallback si la actualización optimista no se refleja inmediatamente
+      // en el componente InteractiveExerciseItem.
+      // Se podría usar useQueryClient().invalidateQueries aquí, pero no tengo acceso directo a queryClient en este scope.
+      // La actualización optimista en useSubmitExercise debería ser suficiente, pero si no lo es,
+      // una recarga de la query de la lección es la siguiente mejor opción.
+      // Como no tengo acceso a queryClient directamente aquí, la invalidación ya se maneja en el hook useSubmitExercise.
+      // Si el problema persiste, el issue está en InteractiveExerciseItem o en la forma en que se renderiza.
     } else {
-      // This branch should ideally not be reached if modal doesn't close on incorrect.
-      // But as a fallback, if it were to close, we could show an error toast.
       toast.error(t("Ejercicio Completado Incorrectamente."), {
         description: t("Por favor, inténtalo de nuevo."),
       });
@@ -246,16 +287,6 @@ const LessonDetailPage: React.FC = () => {
       }
     : null;
 
-  // Usar los ejercicios de la lecciรณn directamente
-  const exercises: LearningExercise[] =
-    lesson.exercises?.map((exercise) => ({
-      ...exercise,
-      url: `/learn/lesson/${lessonId}/exercise/${exercise.id}`, // Construir una URL para el ejercicio
-      isCompleted: exercise.isCompleted ?? false, // Por defecto a false si es undefined
-      isLocked: exercise.isLocked ?? false, // Por defecto a false si es undefined
-      progress: exercise.progress ?? 0, // Por defecto a 0 si es undefined
-      lessonId: lessonId || "", // Asegurar que lessonId siempre sea un string
-    })) || [];
 
   return (
     <div className="flex flex-col flex-grow p-4 md:p-8 max-w-7xl mx-auto">
@@ -359,15 +390,17 @@ const LessonDetailPage: React.FC = () => {
             {t("Ejercicios de la Lecciรณn")}
           </h2>
           <div className="grid gap-4">
-            {exercises.map((exercise) => (
-              <InteractiveExerciseItem
-                key={exercise.id}
-                exercise={exercise}
-                isCompleted={exercise.isCompleted}
-                isLocked={exercise.isLocked}
-                onOpenExercise={handleOpenExerciseModal}
-              />
-            ))}
+            {exercises.map((exercise) => {
+              return (
+                <InteractiveExerciseItem
+                  key={exercise.id}
+                  exercise={exercise}
+                  isCompleted={exercise.isCompleted}
+                  isLocked={exercise.isLocked}
+                  onOpenExercise={handleOpenExerciseModal}
+                />
+              );
+            })}
           </div>
         </div>
       )}

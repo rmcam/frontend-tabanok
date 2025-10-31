@@ -5,7 +5,7 @@
  * @description DTO para enviar la respuesta de un ejercicio.
  */
 export interface SubmitExerciseDto {
-  userAnswer: string | Record<string, any>; // Puede ser string o un objeto complejo
+  userAnswer: string | Record<string, unknown>; // Puede ser string o un objeto complejo
 }
 
 /**
@@ -13,15 +13,49 @@ export interface SubmitExerciseDto {
  * @description Interfaz para la respuesta del backend al enviar un ejercicio.
  */
 export interface SubmitExerciseResponse {
-  isCorrect: boolean;
+  id: string;
   score: number;
-  awardedPoints: number;
+  isCompleted: boolean;
+  answers: Record<string, unknown>; // O puede ser string si userAnswer es siempre string
+  exerciseId: string;
+  userId: string;
+  isCorrect: boolean;
+  correctAnswers?: string | Record<string, unknown>; // Puede ser string o un objeto complejo
   message?: string; // Mensaje opcional para notificaciones
-  exerciseTitle?: string; // Opcional, si el backend lo envía
-  details?: any; // Añadido para el feedback detallado
-  userAnswer?: string; // Añadido si el backend devuelve la respuesta del usuario
-  userId?: string; // Añadido para el progreso del usuario
-  exerciseId?: string; // Añadido para el progreso del ejercicio
+  details?: SubmitExerciseResponseDetails; // Mantener para feedback detallado si aplica
+}
+
+export interface AudioPronunciationDetails {
+  expectedPhrase: string;
+}
+
+export interface FillInTheBlankDetails {
+  blankResults: Array<{ id: string; isCorrect: boolean }>;
+  correctBlanks: string[];
+}
+
+export interface MatchingDetails {
+  correctPairs: Array<{ term: string; match: string }>;
+}
+
+export interface TranslationDetails {
+  correctTranslation: string;
+}
+
+export type SubmitExerciseResponseDetails =
+  | AudioPronunciationDetails
+  | FillInTheBlankDetails
+  | MatchingDetails
+  | TranslationDetails;
+
+/**
+ * @interface SubmitExerciseRequestBody
+ * @description Cuerpo de la solicitud para el nuevo endpoint POST /progress/submit-exercise.
+ */
+export interface SubmitExerciseRequestBody {
+  userId: string;
+  exerciseId: string;
+  answers: Record<string, unknown>;
 }
 
 /**
@@ -34,7 +68,7 @@ export interface ProgressDto {
   exerciseId: string;
   contentId?: string; // Añadido para el progreso de contenido/lecciones
   score: number | null;
-  answers: Record<string, any> | null;
+  answers: Record<string, unknown> | null;
   isCompleted: boolean;
   createdAt: string;
   updatedAt: string;
@@ -50,7 +84,7 @@ export interface CreateProgressDto {
   exerciseId?: string; // Opcional si es progreso de contenido
   contentId?: string; // Opcional si es progreso de ejercicio
   score?: number;
-  answers?: Record<string, any>;
+  answers?: Record<string, unknown>;
   isCompleted?: boolean;
 }
 
@@ -59,7 +93,7 @@ export interface CreateProgressDto {
  * @description DTO para actualizar el progreso de un ejercicio como completado.
  */
 export interface UpdateProgressCompletedDto {
-  answers: Record<string, any>;
+  answers: Record<string, unknown>;
 }
 
 /**
@@ -93,7 +127,7 @@ export interface UpdateCategoryProgressDto {
  * @interface UserProgress
  * @description Interfaz para el progreso general de un usuario.
  */
-import { Module, Unity, Lesson, Topic, Exercise } from "../learning/learning.d";
+import { Module, Unity, Lesson, Topic } from "../learning/learning.d";
 
 /**
  * @interface UserTopicProgressResponse
@@ -143,10 +177,26 @@ export interface UserModuleProgressResponse extends Module {
  * @interface UserExerciseProgressResponse
  * @description Interfaz para el progreso de un ejercicio por usuario, con información anidada del ejercicio.
  */
+/**
+ * @interface ExerciseUserProgress
+ * @description Interfaz para el progreso de un ejercicio por usuario, anidada dentro del objeto Exercise.
+ */
+export interface ExerciseUserProgress {
+  id: string;
+  score: number | null;
+  isCompleted: boolean;
+  isActive: boolean;
+}
+
+/**
+ * @interface UserExerciseProgressResponse
+ * @description Interfaz para el progreso de un ejercicio por usuario, con información anidada del ejercicio.
+ */
 export interface UserExerciseProgressResponse {
   id: string;
   score: number | null;
   isCompleted: boolean;
+  isActive: boolean; // Añadido para reflejar el estado activo del progreso
   exercise: {
     id: string;
     title: string;

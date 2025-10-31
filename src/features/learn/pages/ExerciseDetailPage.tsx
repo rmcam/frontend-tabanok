@@ -5,7 +5,15 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeft, CheckCircle2, XCircle } from 'lucide-react'; // Importar CheckCircle2 y XCircle
 import { useExerciseById, useSubmitExercise } from '@/hooks/exercises/exercises.hooks'; // Importar useExerciseById y useSubmitExercise
 import { useProfile } from '@/hooks/auth/auth.hooks'; // Importar useProfile
-import type { Exercise, QuizContent, MatchingContent, FillInTheBlankContent, AudioPronunciationContent, TranslationContent, FunFactContent } from '@/types/learning/learning.d'; // Importar todos los tipos de contenido de aprendizaje
+import type {
+  QuizContent,
+  MatchingContent,
+  FillInTheBlankContent,
+  AudioPronunciationContent,
+  TranslationContent,
+  FunFactContent,
+} from '@/types/learning/learning.d'; // Importar tipos de contenido de aprendizaje
+import type { Exercise } from '@/types/exercises/exercises.d'; // Importar Exercise desde exercises.d.ts
 import LearningQuiz from '../components/LearningQuiz';
 import LearningMatching from '../components/LearningMatching';
 import LearningFillInTheBlank from '../components/LearningFillInTheBlank';
@@ -18,20 +26,22 @@ const ExerciseDetailPage: React.FC = () => {
   const { id: exerciseId } = useParams<{ id: string }>();
 
   const { data: userProfile } = useProfile();
-  const userId = userProfile?.id;
+  // const userId = userProfile?.id; // userId no se utiliza directamente aquí
 
   const { data: exercise, isLoading, error } = useExerciseById(exerciseId || '');
   // Eliminamos submitExerciseMutation y isSubmitting ya que la lógica de envío se maneja en los componentes de ejercicio
-  // const { mutate: submitExerciseMutation, isPending: isSubmitting } = useSubmitExercise();
+  // const { isPending: isSubmittingHook } = useSubmitExercise(); // isSubmittingHook no se utiliza directamente aquí
+  const [isSubmitting, setIsSubmitting] = useState(false); // Estado local para controlar el envío
 
   const [isExerciseSubmitted, setIsExerciseSubmitted] = useState(false);
   const [exerciseIsCorrect, setExerciseIsCorrect] = useState<boolean | null>(null);
-  const [awardedPoints, setAwardedPoints] = useState<number>(0);
+  const [awardedPoints, setAwardedPoints] = useState<number>(0); // Mantener el nombre awardedPoints para la UI
 
-  const handleExerciseComplete = (isCorrect: boolean, points?: number) => {
+  const handleExerciseComplete = (isCorrect: boolean, score?: number) => { // Cambiar 'points' a 'score'
+    console.log('handleExerciseComplete llamado con isCorrect:', isCorrect, 'y score:', score);
     setIsExerciseSubmitted(true);
     setExerciseIsCorrect(isCorrect);
-    setAwardedPoints(points || 0);
+    setAwardedPoints(score || 0); // Usar 'score' para establecer awardedPoints
   };
 
   if (isLoading) {
@@ -96,74 +106,144 @@ const ExerciseDetailPage: React.FC = () => {
         <div className="prose dark:prose-invert max-w-none">
           <p>{exercise.description}</p>
 
-          {/* Renderizar contenido específico del ejercicio según su tipo */}
-          {exercise.type === 'quiz' && (
-            <LearningQuiz
-              exerciseId={exercise.id}
-              quiz={exercise.content as QuizContent}
-              onComplete={handleExerciseComplete}
-            />
-          )}
-          {exercise.type === 'matching' && (
-            <LearningMatching
-              exerciseId={exercise.id}
-              matching={exercise.content as MatchingContent}
-              onComplete={handleExerciseComplete}
-            />
-          )}
-          {exercise.type === 'fill-in-the-blank' && (
-            <LearningFillInTheBlank
-              exerciseId={exercise.id}
-              fillInTheBlank={exercise.content as FillInTheBlankContent}
-              onComplete={handleExerciseComplete}
-            />
-          )}
-          {exercise.type === 'audio-pronunciation' && (
-            <LearningAudioPronunciation
-              exerciseId={exercise.id}
-              audioPronunciation={exercise.content as AudioPronunciationContent}
-              onComplete={handleExerciseComplete}
-            />
-          )}
-          {exercise.type === 'translation' && (
-            <LearningTranslation
-              exerciseId={exercise.id}
-              translation={exercise.content as TranslationContent}
-              onComplete={handleExerciseComplete}
-            />
-          )}
-          {exercise.type === 'fun-fact' && (
-            <LearningFunFact
-              exerciseId={exercise.id}
-              funFact={exercise.content as FunFactContent}
-              onComplete={handleExerciseComplete}
-            />
-          )}
-
-          {/* Mensaje de resultado general del ejercicio */}
-          {isExerciseSubmitted && exerciseIsCorrect !== null && (
-            <div
-              className={`mt-6 p-4 rounded-md flex items-center justify-center space-x-2 ${exerciseIsCorrect ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}
-              role="status"
-              aria-live="polite"
-            >
-              {exerciseIsCorrect ? <CheckCircle2 className="h-6 w-6" /> : <XCircle className="h-6 w-6" />}
-              <p className="text-lg font-semibold">
-                {exerciseIsCorrect ? t("¡Ejercicio Completado Correctamente!") : t("Ejercicio Completado Incorrectamente.")}
+          {/* Mostrar el estado de progreso del usuario si existe */}
+          {exercise.userProgress && (
+            <div className="mt-4 p-3 rounded-md bg-blue-50 border border-blue-200 text-blue-800 flex items-center space-x-2">
+              <CheckCircle2 className="h-5 w-5 text-blue-600" />
+              <p className="font-semibold">
+                {t("Progreso del usuario")}:{" "}
+                {exercise.userProgress.isCompleted
+                  ? t("Completado")
+                  : t("Activo")}
+                {exercise.userProgress.score !== null && (
+                  <span className="ml-1">
+                    ({exercise.userProgress.score} {t("puntos")})
+                  </span>
+                )}
               </p>
-              {awardedPoints > 0 && (
-                <p className="text-lg font-semibold ml-4">{t("Puntos Ganados")}: {awardedPoints}</p>
-              )}
             </div>
           )}
 
-          {/* Manejar tipos de ejercicio desconocidos */}
-          {!['quiz', 'matching', 'fill-in-the-blank', 'audio-pronunciation', 'translation', 'fun-fact'].includes(exercise.type) && (
-            <div className="mt-8 p-4 rounded-md bg-yellow-100 text-yellow-800">
-              <p className="font-semibold">{t('Tipo de ejercicio desconocido')}: {exercise.type}</p>
-              <pre className="mt-2 text-sm bg-yellow-50 p-3 rounded-md overflow-auto">
-                {JSON.stringify(exercise.content, null, 2)}
-              </pre>
+          {/* Renderizar contenido específico del ejercicio según su tipo */}
+          {exercise.userProgress?.isCompleted ||
+          (exercise.userProgress && !exercise.userProgress.isActive) ? (
+            <div className="mt-8 p-4 rounded-md bg-green-100 text-green-800 flex items-center justify-center space-x-2">
+              <CheckCircle2 className="h-6 w-6" />
+              <p className="text-lg font-semibold">
+                {t("Este ejercicio ya ha sido completado.")}
+              </p>
+              {exercise.userProgress.score !== null && (
+                <p className="text-lg font-semibold ml-4">
+                  {t("Tu puntaje")}: {exercise.userProgress.score}
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="prose dark:prose-invert max-w-none mt-4">
+              {exercise.type === "quiz" && (
+                <LearningQuiz
+                  exerciseId={exercise.id}
+                  quiz={exercise.content as QuizContent}
+                  onComplete={handleExerciseComplete}
+                  isSubmitting={isSubmitting}
+                  setIsSubmitting={setIsSubmitting}
+                />
+              )}
+              {exercise.type === "matching" && (
+                <LearningMatching
+                  exerciseId={exercise.id}
+                  matching={exercise.content as MatchingContent}
+                  onComplete={handleExerciseComplete}
+                  isSubmitting={isSubmitting}
+                  setIsSubmitting={setIsSubmitting}
+                />
+              )}
+              {exercise.type === "fill-in-the-blank" && (
+                <LearningFillInTheBlank
+                  exerciseId={exercise.id}
+                  fillInTheBlank={exercise.content as FillInTheBlankContent}
+                  onComplete={handleExerciseComplete}
+                  isSubmitting={isSubmitting}
+                  setIsSubmitting={setIsSubmitting}
+                />
+              )}
+              {exercise.type === "audio-pronunciation" && (
+                <LearningAudioPronunciation
+                  exerciseId={exercise.id}
+                  audioPronunciation={
+                    exercise.content as AudioPronunciationContent
+                  }
+                  onComplete={handleExerciseComplete}
+                  isSubmitting={isSubmitting}
+                  setIsSubmitting={setIsSubmitting}
+                />
+              )}
+              {exercise.type === "translation" && (
+                <LearningTranslation
+                  exerciseId={exercise.id}
+                  translation={exercise.content as TranslationContent}
+                  onComplete={handleExerciseComplete}
+                  isSubmitting={isSubmitting}
+                  setIsSubmitting={setIsSubmitting}
+                />
+              )}
+              {exercise.type === "fun-fact" && (
+                <LearningFunFact
+                  exerciseId={exercise.id}
+                  funFact={exercise.content as FunFactContent}
+                  onComplete={handleExerciseComplete}
+                  isSubmitting={isSubmitting}
+                  setIsSubmitting={setIsSubmitting}
+                />
+              )}
+
+              {/* Mensaje de resultado general del ejercicio */}
+              {isExerciseSubmitted && exerciseIsCorrect !== null && (
+                <div
+                  className={`mt-6 p-4 rounded-md flex items-center justify-center space-x-2 ${
+                    exerciseIsCorrect
+                      ? "bg-green-100 text-green-700"
+                      : "bg-red-100 text-red-700"
+                  }`}
+                  role="status"
+                  aria-live="polite"
+                >
+                  {exerciseIsCorrect ? (
+                    <CheckCircle2 className="h-6 w-6" />
+                  ) : (
+                    <XCircle className="h-6 w-6" />
+                  )}
+                  <p className="text-lg font-semibold">
+                    {exerciseIsCorrect
+                      ? t("¡Ejercicio Completado Correctamente!")
+                      : t("Ejercicio Completado Incorrectamente.")}
+                  </p>
+                  {awardedPoints > 0 && (
+                    <p className="text-lg font-semibold ml-4">
+                      {t("Puntos Ganados")}: {awardedPoints}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Manejar tipos de ejercicio desconocidos */}
+              {![
+                "quiz",
+                "matching",
+                "fill-in-the-blank",
+                "audio-pronunciation",
+                "translation",
+                "fun-fact",
+              ].includes(exercise.type) && (
+                <div className="mt-8 p-4 rounded-md bg-yellow-100 text-yellow-800">
+                  <p className="font-semibold">
+                    {t("Tipo de ejercicio desconocido")}: {exercise.type}
+                  </p>
+                  <pre className="mt-2 text-sm bg-yellow-50 p-3 rounded-md overflow-auto">
+                    {JSON.stringify(exercise.content, null, 2)}
+                  </pre>
+                </div>
+              )}
             </div>
           )}
         </div>

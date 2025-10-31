@@ -94,12 +94,12 @@ export interface UpdateUnityDto {
   points?: number;
 }
 
+import { Topic } from './index'; // Importar Topic, Exercise ya no se importa aquí
+
 /**
  * @interface Lesson
  * @description Interfaz para el modelo de lección.
  */
-import { Exercise, Multimedia, Topic } from './index'; // Importar Exercise, Multimedia y Topic
-
 export interface Lesson {
   id: string;
   unityId: string;
@@ -114,7 +114,7 @@ export interface Lesson {
   isActive?: boolean; // Añadido según los datos de ejemplo
   createdAt: string; // Añadido según los datos de ejemplo
   updatedAt: string; // Añadido según los datos de ejemplo
-  exercises?: Exercise[]; // Añadir ejercicios
+  // exercises?: Exercise[]; // Los ejercicios se obtendrán con su propio hook
   multimedia?: Multimedia[]; // Añadir multimedia
   topics?: Topic[]; // Añadir tópicos
   url?: string; // Añadir URL
@@ -194,7 +194,7 @@ export interface BaseExercise {
   title: string;
   description: string;
   difficulty: "beginner" | "intermediate" | "advanced";
-  points: number;
+  points: number; // Mantener points para la creación/actualización, pero el progreso se maneja en userProgress
   timeLimit?: number;
   isActive: boolean;
   topicId?: string;
@@ -205,9 +205,6 @@ export interface BaseExercise {
   createdAt: string;
   updatedAt: string;
   lesson?: string;
-  progress?: number;
-  isCompleted?: boolean;
-  isLocked?: boolean;
 }
 
 /**
@@ -320,17 +317,6 @@ export interface FunFactExercise extends BaseExercise {
   content: FunFactContent;
 }
 
-/**
- * @type Exercise
- * @description Tipo unido para todos los ejercicios.
- */
-export type Exercise =
-  | QuizExercise
-  | MatchingExercise
-  | FillInTheBlankExercise
-  | AudioPronunciationExercise
-  | TranslationExercise
-  | FunFactExercise;
 
 /**
  * @interface CreateExerciseDto

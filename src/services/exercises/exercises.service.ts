@@ -1,10 +1,13 @@
 import type { ApiResponse } from "../../types/common/common.d";
 import type {
   Exercise,
+  ExerciseQueryParams,
+  PaginatedExercisesResponse,
+} from "../../types/exercises/exercises.d";
+import type {
   CreateExerciseDto,
   UpdateExerciseDto,
-} from "../../types/learning/learning.d";
-import type { ExerciseQueryParams } from "../../types/exercises/exercises.d"; // Asumiendo que se creará este tipo
+} from "../../types/learning/learning.d"; // Mantener si Create/Update DTOs están en learning.d
 
 import { apiRequest } from "../_shared";
 
@@ -15,7 +18,17 @@ export const exercisesService = {
   createExercise: (exerciseData: CreateExerciseDto) =>
     apiRequest<ApiResponse<Exercise>>("POST", "/exercises", exerciseData),
   getAllExercises: (params?: ExerciseQueryParams) =>
-    apiRequest<ApiResponse<Exercise[]>>("GET", "/exercises", params),
+    apiRequest<ApiResponse<PaginatedExercisesResponse>>(
+      "GET",
+      "/exercises",
+      params || {} // Pasar un objeto vacío si params es undefined
+    ),
+  getExercisesWithProgress: (params?: Omit<ExerciseQueryParams, "lessonId">) =>
+    apiRequest<ApiResponse<PaginatedExercisesResponse>>(
+      "GET",
+      "/exercises/with-progress",
+      { ...(params || {}), withProgress: true } // Pasar un objeto vacío si params es undefined
+    ),
   getExerciseById: (id: string) => {
     return apiRequest<Exercise>("GET", `/exercises/${id}`);
   },
@@ -25,16 +38,25 @@ export const exercisesService = {
     apiRequest<ApiResponse<void>>("DELETE", `/exercises/${id}`),
 
   getExercisesByTopicId: (topicId: string, params?: ExerciseQueryParams) =>
-    apiRequest<ApiResponse<Exercise[]>>(
+    apiRequest<Exercise[]>( // Cambiado a Exercise[] directamente
       "GET",
       `/exercises/by-topic/${topicId}`,
-      params
+      params || {} // Pasar un objeto vacío si params es undefined
     ),
 
   getExercisesByLessonId: (lessonId: string, params?: ExerciseQueryParams) =>
-    apiRequest<ApiResponse<Exercise[]>>(
+    apiRequest<Exercise[]>( // Cambiado a Exercise[] directamente
       "GET",
       `/exercises/by-lesson/${lessonId}`,
-      params
+      params || {} // Pasar un objeto vacío si params es undefined
+    ),
+  getExercisesByLessonIdWithProgress: (
+    lessonId: string,
+    params?: Omit<ExerciseQueryParams, "lessonId">
+  ) =>
+    apiRequest<Exercise[]>( // Cambiado a Exercise[] directamente
+      "GET",
+      `/exercises/by-lesson/${lessonId}/with-progress`,
+      { ...(params || {}), withProgress: true } // Pasar un objeto vacío si params es undefined
     ),
 };

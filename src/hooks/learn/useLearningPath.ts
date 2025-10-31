@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAllModules } from '@/hooks/modules/modules.hooks';
-import type { Module } from '@/types/api';
-import type { LearningModule } from '@/types/learning';
+import type { Module } from '../../types/learning/learning';
+import type { LearningModule } from '../../types/learning';
 
 interface UseLearningPathResult {
   learningPath: LearningModule[];
@@ -28,14 +28,13 @@ const mapModuleToLearningModule = (module: Module): LearningModule => {
 export const useLearningPath = (): UseLearningPathResult => {
   const { data: modulesData, isLoading, error } = useAllModules();
 
-  const modules = modulesData || [];
-
   const learningPath = React.useMemo(() => {
+    const modules = modulesData || [];
     // Mapear los módulos de la API a LearningModule usando la función utilitaria
     const path: LearningModule[] = modules.map(mapModuleToLearningModule);
 
     return path.sort((a, b) => a.order - b.order);
-  }, [modules]);
+  }, [modulesData]);
 
   // Calcular el progreso general del camino de aprendizaje basado en módulos
   // Nota: totalModulesCompleted y nextModule se basan en el campo isCompleted,

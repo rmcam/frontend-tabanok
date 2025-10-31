@@ -5,16 +5,19 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { CheckCircle2, XCircle, RefreshCw } from 'lucide-react';
 import type { MatchingContent } from '@/types/learning/learning.d';
-import { useSubmitExercise } from '@/hooks/exercises/exercises.hooks'; // Corregir importación
+import type { SubmitExerciseResponse, MatchingDetails } from '@/types/progress/progress.d'; // Importar SubmitExerciseResponse y MatchingDetails
 import { useHeartsStore } from '@/stores/heartsStore';
+import { useSubmitExerciseProgress } from '@/hooks/progress/progress.hooks'; // Importar useSubmitExerciseProgress
 
 interface LearningMatchingProps {
   exerciseId: string;
   matching: MatchingContent;
   onComplete?: (isCorrect: boolean, awardedPoints?: number) => void;
+  isSubmitting: boolean;
+  setIsSubmitting: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const LearningMatching: React.FC<LearningMatchingProps> = ({ exerciseId, matching, onComplete }) => { // Aceptar exerciseId
+const LearningMatching: React.FC<LearningMatchingProps> = ({ exerciseId, matching, onComplete, isSubmitting, setIsSubmitting }) => { // Aceptar exerciseId
   const { t } = useTranslation();
   const [selectedTerm, setSelectedTerm] = useState<string | null>(null);
   const [selectedMatch, setSelectedMatch] = useState<string | null>(null);
@@ -23,10 +26,10 @@ const LearningMatching: React.FC<LearningMatchingProps> = ({ exerciseId, matchin
   const [availableMatches, setAvailableMatches] = useState(matching.pairs ? matching.pairs.map(p => p.match).sort(() => Math.random() - 0.5) : []); // Mezclar matches
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
-  const [submissionResponse, setSubmissionResponse] = useState<any>(null); // Nuevo estado para la respuesta
+  const [submissionResponse, setSubmissionResponse] = useState<SubmitExerciseResponse | null>(null); // Nuevo estado para la respuesta
 
   const { decrementHeart } = useHeartsStore();
-  const { mutate: submitExerciseMutation, isPending: isSubmitting } = useSubmitExercise();
+  const { mutate: submitExerciseProgressMutation, isPending: isSubmittingHook } = useSubmitExerciseProgress();
 
   const handleTermClick = (term: string) => {
     if (isSubmitted) return;
@@ -58,26 +61,26 @@ const LearningMatching: React.FC<LearningMatchingProps> = ({ exerciseId, matchin
       return;
     }
 
+    setIsSubmitting(true); // Indicar que el envío ha comenzado
+
     const submission = {
-      userAnswer: userPairs.map(p => ({ term: p.term, match: p.match })),
+      exerciseId: exerciseId,
+      answers: { userAnswer: userPairs.map(p => ({ term: p.term, match: p.match })) },
     };
 
-    submitExerciseMutation({
-      id: exerciseId, // Usar la prop exerciseId
-      submission: submission,
-    }, {
+    submitExerciseProgressMutation(submission, {
       onSuccess: (response) => {
-        setSubmissionResponse(response); // Guardar la respuesta completa
-        const correct = response.isCorrect;
-        setIsCorrect(correct);
+        setSubmissionResponse(response); // Guardar la respuesta completa directamente
+        const correct = response?.isCorrect; // Acceder directamente a isCorrect
+        setIsCorrect(correct ?? false);
         setIsSubmitted(true);
         if (correct) {
-          toast.success(t("¡Correcto! Has ganado {{points}} puntos.", { points: response.awardedPoints }));
+          toast.success(t("¡Correcto! Has ganado {{points}} puntos.", { points: response?.score })); // Usar response?.score
         } else {
           toast.error(t("Incorrecto. Inténtalo de nuevo."));
           decrementHeart();
         }
-        onComplete?.(correct, response.awardedPoints);
+        onComplete?.(correct ?? false, response?.score); // Usar response?.score
       },
       onError: (error) => {
         console.error('Error al enviar respuesta del ejercicio:', error);
@@ -86,7 +89,10 @@ const LearningMatching: React.FC<LearningMatchingProps> = ({ exerciseId, matchin
         setIsSubmitted(true);
         decrementHeart();
         onComplete?.(false);
-      }
+      },
+      onSettled: () => {
+        // setIsSubmitting(false); // Esto se maneja en ExerciseModal
+      },
     });
   };
 
@@ -98,6 +104,7 @@ const LearningMatching: React.FC<LearningMatchingProps> = ({ exerciseId, matchin
     setAvailableMatches(matching.pairs ? matching.pairs.map(p => p.match).sort(() => Math.random() - 0.5) : []);
     setIsSubmitted(false);
     setIsCorrect(null);
+    setIsSubmitting(false); // Resetear el estado de envío en el padre también
   };
 
   return (
@@ -172,20 +179,20 @@ const LearningMatching: React.FC<LearningMatchingProps> = ({ exerciseId, matchin
             <p className="text-xl font-bold">
               {isCorrect ? t("¡Respuesta Correcta!") : t("Respuesta Incorrecta.")}
             </p>
-            {!isCorrect && submissionResponse?.details && submissionResponse.details.correctPairs && (
+            {!isCorrect && submissionResponse?.details && 'correctPairs' in submissionResponse.details && (
               <p className="text-md text-center">
-                {t("Los pares correctos eran:")} <span className="font-semibold">{submissionResponse.details.correctPairs.map((p: any) => `${p.term} - ${p.match}`).join(', ')}</span>
+                {t("Los pares correctos eran:")} <span className="font-semibold">{(submissionResponse.details as MatchingDetails).correctPairs.map((p: { term: string; match: string }) => `${p.term} - ${p.match}`).join(', ')}</span>
               </p>
             )}
           </div>
         )}
       </CardContent>
       <CardFooter className="flex justify-between">
-        <Button variant="outline" onClick={handleReset} disabled={isSubmitting}>
+        <Button variant="outline" onClick={handleReset} disabled={isSubmittingHook}>
           <RefreshCw className="h-4 w-4 mr-2" /> {t("Reiniciar")}
         </Button>
-        <Button onClick={handleSubmit} disabled={isSubmitting || isSubmitted || !matching.pairs || userPairs.length !== matching.pairs.length}>
-          {isSubmitting ? t("Enviando...") : t("Enviar Respuesta")}
+        <Button onClick={handleSubmit} disabled={isSubmittingHook || isSubmitted || !matching.pairs || userPairs.length !== matching.pairs.length || isSubmitting}>
+          {isSubmittingHook ? t("Enviando...") : t("Enviar Respuesta")}
         </Button>
       </CardFooter>
     </Card>

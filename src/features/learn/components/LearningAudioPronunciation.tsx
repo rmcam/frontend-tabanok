@@ -5,16 +5,19 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { CheckCircle2, XCircle, Volume2, Mic, StopCircle, RefreshCw } from 'lucide-react';
 import type { AudioPronunciationContent } from '@/types/learning/learning.d';
-import { useSubmitExercise } from '@/hooks/exercises/exercises.hooks'; // Corregir importación
+import type { AudioPronunciationDetails, SubmitExerciseResponse } from '@/types/progress/progress.d';
 import { useHeartsStore } from '@/stores/heartsStore';
+import { useSubmitExerciseProgress } from '@/hooks/progress/progress.hooks'; // Importar useSubmitExerciseProgress
 
 interface LearningAudioPronunciationProps {
   exerciseId: string;
   audioPronunciation: AudioPronunciationContent;
   onComplete?: (isCorrect: boolean, awardedPoints?: number) => void;
+  isSubmitting: boolean;
+  setIsSubmitting: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const LearningAudioPronunciation: React.FC<LearningAudioPronunciationProps> = ({ exerciseId, audioPronunciation, onComplete }) => { // Aceptar exerciseId
+const LearningAudioPronunciation: React.FC<LearningAudioPronunciationProps> = ({ exerciseId, audioPronunciation, onComplete, isSubmitting, setIsSubmitting }) => { // Aceptar exerciseId
   const { t } = useTranslation();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -22,10 +25,11 @@ const LearningAudioPronunciation: React.FC<LearningAudioPronunciationProps> = ({
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
-  const [submissionResponse, setSubmissionResponse] = useState<any>(null); // Nuevo estado para la respuesta
+  const [submissionResponse, setSubmissionResponse] = useState<SubmitExerciseResponse | null>(null); // Nuevo estado para la respuesta
+
 
   const { decrementHeart } = useHeartsStore();
-  const { mutate: submitExerciseMutation, isPending: isSubmitting } = useSubmitExercise();
+  const { mutate: submitExerciseProgressMutation, isPending: isSubmittingHook } = useSubmitExerciseProgress();
 
   const handlePlayAudio = () => {
     if (audioPronunciation.audioUrl) {
@@ -75,6 +79,8 @@ const LearningAudioPronunciation: React.FC<LearningAudioPronunciationProps> = ({
       return;
     }
 
+    setIsSubmitting(true); // Indicar que el envío ha comenzado
+
     // En un escenario real, aquí enviarías el audioBlob al backend para su evaluación.
     // Por ahora, simularemos una respuesta.
     // El backend debería tener un endpoint que reciba el archivo de audio y la frase esperada,
@@ -92,22 +98,22 @@ const LearningAudioPronunciation: React.FC<LearningAudioPronunciationProps> = ({
       }
     };
 
-    submitExerciseMutation({
-      id: exerciseId, // Usar la prop exerciseId
-      submission: submission,
+    submitExerciseProgressMutation({
+      exerciseId: exerciseId,
+      answers: submission.userAnswer, // Asegurarse de que `answers` sea un objeto
     }, {
       onSuccess: (response) => {
-        setSubmissionResponse(response); // Guardar la respuesta completa
-        const correct = response.isCorrect;
-        setIsCorrect(correct);
+        setSubmissionResponse(response); // Guardar la respuesta completa directamente
+        const correct = response?.isCorrect; // Acceder directamente a isCorrect
+        setIsCorrect(correct ?? false);
         setIsSubmitted(true);
         if (correct) {
-          toast.success(t("¡Pronunciación correcta! Has ganado {{points}} puntos.", { points: response.awardedPoints }));
+          toast.success(t("¡Pronunciación correcta! Has ganado {{points}} puntos.", { points: response?.score })); // Usar response?.score
         } else {
           toast.error(t("Pronunciación incorrecta. Inténtalo de nuevo."));
           decrementHeart();
         }
-        onComplete?.(correct, response.awardedPoints);
+        onComplete?.(correct ?? false, response?.score); // Usar response?.score
       },
       onError: (error) => {
         console.error('Error al enviar pronunciación:', error);
@@ -116,7 +122,10 @@ const LearningAudioPronunciation: React.FC<LearningAudioPronunciationProps> = ({
         setIsSubmitted(true);
         decrementHeart();
         onComplete?.(false);
-      }
+      },
+      onSettled: () => {
+        // setIsSubmitting(false); // Esto se maneja en ExerciseModal
+      },
     });
   };
 
@@ -127,6 +136,7 @@ const LearningAudioPronunciation: React.FC<LearningAudioPronunciationProps> = ({
     setAudioBlob(null);
     audioChunksRef.current = [];
     mediaRecorderRef.current = null;
+    setIsSubmitting(false); // Resetear el estado de envío en el padre también
   };
 
   return (
@@ -176,20 +186,20 @@ const LearningAudioPronunciation: React.FC<LearningAudioPronunciationProps> = ({
             <p className="text-xl font-bold">
               {isCorrect ? t("¡Pronunciación Correcta!") : t("Pronunciación Incorrecta.")}
             </p>
-            {!isCorrect && submissionResponse?.details && submissionResponse.details.expectedPhrase && (
+            {!isCorrect && submissionResponse?.details && 'expectedPhrase' in submissionResponse.details && (
               <p className="text-md text-center">
-                {t("La frase esperada era:")} <span className="font-semibold">{submissionResponse.details.expectedPhrase}</span>
+                {t("La frase esperada era:")} <span className="font-semibold">{(submissionResponse.details as AudioPronunciationDetails).expectedPhrase}</span>
               </p>
             )}
           </div>
         )}
       </CardContent>
       <CardFooter className="flex justify-between">
-        <Button variant="outline" onClick={handleReset} disabled={isSubmitting || isRecording}>
+        <Button variant="outline" onClick={handleReset} disabled={isSubmittingHook || isRecording}>
           <RefreshCw className="h-4 w-4 mr-2" /> {t("Reiniciar")}
         </Button>
-        <Button onClick={handleSubmit} disabled={isSubmitting || isSubmitted || isRecording || !audioBlob}>
-          {isSubmitting ? t("Enviando...") : t("Enviar Pronunciación")}
+        <Button onClick={handleSubmit} disabled={isSubmittingHook || isSubmitted || isRecording || !audioBlob}>
+          {isSubmittingHook ? t("Enviando...") : t("Enviar Pronunciación")}
         </Button>
       </CardFooter>
     </Card>

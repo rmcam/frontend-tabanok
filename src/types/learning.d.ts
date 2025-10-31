@@ -4,7 +4,6 @@ import type {
   Lesson as BaseLesson, // Renombrar Lesson a BaseLesson
   Exercise as BaseExercise, // Renombrar Exercise a BaseExercise
   Multimedia,
-  Topic as BaseTopic, // Renombrar Topic a BaseTopic
 } from "./learning/learning.d"; // Importar directamente de learning/learning.d
 
 // Extender las interfaces base para incluir propiedades de aprendizaje
@@ -220,13 +219,6 @@ export interface LearningTopicSectionProps {
   topic: LearningTopic;
   userProgress?: UserProgress; // Añadir prop userProgress (opcional)
   isPreviousTopicCompleted?: boolean; // Añadir prop para la lógica de bloqueo
-}
-
-export interface LearningModule extends Module {
-  units: LearningUnit[];
-  url: string;
-  isCompleted: boolean;
-  progress: number;
 }
 
 export interface LearningUnitCardProps {

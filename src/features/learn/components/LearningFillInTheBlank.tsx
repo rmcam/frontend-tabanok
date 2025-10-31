@@ -6,25 +6,28 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { CheckCircle2, XCircle, RefreshCw } from 'lucide-react';
 import type { FillInTheBlankContent } from '@/types/learning/learning.d';
-import { useSubmitExercise } from '@/hooks/exercises/exercises.hooks';
+import type { SubmitExerciseResponse, FillInTheBlankDetails } from '@/types/progress/progress.d'; // Importar SubmitExerciseResponse y FillInTheBlankDetails
 import { useHeartsStore } from '@/stores/heartsStore';
+import { useSubmitExerciseProgress } from '@/hooks/progress/progress.hooks'; // Importar useSubmitExerciseProgress
 
 interface LearningFillInTheBlankProps {
   exerciseId: string;
   fillInTheBlank: FillInTheBlankContent;
   onComplete?: (isCorrect: boolean, awardedPoints?: number) => void;
+  isSubmitting: boolean;
+  setIsSubmitting: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const LearningFillInTheBlank: React.FC<LearningFillInTheBlankProps> = ({ exerciseId, fillInTheBlank, onComplete }) => {
+const LearningFillInTheBlank: React.FC<LearningFillInTheBlankProps> = ({ exerciseId, fillInTheBlank, onComplete, isSubmitting, setIsSubmitting }) => {
   const { t } = useTranslation();
   const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [blankStatus, setBlankStatus] = useState<Record<string, boolean | null>>({});
-  const [submissionResponse, setSubmissionResponse] = useState<any>(null); // Nuevo estado para la respuesta
+  const [submissionResponse, setSubmissionResponse] = useState<SubmitExerciseResponse | null>(null); // Nuevo estado para la respuesta
 
   const { decrementHeart } = useHeartsStore();
-  const { mutate: submitExerciseMutation, isPending: isSubmitting } = useSubmitExercise();
+  const { mutate: submitExerciseProgressMutation, isPending: isSubmittingHook } = useSubmitExerciseProgress();
 
   useEffect(() => {
     const initialAnswers: Record<string, string> = {};
@@ -55,24 +58,24 @@ const LearningFillInTheBlank: React.FC<LearningFillInTheBlankProps> = ({ exercis
       return;
     }
 
+    setIsSubmitting(true); // Indicar que el envío ha comenzado
+
     const submission = {
-      userAnswer: userAnswers,
+      exerciseId: exerciseId,
+      answers: { userAnswer: userAnswers },
     };
 
-    submitExerciseMutation({
-      id: exerciseId, // Usar la prop exerciseId
-      submission: submission,
-    }, {
+    submitExerciseProgressMutation(submission, {
       onSuccess: (response) => {
-        setSubmissionResponse(response); // Guardar la respuesta completa
-        const correct = response.isCorrect;
-        setIsCorrect(correct);
+        setSubmissionResponse(response); // Guardar la respuesta completa directamente
+        const correct = response?.isCorrect; // Acceder directamente a isCorrect
+        setIsCorrect(correct ?? false);
         setIsSubmitted(true);
 
         const newBlankStatus: Record<string, boolean | null> = {};
         // Si el backend devuelve detalles de cada blank, usarlos. De lo contrario, usar la lógica local.
-        if (response.details && response.details.blankResults) {
-          response.details.blankResults.forEach((result: { id: string; isCorrect: boolean; }) => {
+        if (response?.details && 'blankResults' in response.details) {
+          (response.details as FillInTheBlankDetails).blankResults.forEach((result: { id: string; isCorrect: boolean; }) => {
             newBlankStatus[result.id] = result.isCorrect;
           });
         } else if (fillInTheBlank.blanks) {
@@ -85,12 +88,12 @@ const LearningFillInTheBlank: React.FC<LearningFillInTheBlankProps> = ({ exercis
         setBlankStatus(newBlankStatus);
 
         if (correct) {
-          toast.success(t("¡Correcto! Has ganado {{points}} puntos.", { points: response.awardedPoints }));
+          toast.success(t("¡Correcto! Has ganado {{points}} puntos.", { points: response?.score })); // Usar response?.score
         } else {
           toast.error(t("Incorrecto. Inténtalo de nuevo."));
           decrementHeart();
         }
-        onComplete?.(correct, response.awardedPoints);
+        onComplete?.(correct ?? false, response?.score); // Usar response?.score
       },
       onError: (error) => {
         console.error('Error al enviar respuesta del ejercicio:', error);
@@ -99,7 +102,10 @@ const LearningFillInTheBlank: React.FC<LearningFillInTheBlankProps> = ({ exercis
         setIsSubmitted(true);
         decrementHeart();
         onComplete?.(false);
-      }
+      },
+      onSettled: () => {
+        // setIsSubmitting(false); // Esto se maneja en ExerciseModal
+      },
     });
   };
 
@@ -116,6 +122,7 @@ const LearningFillInTheBlank: React.FC<LearningFillInTheBlankProps> = ({ exercis
     setBlankStatus(initialStatus);
     setIsSubmitted(false);
     setIsCorrect(null);
+    setIsSubmitting(false); // Resetear el estado de envío en el padre también
   };
 
   const renderTextWithBlanks = () => {
@@ -131,8 +138,7 @@ const LearningFillInTheBlank: React.FC<LearningFillInTheBlankProps> = ({ exercis
     let match;
 
     while ((match = blankRegex.exec(currentText)) !== null) {
-      const blankPlaceholder = match[0]; // e.g., "[BLANK_123]"
-      const blankId = match[1]; // e.g., "123"
+    const blankId = match[1]; // e.g., "123"
 
       // Añadir el texto antes del espacio en blanco
       if (match.index > lastIndex) {
@@ -196,20 +202,20 @@ const LearningFillInTheBlank: React.FC<LearningFillInTheBlankProps> = ({ exercis
             <p className="text-xl font-bold">
               {isCorrect ? t("¡Respuesta Correcta!") : t("Respuesta Incorrecta.")}
             </p>
-            {!isCorrect && submissionResponse?.details && submissionResponse.details.correctBlanks && (
+            {!isCorrect && submissionResponse?.details && 'correctBlanks' in submissionResponse.details && (
               <p className="text-md text-center">
-                {t("Las respuestas correctas eran:")} <span className="font-semibold">{submissionResponse.details.correctBlanks.join(', ')}</span>
+                {t("Las respuestas correctas eran:")} <span className="font-semibold">{(submissionResponse.details as FillInTheBlankDetails).correctBlanks.join(', ')}</span>
               </p>
             )}
           </div>
         )}
       </CardContent>
       <CardFooter className="flex justify-between">
-        <Button variant="outline" onClick={handleReset} disabled={isSubmitting}>
+        <Button variant="outline" onClick={handleReset} disabled={isSubmittingHook}>
           <RefreshCw className="h-4 w-4 mr-2" /> {t("Reiniciar")}
         </Button>
-        <Button onClick={handleSubmit} disabled={isSubmitting || isSubmitted}>
-          {isSubmitting ? t("Enviando...") : t("Enviar Respuesta")}
+        <Button onClick={handleSubmit} disabled={isSubmittingHook || isSubmitted || isSubmitting}>
+          {isSubmittingHook ? t("Enviando...") : t("Enviar Respuesta")}
         </Button>
       </CardFooter>
     </Card>

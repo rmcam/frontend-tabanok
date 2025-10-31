@@ -1,7 +1,6 @@
 import { apiRequest } from '../_shared';
 import type { ApiResponse } from '../../types/common/common.d';
-import type { SubmitExerciseDto, SubmitExerciseResponse, ProgressDto, CreateProgressDto, UserLessonProgressResponse, UserUnityProgressResponse, UserExerciseProgressResponse, GetUserProgressFilters, PaginatedUserProgressResponse } from '../../types/progress/progress.d';
-import type { Exercise } from '../../types/learning/learning.d';
+import type { SubmitExerciseDto, SubmitExerciseResponse, ProgressDto, CreateProgressDto, UserLessonProgressResponse, UserUnityProgressResponse, UserExerciseProgressResponse, GetUserProgressFilters, PaginatedUserProgressResponse, SubmitExerciseRequestBody } from '../../types/progress/progress.d';
 
 interface PaginationParams {
   page?: number;
@@ -53,14 +52,18 @@ const ProgressService = {
     }
     return { data: progress };
   },
-  markProgressAsCompleted: (progressId: string, data: { answers: Record<string, any> }) => {
-    return apiRequest<ApiResponse<UserExerciseProgressResponse>>('PATCH', `/progress/${progressId}/complete`, data);
+  markProgressAsCompleted: (progressId: string, data: { answers: Record<string, unknown> }) => {
+    return apiRequest<ApiResponse<{ isCorrect: boolean; score?: number; awardedPoints?: number; message?: string; }>>('PATCH', `/progress/${progressId}/complete`, data);
   },
   updateProgressScore: (progressId: string, data: { score: number }) => {
     return apiRequest<ApiResponse<UserExerciseProgressResponse>>('PATCH', `/progress/${progressId}/score`, data);
   },
   submitExercise: (id: string, submission: SubmitExerciseDto) => {
     return apiRequest<ApiResponse<SubmitExerciseResponse>>('POST', `/progress/${id}/submit-exercise`, submission);
+  },
+
+  submitExerciseProgress: (submission: SubmitExerciseRequestBody) => {
+    return apiRequest<SubmitExerciseResponse>('POST', '/progress/submit-exercise', submission);
   },
 
   // Nuevos métodos para progreso de lecciones y unidades

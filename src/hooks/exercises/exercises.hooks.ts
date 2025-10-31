@@ -8,42 +8,47 @@ import type { ApiResponse } from "@/types/common/common.d";
 import type { GamificationUserStatsDto } from "@/types/gamification/gamification.d";
 import type {
   Exercise,
+  ExerciseQueryParams,
+  PaginatedExercisesResponse,
+} from "@/types/exercises/exercises.d";
+import type {
   CreateExerciseDto,
   UpdateExerciseDto,
-} from "@/types/learning/learning.d";
+} from "@/types/learning/learning.d"; // Importar desde learning.d
 import type {
-  ProgressDto,
   SubmitExerciseDto,
   SubmitExerciseResponse,
+  SubmitExerciseRequestBody,
 } from "@/types/progress/progress.d";
-import type { ExerciseQueryParams } from "@/types/exercises/exercises.d";
+import type { ExerciseUserProgress } from "@/types/progress/progress.d"; // Importar ExerciseUserProgress
 
 /**
  * Hooks para los endpoints de ejercicios.
  */
 export const useAllExercises = (params?: ExerciseQueryParams) => {
-  return useQuery<Exercise[], ApiError>({
+  return useQuery<PaginatedExercisesResponse, ApiError>({
     queryKey: ["exercises", params],
-    queryFn: async () => (await exercisesService.getAllExercises(params)).data,
+    queryFn: async () => {
+      if (params?.withProgress) {
+        return (await exercisesService.getExercisesWithProgress(params)).data;
+      }
+      return (await exercisesService.getAllExercises(params)).data;
+    },
   });
 };
 
 export const useExerciseById = (id: string) => {
-  const data = useQuery<Exercise, ApiError>({
+  return useQuery<Exercise, ApiError>({
     queryKey: ["exercises", id],
     queryFn: async () => {
       const response = await exercisesService.getExerciseById(id);
-      // Logs de depuración eliminados
       if (!response) {
-        // Ahora verificamos si la respuesta completa es nula/undefined
         throw new Error("No se encontraron datos para el ejercicio.");
       }
-      return response; // Accedemos directamente a la respuesta, que ya es el objeto Exercise
+      return response;
     },
     enabled: !!id,
   });
-  // Log de depuración eliminado
-  return data;
 };
 
 export const useCreateExercise = () => {
@@ -69,7 +74,7 @@ export const useExercisesByTopicId = (
   return useQuery<Exercise[], ApiError>({
     queryKey: ["exercises", { topicId }, params],
     queryFn: async () =>
-      (await exercisesService.getExercisesByTopicId(topicId, params)).data,
+      (await exercisesService.getExercisesByTopicId(topicId, params)),
     enabled: !!topicId,
   });
 };
@@ -78,10 +83,14 @@ export const useExercisesByLessonId = (
   lessonId: string,
   params?: ExerciseQueryParams
 ) => {
-  return useQuery<Exercise[], ApiError>({
+  return useQuery<Exercise[], ApiError>({ // Cambiado a Exercise[]
     queryKey: ["exercises", { lessonId }, params],
-    queryFn: async () =>
-      (await exercisesService.getExercisesByLessonId(lessonId, params)).data,
+    queryFn: async () => {
+      if (params?.withProgress) {
+        return await exercisesService.getExercisesByLessonIdWithProgress(lessonId, params); // Eliminado .data
+      }
+      return await exercisesService.getExercisesByLessonId(lessonId, params); // Eliminado .data
+    },
     enabled: !!lessonId,
   });
 };
@@ -133,7 +142,8 @@ export const useDeleteExercise = () => {
 
 interface SubmitExerciseContext {
   previousExercise?: Exercise;
-  previousUserProgress?: ProgressDto[];
+  previousAllExercisesWithProgress?: PaginatedExercisesResponse;
+  previousLessonExercisesWithProgress?: Exercise[]; // Cambiado a Exercise[]
   previousUserStats?: GamificationUserStatsDto;
 }
 
@@ -142,7 +152,7 @@ export const useSubmitExercise = () => {
   const { data: userProfile } = useProfile();
 
   return useMutation<
-    SubmitExerciseResponse,
+    SubmitExerciseResponse, // El tipo de retorno ahora es directamente SubmitExerciseResponse
     ApiError,
     { id: string; submission: SubmitExerciseDto },
     SubmitExerciseContext
@@ -152,92 +162,158 @@ export const useSubmitExercise = () => {
         throw new Error("User not authenticated.");
       }
 
-      const progressResponse = await ProgressService.getOrCreateProgress(
-        userProfile.id,
-        exerciseId
-      );
-      const progress: ProgressDto = progressResponse.data;
-
-      const response = await ProgressService.markProgressAsCompleted(
-        progress.id,
-        { answers: submission }
-      );
-
-      return {
-        isCorrect: response.data.isCompleted,
-        score: response.data.score || 0,
-        awardedPoints: response.data.score || 0,
-        message: response.data.isCompleted
-          ? "Ejercicio completado."
-          : "Progreso actualizado.",
-        details: submission, // Usar la submission original para los detalles
-        userAnswer: JSON.stringify(submission),
-        userId: userProfile.id, // Usar el ID del perfil de usuario
-        exerciseId: exerciseId, // Usar el exerciseId de la mutación
+      const fullSubmission: SubmitExerciseRequestBody = {
+        userId: userProfile.id,
+        exerciseId: exerciseId,
+        answers: typeof submission.userAnswer === "string" ? { userAnswer: submission.userAnswer } : submission.userAnswer,
       };
+
+      // Usar el nuevo endpoint consolidado
+      const response = await ProgressService.submitExerciseProgress(fullSubmission);
+
+      return response; // La respuesta ya cumple con SubmitExerciseResponse
     },
     onMutate: async ({ id: exerciseId, submission: _submission }) => {
-      await queryClient.cancelQueries({ queryKey: ["exercises", exerciseId] });
-      await queryClient.cancelQueries({ queryKey: ["user-progress"] });
-      await queryClient.cancelQueries({ queryKey: ["user-stats"] });
-
       const previousExercise = queryClient.getQueryData<Exercise>([
         "exercises",
         exerciseId,
       ]);
-      const previousUserProgress = queryClient.getQueryData<ProgressDto[]>([
-        "user-progress",
+      const previousAllExercisesWithProgress = queryClient.getQueryData<PaginatedExercisesResponse>([
+        "exercises", { withProgress: true }
+      ]);
+      const previousLessonExercisesWithProgress = queryClient.getQueryData<Exercise[]>([
+        "exercises", { lessonId: previousExercise?.lessonId, withProgress: true }
       ]);
       const previousUserStats =
         queryClient.getQueryData<GamificationUserStatsDto>(["user-stats"]);
 
+      await queryClient.cancelQueries({ queryKey: ["exercises", exerciseId] });
+      await queryClient.cancelQueries({ queryKey: ["exercises", { withProgress: true }] });
+      await queryClient.cancelQueries({ queryKey: ["exercises", { lessonId: previousExercise?.lessonId, withProgress: true }] });
+      await queryClient.cancelQueries({ queryKey: ["user-stats"] });
+
       if (previousExercise) {
         queryClient.setQueryData<Exercise>(["exercises", exerciseId], {
           ...previousExercise,
-          isCompleted: true,
-          progress: previousExercise.points,
+          userProgress: {
+            id: "temp-id", // ID temporal, se actualizará con la respuesta real
+            score: 0, // Score temporal
+            isCompleted: true,
+            isActive: true, // Asumimos que el progreso está activo si existe
+          },
         });
       }
 
-      if (previousUserProgress && userProfile?.id) {
-        const updatedProgresses = previousUserProgress.map((p) =>
-          p.exerciseId === exerciseId
-            ? { ...p, isCompleted: true, score: previousExercise?.points || 0 }
-            : p
-        );
-        queryClient.setQueryData<ProgressDto[]>(
-          ["user-progress"],
-          updatedProgresses
-        );
-      }
-
-      if (previousUserStats && previousExercise) {
-        queryClient.setQueryData<GamificationUserStatsDto>(
-          ["user-stats"],
-          (oldStats) => {
-            if (!oldStats) return oldStats;
-            return {
-              ...oldStats,
-              points: (oldStats.points || 0) + previousExercise.points,
-              totalPoints:
-                (oldStats.totalPoints || 0) + previousExercise.points,
-            };
+      if (previousAllExercisesWithProgress) {
+        queryClient.setQueryData<PaginatedExercisesResponse>(
+          ["exercises", { withProgress: true }],
+          {
+            ...previousAllExercisesWithProgress,
+            data: previousAllExercisesWithProgress.data.map((ex) =>
+              ex.id === exerciseId
+                ? {
+                    ...ex,
+                    userProgress: {
+                      id: "temp-id",
+                      score: 0,
+                      isCompleted: true,
+                      isActive: true, // Asumimos que el progreso está activo si existe
+                    },
+                  }
+                : ex
+            ),
           }
         );
       }
 
-      return { previousExercise, previousUserProgress, previousUserStats };
+      if (previousLessonExercisesWithProgress) {
+        queryClient.setQueryData<Exercise[]>(
+          ["exercises", { lessonId: previousExercise?.lessonId, withProgress: true }],
+          previousLessonExercisesWithProgress.map((ex) =>
+            ex.id === exerciseId
+              ? {
+                  ...ex,
+                  userProgress: {
+                    id: "temp-id",
+                    score: 0,
+                    isCompleted: true,
+                    isActive: true, // Asumimos que el progreso está activo si existe
+                  },
+                }
+              : ex
+          )
+        );
+      }
+
+      if (previousUserStats && previousExercise) {
+        // La actualización de puntos se realizará en onSuccess, donde 'data' (la respuesta del submit) está disponible.
+        // Aquí solo preparamos el contexto.
+      }
+
+      return { previousExercise, previousAllExercisesWithProgress, previousLessonExercisesWithProgress, previousUserStats };
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (data, variables, context) => {
       toast.success(
         data.message ||
           (data.isCorrect
             ? "¡Respuesta correcta! Ganaste puntos."
             : "Respuesta incorrecta. Inténtalo de nuevo.")
       );
-      queryClient.invalidateQueries({ queryKey: ["exercises", variables.id] });
-      queryClient.invalidateQueries({ queryKey: ["lesson"] });
-      queryClient.invalidateQueries({ queryKey: ["user-progress"] });
+
+      // Actualizar los puntos del usuario en la caché
+      if (context?.previousUserStats) {
+        queryClient.setQueryData<GamificationUserStatsDto>(
+          ["user-stats"],
+          (oldStats) => {
+            if (!oldStats) return oldStats;
+            return {
+              ...oldStats,
+              points: (oldStats.points || 0) + data.score,
+              totalPoints: (oldStats.totalPoints || 0) + data.score,
+            };
+          }
+        );
+      }
+
+      // Actualizar el ejercicio individual en caché
+      queryClient.setQueryData<Exercise>(["exercises", variables.id], (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          userProgress: {
+            id: data.id,
+            score: data.score,
+            isCompleted: data.isCompleted,
+            isActive: true, // Asumimos que el progreso está activo si existe
+          },
+        };
+      });
+
+      // Actualizar la lista de ejercicios de la lección en caché
+      if (context?.previousLessonExercisesWithProgress && context.previousExercise?.lessonId) {
+        queryClient.setQueryData<Exercise[]>(
+          ["exercises", { lessonId: context.previousExercise.lessonId, withProgress: true }],
+          (old) => {
+            if (!old) return old;
+            return old.map((ex) =>
+              ex.id === variables.id
+                ? {
+                    ...ex,
+                    userProgress: {
+                      id: data.id,
+                      score: data.score,
+                      isCompleted: data.isCompleted,
+                      isActive: true, // Asumimos que el progreso está activo si existe
+                    },
+                  }
+                : ex
+            );
+          }
+        );
+      }
+
+      // Invalidar otras queries que podrían necesitar una refetch
+      queryClient.invalidateQueries({ queryKey: ["lesson", context.previousExercise?.lessonId] });
       queryClient.invalidateQueries({ queryKey: ["user-stats"] });
     },
     onError: (error, variables, context) => {
@@ -254,20 +330,28 @@ export const useSubmitExercise = () => {
           context.previousExercise
         );
       }
-      if (context?.previousUserProgress) {
+      if (context?.previousAllExercisesWithProgress) {
         queryClient.setQueryData(
-          ["user-progress"],
-          context.previousUserProgress
+          ["exercises", { withProgress: true }],
+          context.previousAllExercisesWithProgress
+        );
+      }
+      if (context?.previousLessonExercisesWithProgress) {
+        queryClient.setQueryData<Exercise[]>(
+          ["exercises", { lessonId: context.previousExercise?.lessonId, withProgress: true }],
+          context.previousLessonExercisesWithProgress
         );
       }
       if (context?.previousUserStats) {
         queryClient.setQueryData(["user-stats"], context.previousUserStats);
       }
     },
-    onSettled: (data, error, variables) => {
+    onSettled: (data, error, variables, context) => {
+      // Invalidar queries para asegurar consistencia si la actualización optimista falló o si hay otros cambios
       queryClient.invalidateQueries({ queryKey: ["exercises", variables.id] });
-      queryClient.invalidateQueries({ queryKey: ["lesson"] });
-      queryClient.invalidateQueries({ queryKey: ["user-progress"] });
+      queryClient.invalidateQueries({ queryKey: ["exercises", { withProgress: true }] });
+      queryClient.invalidateQueries({ queryKey: ["exercises", { lessonId: context?.previousExercise?.lessonId, withProgress: true }] });
+      queryClient.invalidateQueries({ queryKey: ["lesson", context?.previousExercise?.lessonId] });
       queryClient.invalidateQueries({ queryKey: ["user-stats"] });
     },
   });

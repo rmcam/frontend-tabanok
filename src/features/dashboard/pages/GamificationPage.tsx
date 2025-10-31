@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Trophy, Award, Gem, Heart, Zap } from 'lucide-react';
 import { useProfile } from '@/hooks/auth/auth.hooks';
 import { useCurrentLeaderboard, useAllAchievements, useAllMissionTemplates, useHeartRecharge, useGamificationUserStats } from '@/hooks/gamification/gamification.hooks';
-import type { LeaderboardRanking, GamificationUserStatsDto, Achievement, MissionTemplate, UserAchievementDto, UserMissionDto } from '@/types/gamification/gamification.d'; // Importar los tipos correctos
+import type { GamificationUserStatsDto } from '@/types/gamification/gamification.d'; // Importar los tipos correctos
 import AchievementCard from '../components/AchievementCard';
 import MissionCard from '../components/MissionCard';
 import { useSoundEffect } from '@/hooks/gamification/useSoundEffect';

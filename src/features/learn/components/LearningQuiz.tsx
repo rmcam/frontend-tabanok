@@ -12,20 +12,23 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import type { QuizContent } from "@/types/learning/learning.d";
-import { useProfile } from "@/hooks/auth/auth.hooks";
-import { useSubmitExercise } from "@/hooks/exercises/exercises.hooks"; // Importar useSubmitExercise
 import { useHeartsStore } from "@/stores/heartsStore"; // Importar el store de vidas
+import { useSubmitExerciseProgress } from "@/hooks/progress/progress.hooks"; // Importar useSubmitExerciseProgress
 
 interface LearningQuizProps {
   exerciseId: string;
   quiz: QuizContent;
   onComplete?: (isCorrect: boolean, awardedPoints?: number) => void;
+  isSubmitting: boolean;
+  setIsSubmitting: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const LearningQuiz: React.FC<LearningQuizProps> = ({
   exerciseId,
   quiz,
   onComplete,
+  isSubmitting,
+  setIsSubmitting,
 }) => {
   const { t } = useTranslation();
   const [selectedOption, setSelectedOption] = React.useState<string | null>(
@@ -34,11 +37,9 @@ const LearningQuiz: React.FC<LearningQuizProps> = ({
   const [isSubmitted, setIsSubmitted] = React.useState(false);
   const [isCorrect, setIsCorrect] = React.useState<boolean | null>(null);
 
-  const { data: userProfile } = useProfile();
-  const userId = userProfile?.id;
   const { decrementHeart } = useHeartsStore(); // Obtener la función para decrementar vidas
 
-  const { mutate: submitExerciseMutation, isPending } = useSubmitExercise();
+  const { mutate: submitExerciseProgressMutation, isPending } = useSubmitExerciseProgress();
 
   const handleSubmit = () => {
     if (selectedOption === null) {
@@ -46,23 +47,25 @@ const LearningQuiz: React.FC<LearningQuizProps> = ({
       return;
     }
 
-    if (!userId || !exerciseId) {
-      // Usar la prop exerciseId
-      console.error("User ID o Exercise ID no disponibles.");
+    if (!exerciseId) {
+      console.error("Exercise ID no disponible.");
       return;
     }
 
-    submitExerciseMutation(
+    setIsSubmitting(true); // Indicar que el envío ha comenzado
+
+    submitExerciseProgressMutation(
       {
-        id: exerciseId, // Usar la prop exerciseId
-        submission: { userAnswer: selectedOption },
+        exerciseId: exerciseId,
+        answers: { userAnswer: selectedOption },
       },
       {
         onSuccess: (response) => {
-          const correct = response.isCorrect;
-          setIsCorrect(correct);
+          const correct = response?.isCorrect; // Acceder directamente a isCorrect
+          console.log('Valor de correct en LearningQuiz.tsx:', correct);
+          setIsCorrect(correct ?? false);
           setIsSubmitted(true);
-          onComplete?.(correct, response.awardedPoints);
+          onComplete?.(correct ?? false, response?.score); // Usar response?.score
         },
         onError: (error) => {
           console.error("Error al enviar respuesta del ejercicio:", error);
@@ -70,6 +73,9 @@ const LearningQuiz: React.FC<LearningQuizProps> = ({
           setIsSubmitted(true);
           decrementHeart(); // Decrementar una vida si la respuesta es incorrecta
           onComplete?.(false);
+        },
+        onSettled: () => {
+          // setIsSubmitting(false); // Esto se maneja en ExerciseModal
         },
       }
     );
@@ -79,6 +85,7 @@ const LearningQuiz: React.FC<LearningQuizProps> = ({
     setSelectedOption(null);
     setIsSubmitted(false);
     setIsCorrect(null);
+    setIsSubmitting(false); // Resetear el estado de envío en el padre también
   };
 
   return (
@@ -123,39 +130,12 @@ const LearningQuiz: React.FC<LearningQuizProps> = ({
             {t("Opciones no disponibles.")}
           </p>
         )}
-        {isSubmitted && isCorrect !== null && (
-          <div
-            key={isSubmitted.toString()}
-            className={`mt-6 p-4 rounded-md flex flex-col items-center justify-center space-y-2 transition-all duration-300 ease-in-out transform animate-fade-in-up ${
-              isCorrect
-                ? "bg-green-100 text-green-700 scale-105"
-                : "bg-red-100 text-red-700 scale-105"
-            }`}
-            role="status"
-            aria-live="polite"
-          >
-            {isCorrect ? (
-              <CheckCircle2 className="h-10 w-10 text-green-600 animate-bounce" />
-            ) : (
-              <XCircle className="h-10 w-10 text-red-600 animate-shake" />
-            )}
-            <p className="text-xl font-bold">
-              {isCorrect ? t("¡Correcto!") : t("Incorrecto.")}
-            </p>
-            {!isCorrect && quiz?.answer && (
-              <p className="text-md text-center">
-                {t("La respuesta correcta era:")}{" "}
-                <span className="font-semibold">{quiz.answer}</span>
-              </p>
-            )}
-          </div>
-        )}
       </CardContent>
       <CardFooter className="flex justify-end space-x-2">
         {!isSubmitted ? (
           <Button
             onClick={handleSubmit}
-            disabled={isPending || selectedOption === null}
+            disabled={isPending || selectedOption === null || isSubmitting}
             className="cursor-pointer transition-all duration-200 ease-in-out hover:scale-105"
           >
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

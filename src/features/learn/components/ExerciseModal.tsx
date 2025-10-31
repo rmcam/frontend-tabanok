@@ -9,13 +9,11 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ChevronLeft, CheckCircle2, XCircle } from "lucide-react";
+import { ChevronLeft, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import {
   useExerciseById,
   useSubmitExercise,
 } from "@/hooks/exercises/exercises.hooks";
-import { useProfile } from "@/hooks/auth/auth.hooks";
 import type {
   QuizContent,
   MatchingContent,
@@ -24,6 +22,7 @@ import type {
   TranslationContent,
   FunFactContent,
 } from "@/types/learning/learning.d";
+import type { Exercise } from "@/types/exercises/exercises.d";
 import LearningQuiz from "./LearningQuiz";
 import LearningMatching from "./LearningMatching";
 import LearningFillInTheBlank from "./LearningFillInTheBlank";
@@ -46,8 +45,6 @@ const ExerciseModal: React.FC<ExerciseModalProps> = ({
   onExerciseComplete,
 }) => {
   const { t } = useTranslation();
-  const { data: userProfile } = useProfile();
-  const userId = userProfile?.id;
 
   const {
     data: exercise,
@@ -59,6 +56,8 @@ const ExerciseModal: React.FC<ExerciseModalProps> = ({
   // Logs de depuración eliminados
   // The submitExerciseMutation and isSubmitting are handled by child components,
   // so we just import the hook to ensure it's available in the context if needed.
+  // The submitExerciseMutation and isSubmitting are handled by child components,
+  // so we just import the hook to ensure it's available in the context if needed.
   useSubmitExercise();
 
   const [isExerciseSubmitted, setIsExerciseSubmitted] = useState(false);
@@ -67,6 +66,7 @@ const ExerciseModal: React.FC<ExerciseModalProps> = ({
   );
   const [awardedPoints, setAwardedPoints] = useState<number>(0);
   const [showRetryOption, setShowRetryOption] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false); // Nuevo estado para manejar el envío
 
   useEffect(() => {
     if (isOpen && exerciseId) {
@@ -75,6 +75,7 @@ const ExerciseModal: React.FC<ExerciseModalProps> = ({
       setExerciseIsCorrect(null);
       setAwardedPoints(0);
       setShowRetryOption(false);
+      setIsSubmitting(false); // Resetear estado de envío
     }
   }, [isOpen, exerciseId, refetch]);
 
@@ -86,10 +87,14 @@ const ExerciseModal: React.FC<ExerciseModalProps> = ({
     setExerciseIsCorrect(isCorrect);
     const actualPoints = points || 0;
     setAwardedPoints(actualPoints);
+    setIsSubmitting(false); // Finalizar el estado de envío
 
     if (isCorrect) {
-      onExerciseComplete(isCorrect, actualPoints); // Notify parent component
-      onClose(); // Close modal only if correct
+      // Esperar un momento antes de cerrar para que el usuario vea el mensaje de "Correcto"
+      setTimeout(() => {
+        onExerciseComplete(isCorrect, actualPoints); // Notify parent component
+        onClose(); // Close modal only if correct
+      }, 1500); // Cerrar después de 1.5 segundos
     } else {
       setShowRetryOption(true); // Show retry option if incorrect
       // Do not close modal
@@ -101,8 +106,7 @@ const ExerciseModal: React.FC<ExerciseModalProps> = ({
     setExerciseIsCorrect(null);
     setAwardedPoints(0);
     setShowRetryOption(false);
-    // Optionally, trigger a reset on the child exercise component if it supports it
-    // For now, refetching the exercise will reset the child components as well
+    setIsSubmitting(false); // Resetear estado de envío
     refetch();
   };
 
@@ -160,13 +164,15 @@ const ExerciseModal: React.FC<ExerciseModalProps> = ({
           </div>
         )}
 
-        {exercise && exercise.content && (
+        {exercise && exercise.content && !isExerciseSubmitted && (
           <div className="prose dark:prose-invert max-w-none mt-4">
             {exercise.type === "quiz" && (
               <LearningQuiz
                 exerciseId={exercise.id}
                 quiz={exercise.content as QuizContent}
                 onComplete={handleExerciseCompleteInternal}
+                isSubmitting={isSubmitting}
+                setIsSubmitting={setIsSubmitting} // Pasar la función para actualizar el estado de envío
               />
             )}
             {exercise.type === "matching" && (
@@ -174,6 +180,8 @@ const ExerciseModal: React.FC<ExerciseModalProps> = ({
                 exerciseId={exercise.id}
                 matching={exercise.content as MatchingContent}
                 onComplete={handleExerciseCompleteInternal}
+                isSubmitting={isSubmitting}
+                setIsSubmitting={setIsSubmitting}
               />
             )}
             {exercise.type === "fill-in-the-blank" && (
@@ -181,6 +189,8 @@ const ExerciseModal: React.FC<ExerciseModalProps> = ({
                 exerciseId={exercise.id}
                 fillInTheBlank={exercise.content as FillInTheBlankContent}
                 onComplete={handleExerciseCompleteInternal}
+                isSubmitting={isSubmitting}
+                setIsSubmitting={setIsSubmitting}
               />
             )}
             {exercise.type === "audio-pronunciation" && (
@@ -190,6 +200,8 @@ const ExerciseModal: React.FC<ExerciseModalProps> = ({
                   exercise.content as AudioPronunciationContent
                 }
                 onComplete={handleExerciseCompleteInternal}
+                isSubmitting={isSubmitting}
+                setIsSubmitting={setIsSubmitting}
               />
             )}
             {exercise.type === "translation" && (
@@ -197,6 +209,8 @@ const ExerciseModal: React.FC<ExerciseModalProps> = ({
                 exerciseId={exercise.id}
                 translation={exercise.content as TranslationContent}
                 onComplete={handleExerciseCompleteInternal}
+                isSubmitting={isSubmitting}
+                setIsSubmitting={setIsSubmitting}
               />
             )}
             {exercise.type === "fun-fact" && (
@@ -204,6 +218,8 @@ const ExerciseModal: React.FC<ExerciseModalProps> = ({
                 exerciseId={exercise.id}
                 funFact={exercise.content as FunFactContent}
                 onComplete={handleExerciseCompleteInternal}
+                isSubmitting={isSubmitting}
+                setIsSubmitting={setIsSubmitting}
               />
             )}
 
@@ -228,14 +244,70 @@ const ExerciseModal: React.FC<ExerciseModalProps> = ({
           </div>
         )}
 
+        {isExerciseSubmitted && exerciseIsCorrect !== null && (
+          <div
+            className={`mt-6 p-6 rounded-lg flex flex-col items-center justify-center space-y-4 transition-all duration-500 ease-in-out transform ${
+              exerciseIsCorrect
+                ? "bg-green-50 border-green-200 text-green-800 shadow-lg scale-105"
+                : "bg-red-50 border-red-200 text-red-800 shadow-lg scale-105"
+            }`}
+            role="status"
+            aria-live="polite"
+          >
+            {exerciseIsCorrect ? (
+              <CheckCircle2 className="h-16 w-16 text-green-600 animate-bounce" />
+            ) : (
+              <XCircle className="h-16 w-16 text-red-600 animate-shake" />
+            )}
+            <p className="text-3xl font-extrabold">
+              {exerciseIsCorrect ? t("¡Correcto!") : t("Incorrecto.")}
+            </p>
+            {awardedPoints > 0 && (
+              <p className="text-xl font-semibold">
+                {t("Puntos obtenidos")}: {awardedPoints}
+              </p>
+            )}
+            {!exerciseIsCorrect && (
+              <p className="text-lg text-center">
+                {t("Sigue practicando para mejorar.")}
+              </p>
+            )}
+            {showRetryOption && (
+              <Button
+                onClick={handleRetry}
+                className="mt-4 px-8 py-3 text-lg font-semibold cursor-pointer transition-all duration-200 ease-in-out hover:scale-105"
+              >
+                {t("Reintentar")}
+              </Button>
+            )}
+          </div>
+        )}
+
+        {isSubmitting && (
+          <div className="mt-6 p-6 rounded-lg flex flex-col items-center justify-center space-y-4 bg-blue-50 border-blue-200 text-blue-800 shadow-lg">
+            <Loader2 className="h-16 w-16 text-blue-600 animate-spin" />
+            <p className="text-xl font-bold">{t("Enviando respuesta...")}</p>
+          </div>
+        )}
+
         <DialogFooter className="mt-6 flex justify-between">
           <Button
             onClick={onClose}
             variant="outline"
             className="cursor-pointer"
+            disabled={isSubmitting || (exercise?.userProgress?.isCompleted && !showRetryOption)}
           >
             <ChevronLeft className="mr-2 h-4 w-4" /> {t("Volver a la Lección")}
           </Button>
+          {exercise?.userProgress?.isCompleted && !showRetryOption && (
+            <div className="flex items-center text-green-600 font-semibold">
+              <CheckCircle2 className="mr-2 h-5 w-5" />
+              {t("Completado")}
+              {exercise.userProgress.score !== null && (
+                <span className="ml-2">({exercise.userProgress.score} {t("puntos")})</span>
+              )}
+            </div>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

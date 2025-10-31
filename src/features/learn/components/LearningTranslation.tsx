@@ -13,30 +13,34 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { CheckCircle2, XCircle, RefreshCw } from "lucide-react";
 import type { TranslationContent } from "@/types/learning/learning.d";
-import { useSubmitExercise } from "@/hooks/exercises/exercises.hooks"; // Corregir importación
+import type { SubmitExerciseResponse, TranslationDetails } from '@/types/progress/progress.d'; // Importar SubmitExerciseResponse y TranslationDetails
 import { useHeartsStore } from "@/stores/heartsStore";
+import { useSubmitExerciseProgress } from "@/hooks/progress/progress.hooks"; // Importar useSubmitExerciseProgress
 
 interface LearningTranslationProps {
   exerciseId: string;
   translation: TranslationContent;
   onComplete?: (isCorrect: boolean, awardedPoints?: number) => void;
+  isSubmitting: boolean;
+  setIsSubmitting: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const LearningTranslation: React.FC<LearningTranslationProps> = ({
   exerciseId,
   translation,
   onComplete,
+  setIsSubmitting,
 }) => {
   // Aceptar exerciseId
   const { t } = useTranslation();
   const [userAnswer, setUserAnswer] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
-  const [submissionResponse, setSubmissionResponse] = useState<any>(null); // Nuevo estado para la respuesta
+  const [submissionResponse, setSubmissionResponse] = useState<SubmitExerciseResponse | null>(null); // Nuevo estado para la respuesta
 
   const { decrementHeart } = useHeartsStore();
-  const { mutate: submitExerciseMutation, isPending: isSubmitting } =
-    useSubmitExercise();
+  const { mutate: submitExerciseProgressMutation, isPending: isSubmittingHook } =
+    useSubmitExerciseProgress();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (isSubmitted) return;
@@ -49,59 +53,60 @@ const LearningTranslation: React.FC<LearningTranslationProps> = ({
       return;
     }
 
+    setIsSubmitting(true); // Indicar que el envío ha comenzado
+
     const submission = {
-      userAnswer: userAnswer.trim(),
-      score: 0, // Placeholder score, actual points awarded by backend
+      exerciseId: exerciseId,
+      answers: { userAnswer: userAnswer.trim() },
     };
 
-    submitExerciseMutation(
-      {
-        id: exerciseId, // Usar la prop exerciseId
-        submission: submission,
-      },
-      {
-        onSuccess: (response) => {
-          setSubmissionResponse(response); // Guardar la respuesta completa
-          const correct = response.isCorrect;
-          setIsCorrect(correct);
-          setIsSubmitted(true);
-          if (correct) {
-            toast.success(
-              t("¡Traducción correcta! Has ganado {{points}} puntos.", {
-                points: response.awardedPoints,
-              })
-            );
-          } else {
-            toast.error(
-              t(
-                "Traducción incorrecta. La respuesta correcta era: {{correctTranslation}}",
-                {
-                  correctTranslation:
-                    response.details?.correctTranslation ||
-                    translation.correctTranslation,
-                }
-              )
-            );
-            decrementHeart();
-          }
-          onComplete?.(correct, response.awardedPoints);
-        },
-        onError: (error) => {
-          console.error("Error al enviar traducción:", error);
-          toast.error(t("Error al enviar traducción."));
-          setIsCorrect(false);
-          setIsSubmitted(true);
+    submitExerciseProgressMutation(submission, {
+      onSuccess: (response) => {
+        setSubmissionResponse(response); // Guardar la respuesta completa directamente
+        const correct = response?.isCorrect; // Acceder directamente a isCorrect
+        setIsCorrect(correct ?? false);
+        setIsSubmitted(true);
+        if (correct) {
+          toast.success(
+            t("¡Traducción correcta! Has ganado {{points}} puntos.", {
+              points: response?.score, // Usar response?.score
+            })
+          );
+        } else {
+          toast.error(
+            t(
+              "Traducción incorrecta. La respuesta correcta era: {{correctTranslation}}",
+              {
+                correctTranslation:
+                  (response?.details && 'correctTranslation' in response.details) // Acceder directamente a details
+                    ? (response.details as TranslationDetails).correctTranslation
+                    : translation.correctTranslation,
+              }
+            )
+          );
           decrementHeart();
-          onComplete?.(false);
-        },
-      }
-    );
+        }
+        onComplete?.(correct ?? false, response?.score); // Usar response?.score
+      },
+      onError: (error) => {
+        console.error("Error al enviar traducción:", error);
+        toast.error(t("Error al enviar traducción."));
+        setIsCorrect(false);
+        setIsSubmitted(true);
+        decrementHeart();
+        onComplete?.(false);
+      },
+      onSettled: () => {
+        // setIsSubmitting(false); // Esto se maneja en ExerciseModal
+      },
+    });
   };
 
   const handleReset = () => {
     setUserAnswer("");
     setIsSubmitted(false);
     setIsCorrect(null);
+    setIsSubmitting(false); // Resetear el estado de envío en el padre también
   };
 
   return (
@@ -162,11 +167,11 @@ const LearningTranslation: React.FC<LearningTranslationProps> = ({
             </p>
             {!isCorrect &&
               submissionResponse?.details &&
-              submissionResponse.details.correctTranslation && (
+              'correctTranslation' in submissionResponse.details && (
                 <p className="text-md text-center">
                   {t("La respuesta correcta era:")}{" "}
                   <span className="font-semibold">
-                    {submissionResponse.details.correctTranslation}
+                    {(submissionResponse.details as TranslationDetails).correctTranslation}
                   </span>
                 </p>
               )}
@@ -177,17 +182,17 @@ const LearningTranslation: React.FC<LearningTranslationProps> = ({
         <Button
           variant="outline"
           onClick={handleReset}
-          disabled={isSubmitting}
+          disabled={isSubmittingHook}
           className="cursor-pointer"
         >
           <RefreshCw className="h-4 w-4 mr-2" /> {t("Reiniciar")}
         </Button>
         <Button
           onClick={handleSubmit}
-          disabled={isSubmitting || isSubmitted || userAnswer.trim() === "" || !translation.sourceText}
+          disabled={isSubmittingHook || isSubmitted || userAnswer.trim() === "" || !translation.sourceText}
           className="cursor-pointer"
         >
-          {isSubmitting ? t("Enviando...") : t("Enviar Traducción")}
+          {isSubmittingHook ? t("Enviando...") : t("Enviar Traducción")}
         </Button>
       </CardFooter>
     </Card>

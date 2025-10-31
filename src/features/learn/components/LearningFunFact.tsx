@@ -3,24 +3,25 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Lightbulb, CheckCircle2 } from 'lucide-react'; // Añadir CheckCircle2
 import type { FunFactContent } from '@/types/learning/learning.d';
-import { useSubmitExercise } from '@/hooks/exercises/exercises.hooks'; // Importar useSubmitExercise
-import { useHeartsStore } from '@/stores/heartsStore'; // Importar el store de vidas
 import { toast } from 'sonner'; // Importar toast
 import { Button } from '@/components/ui/button'; // Importar Button
 import { CardFooter } from '@/components/ui/card'; // Importar CardFooter
+import { useSubmitExerciseProgress } from '@/hooks/progress/progress.hooks'; // Importar useSubmitExerciseProgress
 
 interface LearningFunFactProps {
   exerciseId: string;
   funFact: FunFactContent;
   onComplete?: (isCorrect: boolean, awardedPoints?: number) => void;
+  isSubmitting: boolean;
+  setIsSubmitting: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const LearningFunFact: React.FC<LearningFunFactProps> = ({ exerciseId, funFact, onComplete }) => { // Aceptar exerciseId y onComplete
+const LearningFunFact: React.FC<LearningFunFactProps> = ({ exerciseId, funFact, onComplete, isSubmitting, setIsSubmitting }) => { // Aceptar exerciseId y onComplete
   const { t } = useTranslation();
   const [isSubmitted, setIsSubmitted] = React.useState(false);
   const [awardedPoints, setAwardedPoints] = React.useState<number>(0);
 
-  const { mutate: submitExerciseMutation, isPending: isSubmitting } = useSubmitExercise();
+  const { mutate: submitExerciseProgressMutation, isPending: isSubmittingHook } = useSubmitExerciseProgress();
 
   const handleComplete = () => {
     if (!exerciseId) {
@@ -28,21 +29,26 @@ const LearningFunFact: React.FC<LearningFunFactProps> = ({ exerciseId, funFact, 
       return;
     }
 
-    submitExerciseMutation({
-      id: exerciseId,
-      submission: { userAnswer: "fun_fact_viewed" }, // Placeholder para indicar que se vio el fun-fact
+    setIsSubmitting(true); // Indicar que el envío ha comenzado
+
+    submitExerciseProgressMutation({
+      exerciseId: exerciseId,
+      answers: { userAnswer: "fun_fact_viewed" }, // Placeholder para indicar que se vio el fun-fact
     }, {
       onSuccess: (response) => {
         setIsSubmitted(true);
-        setAwardedPoints(response.awardedPoints);
-        toast.success(t("¡Dato curioso completado! Has ganado {{points}} puntos.", { points: response.awardedPoints }));
-        onComplete?.(true, response.awardedPoints);
+        setAwardedPoints(response?.score ?? 0); // Usar response?.score
+        toast.success(t("¡Dato curioso completado! Has ganado {{points}} puntos.", { points: response?.score ?? 0 })); // Usar response?.score
+        onComplete?.(true, response?.score ?? 0); // Usar response?.score
       },
       onError: (error) => {
         console.error('Error al completar dato curioso:', error);
         toast.error(t("Error al completar dato curioso."));
         onComplete?.(false);
-      }
+      },
+      onSettled: () => {
+        // setIsSubmitting(false); // Esto se maneja en ExerciseModal
+      },
     });
   };
 
@@ -68,8 +74,8 @@ const LearningFunFact: React.FC<LearningFunFactProps> = ({ exerciseId, funFact, 
       </CardContent>
       <CardFooter className="flex justify-end">
         {!isSubmitted ? (
-          <Button onClick={handleComplete} disabled={isSubmitting || !funFact.fact}>
-            {isSubmitting ? t("Completando...") : t("Entendido")}
+          <Button onClick={handleComplete} disabled={isSubmittingHook || !funFact.fact || isSubmitting}>
+            {isSubmittingHook ? t("Completando...") : t("Entendido")}
           </Button>
         ) : (
           <div

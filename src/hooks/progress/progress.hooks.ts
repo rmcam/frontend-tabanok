@@ -2,9 +2,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import ProgressService from '@/services/progress/progress.service';
 import { ApiError } from '@/services/_shared';
-import type { UserModuleProgressResponse, UserUnityProgressResponse, UserLessonProgressResponse, UserExerciseProgressResponse, CreateProgressDto, ProgressDto, GetUserProgressFilters, PaginatedUserProgressResponse } from '@/types/progress/progress.d';
+import type { UserUnityProgressResponse, UserLessonProgressResponse, CreateProgressDto, GetUserProgressFilters, PaginatedUserProgressResponse, SubmitExerciseRequestBody, SubmitExerciseResponse } from '@/types/progress/progress.d';
 import { useUserStore } from '@/stores/userStore';
 import type { ApiResponse } from '@/types/common/common.d';
+import type { Exercise } from '@/types/exercises/exercises.d'; // Importar Exercise
 
 interface PaginationParams {
   page?: number;
@@ -51,13 +52,65 @@ export function useGetProgressByUser(userId: string | undefined, pagination?: Pa
 }
 
 /**
+ * Hook para enviar las respuestas de un ejercicio y actualizar el progreso.
+ * Utiliza el nuevo endpoint POST /progress/submit-exercise.
+ * @returns Un objeto de React Query con la función de mutación para enviar el ejercicio.
+ */
+export const useSubmitExerciseProgress = () => {
+  const queryClient = useQueryClient();
+  const { user } = useUserStore();
+  const userId = user?.id;
+
+  return useMutation<
+    SubmitExerciseResponse,
+    ApiError,
+    Omit<SubmitExerciseRequestBody, 'userId'>
+  >({
+    mutationFn: async (submissionData) => {
+      if (!userId) {
+        throw new Error('User not authenticated.');
+      }
+      const fullSubmission: SubmitExerciseRequestBody = {
+        ...submissionData,
+        userId,
+      };
+      return ProgressService.submitExerciseProgress(fullSubmission);
+    },
+    onSuccess: (data) => {
+      console.log('Respuesta completa del backend al enviar ejercicio:', data);
+      // La lógica de onComplete y awardedPoints se maneja en los componentes de UI (ExerciseModal, ExerciseDetailPage)
+      // Invalidar queries relevantes para reflejar el progreso actualizado
+      queryClient.invalidateQueries({ queryKey: ['userGeneralProgress', userId] });
+      queryClient.invalidateQueries({ queryKey: ['allUserLessonProgress', userId] });
+      queryClient.invalidateQueries({ queryKey: ['allUserUnityProgress', userId] });
+      queryClient.invalidateQueries({ queryKey: ['userProgress', userId, { exerciseId: data.exerciseId }] });
+      queryClient.invalidateQueries({ queryKey: ['exercises', data.exerciseId] }); // Invalidar el ejercicio específico
+      queryClient.invalidateQueries({ queryKey: ['exercises', { withProgress: true }] }); // Invalidar la lista general con progreso
+      // Si el ejercicio tiene un lessonId, invalidar también la lista de ejercicios de esa lección con progreso
+      // Esto requeriría obtener el lessonId del ejercicio, lo cual no está directamente en SubmitExerciseResponse.
+      // Podríamos refetch el ejercicio para obtener su lessonId o invalidar todas las listas de lecciones.
+      // Por simplicidad, invalidaremos todas las lecciones si es necesario, o se puede refinar más tarde.
+      // Para invalidar la caché de ejercicios por lección, necesitamos el lessonId del ejercicio.
+      // Como SubmitExerciseResponse no lo incluye, tendríamos que hacer una consulta adicional
+      // o pasar el lessonId como parte de la mutación si es relevante para el contexto actual.
+      // Por ahora, se omite la invalidación específica por lessonId para evitar errores.
+      // Si es crítico, se podría obtener el ejercicio completo (con lessonId) en onMutate.
+    },
+    onError: (error) => {
+      console.error('Error al enviar ejercicio:', error.message, error.details);
+      toast.error('Error al enviar el ejercicio.');
+    },
+  });
+};
+
+/**
  * Hook para crear un nuevo progreso.
  * @returns Un objeto de React Query con la función de mutación para crear progreso.
  */
 export const useCreateProgress = () => {
   const queryClient = useQueryClient();
   return useMutation<
-    ApiResponse<ProgressDto>, // Tipo de retorno corregido
+    ApiResponse<any>, // Tipo de retorno corregido a any temporalmente
     ApiError,
     CreateProgressDto,
     { previousUserGeneralProgress?: UserGeneralProgress; previousAllUserLessonProgress?: ApiResponse<UserLessonProgressResponse[]>; previousAllUserUnityProgress?: ApiResponse<UserUnityProgressResponse[]> } // Tipos actualizados
